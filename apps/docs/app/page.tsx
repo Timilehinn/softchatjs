@@ -1,8 +1,16 @@
 import Image from "next/image";
 import { Button } from "@repo/ui/button";
 import styles from "./page.module.css";
+import ChatClient, { ChatEventGenerics } from "softchatjs-core/src"
+
+
+const client = ChatClient.getInstance({ projectId: "5909b61d-e6be-47b5-bb54-a60e56344580", apiKey: "1234" })
 
 export default function Home() {
+
+  console.log(client, 'the is client')
+
+
   return (
     <div className={styles.page}>
       <main className={styles.main}>
@@ -18,7 +26,7 @@ export default function Home() {
           <li>
             Get started by editing <code>app/page.tsx</code>
           </li>
-          <li>Save and see your changes instantly.</li>
+          <li>Save and see your changes instantsdfsfdsdfsdly.</li>
         </ol>
 
         <div className={styles.ctas}>

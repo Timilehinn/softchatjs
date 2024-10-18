@@ -3,13 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbo",
+    "dev": "next dev --turbo --port 1000",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
     "@repo/ui": "*",
+    "softchatjs-core": "file:../../../packages/softchatjs-core",
     "next": "14.2.6",
     "react": "18.3.1",
     "react-dom": "18.3.1"

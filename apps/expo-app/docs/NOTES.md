@@ -1,0 +1,3 @@
+-- Removed node_modules
+-- added metro config js
+-- imported expo-router/entry with inex.ts

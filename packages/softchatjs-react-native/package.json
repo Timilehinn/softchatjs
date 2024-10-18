@@ -1,0 +1,29 @@
+{
+  "name": "softchatjs-react-native",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "dependencies": {
+    "@flyerhq/react-native-link-preview": "^1.6.0",
+    "@shopify/flash-list": "^1.6.4",
+    "date-fns": "^4.0.0-beta.1",
+    "emoji-datasource": "^15.1.2",
+    "expo-clipboard": "^6.0.3",
+    "expo-haptics": "^13.0.1",
+    "lodash": "^4.17.21",
+    "moment": "^2.30.1",
+    "softchatjs-core": "*"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.20.0",
+    "@types/lodash": "^4.17.0"
+  },
+  "peerDependencies": {
+    "react-native": ">=0.60.0",
+    "expo-av": "^14.0.7",
+    "expo-camera": "^15.0.16",
+    "expo-file-system": "^17.0.1",
+    "expo-image": "^1.13.0",
+    "expo-image-picker": "^15.0.7"
+  },
+  "private": true
+}
