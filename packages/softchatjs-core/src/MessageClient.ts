@@ -73,7 +73,7 @@ export default class MessageClient {
 
   private getConversationType(conversationId?: string) {
     // const conversationMeta = this.connection.conversationListMeta[conversationId? conversationId : this.connection.activeConversationId];
-    const conversationMeta = this.connection.conversationListMeta["1448680299"]
+    const conversationMeta = this.connection.conversationListMeta[conversationId? conversationId : this.connection.activeConversationId]
     return conversationMeta.conversation.conversationType
   }
 
@@ -362,6 +362,8 @@ export default class MessageClient {
   }
 
   private addMessageToConversation(newMessage: Message, screen: string) {
+    try {
+      console.log(newMessage, ":::new mesage")
     const conversation = this.connection.conversationMap[newMessage.conversationId];
     if (conversation) {
       const updatedMessages = [
@@ -384,10 +386,14 @@ export default class MessageClient {
             screen === Screens.CHAT ? MessageStates.READ : MessageStates.SENT,
         },
       });
+
       const unread = [
         ...this.connection.conversationListMeta[newMessage.conversationId].unread,
-        newMessage.messageId,
       ];
+
+      if(newMessage.conversationId !== this.connection.activeConversationId){
+        unread.push(newMessage.messageId)
+      }
       
       const updatedConversationListMeta = {
         conversation: { ...this.connection.conversationListMeta[newMessage.conversationId].conversation, messages: updatedMessages },
@@ -402,6 +408,10 @@ export default class MessageClient {
         conversationListMeta: this.connection.conversationListMeta,
       });
     }
+    } catch (error) {
+      console.log(error)
+    }
+    
   }
 
   private sendReadNotification(data: ReadMessages) {
@@ -438,6 +448,7 @@ export default class MessageClient {
           token: this.connection.wsAccessConfig.token,
         },
       }
+      
       this.connection.socket.send(JSON.stringify(socketMessage));
       var conversationMeta = this.connection.conversationListMeta[conversationId]
       const updatedConversationListMeta = { 

@@ -118,6 +118,7 @@ export default function Chat(props: ChatProps) {
   const [ isScrolling, setIsScrolling ] = useState(false);
   const [ currentPage, setCurrentPage ] = useState(2);
   const [ loadingOlderMessages, setLoadingOlderMessages ] = useState(false);
+  const [recipientId, setRecipientId] = useState("");
 
   const onViewRef = useRef((viewableItems: any) => {
     let Check = [];
@@ -189,7 +190,6 @@ export default function Chat(props: ChatProps) {
     ref: null,
     itemIndex: 0,
   });
-  const [recipientId, setRecipientId] = useState("");
 
   useEffect(() => {
     console.log("re-rendering");
@@ -214,7 +214,7 @@ export default function Chat(props: ChatProps) {
       setLoadingMessages(false);
     }
   }
-
+  
   async function getOlderMessages() {
     try {
       // if(messages.length < 25) {

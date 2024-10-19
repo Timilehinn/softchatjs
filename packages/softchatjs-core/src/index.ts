@@ -10,6 +10,9 @@ export type {
   Conversation,
   Config,
   ConnectionEvent,
-  ChatEventGenerics
+  ChatEventGenerics,
 } from "./types";
+export { 
+  MessageStates
+ } from './types'
 export default ChatClient

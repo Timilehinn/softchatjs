@@ -6,7 +6,7 @@
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "dev": "ts-node src/index.ts",
+    "run": "ts-node src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsup ./src",
     "pub": "npm publish --access public"

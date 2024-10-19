@@ -1,0 +1,144 @@
+.input {
+
+  position: absolute;
+ bottom: 0px;
+  padding: 10px 10px 10px 10px;
+
+  width: 70%;
+  display: flex;
+  align-items: center;
+  z-index: 600;
+  padding-bottom: 20px;
+}
+
+.input__inner {
+  width: 90%;
+  background-color: #222529;
+  height: 100%;
+  border-radius: 30px;
+  padding: 0px 0px 0px 20px;
+
+}
+
+.input__inner input {
+  height: auto;
+  width: 100%;
+  background-color: #222529;
+  outline: none;
+  border: none;
+  color: white;
+  min-height: 50px;
+  border-radius: 30px;
+  
+}
+
+/* .input__inner input:focus{
+  border: 1px solid white;
+ 
+} */
+
+.input__button {
+  width: 10%;
+  height: 100%;
+  cursor: pointer;
+  border-radius: 10px;
+
+  display: flex;
+  justify-content: flex-start;
+  padding-left: 20px;
+}
+
+.input__icon {
+  width: 5%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+
+
+}
+
+.input__icon div{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.input__icon div:hover{
+  background-color: #222529;
+  height: 35px;
+  width: 35px;
+  border-radius: 100px;
+}
+
+.input__menu {
+  position: absolute;
+  bottom: 60px;
+  height: auto;
+}
+
+.input__emoji{
+  /* position: absolute;
+  top: 22px;
+  right: 135px; */
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+.chatPhotos {
+  height: auto;
+  width: 300px;
+  display: flex;
+  margin-bottom: 20px;
+ 
+}
+
+.chatPhotos__item {
+  height: 60px;
+  width: 60px;
+  margin-right: 10px; position: relative;
+}
+
+.chatPhotos__cancel {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  cursor: pointer;
+}
+
+.chatPhotos img {
+  height: 100%;
+  width: 100%;
+
+  border-radius: 10px;
+  border: 0.5px solid rgba(142, 139, 139, 0.344);
+}
+
+.audioContainer{
+  background: red;
+  width: 500px;
+}
+
+.input__emoji__picker{
+  position: absolute;
+  top: -450px;
+  right: 115px;
+}
+
+@media screen and (max-width:768px) {
+
+  .input {
+    width: 100%;
+  
+  }
+
+  .input__inner{
+    /* width: 60%; */
+  }
+
+  .input__button {
+    width: auto;
+  }
+ 
+}

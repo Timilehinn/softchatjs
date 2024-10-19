@@ -1,0 +1,25 @@
+.options {
+  width: 200px;
+  background-color: #222529;
+  border-radius: 5px;
+  border: 0.5px solid rgba(142, 139, 139, 0.344);
+  position: absolute;
+  left: 200px;
+  top: -30px;
+  z-index: 1000;
+}
+
+.options ul {
+  padding: 10px;
+  display: flex;
+  align-items: flex-start;
+  list-style: none;
+  flex-direction: column;
+}
+
+.options ul li {
+  margin-bottom: 10px;
+  display: flex;
+  justify-self: flex-start;
+  width: 100%;
+}

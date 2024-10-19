@@ -1,0 +1,135 @@
+/* *{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  } */
+
+.list{
+    background-color:#202326;
+    height: 100%;
+    /* padding: 10px; */
+position: relative;
+}
+
+.item:hover{
+    opacity: .7;
+    background-color: #4a515a;
+  
+}
+
+.item{
+    display: flex;
+    padding: 20px;
+    cursor: pointer;
+    border-radius: 10px;
+}
+
+.item__image{
+    height: 30px;
+    width: 30px;
+    background-color: grey;
+    border-radius: 100%;
+    margin-right: 10px;
+}
+
+.unread{
+    height: 15px;
+    width: 15px;
+    background: lightgreen;
+    border-radius: 50px;
+    margin-top: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.unread p{
+    font-size: 0.6rem;
+}
+
+.media{
+    
+ display: flex;
+    border-radius: 2px;
+    align-items: center;
+    margin-top: 3px;
+
+}
+
+.media img{
+    height:15px;
+    width: 15px;
+    border-radius: 2px;
+    margin-right: 5px;
+}
+
+.newMessage{
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    cursor: pointer;
+}
+
+.userList{
+    height: 300px;
+    width: 300px;
+    background-color:#202326;
+    border-radius: 20px;
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+  
+}
+
+.userList__wrap{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+}
+
+.userList__avartar{
+    height: 30px;
+    width: 30px;
+    background:#015EFF;
+    border-radius: 100px;
+    margin-right: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.userList__user{
+    display: flex;
+    align-items: center;
+    /* margin-bottom: 10px; */
+    cursor: pointer;
+   
+}
+
+.userList__wrap:hover{
+    opacity: .7;
+    background-color: #4a515a;
+    border-radius: 10px;
+}
+
+.userList__button{
+    display: flex;
+    justify-content: flex-end;
+    padding-right: 10px;
+    position: absolute;
+    bottom: 10px;
+    width: 100%;
+}
+
+.userList__button button{
+    padding: 5px 15px;
+    background-color: #015EFF;
+    border: none;
+    color: white;
+    border-radius: 20px;
+    cursor: pointer;
+   
+}

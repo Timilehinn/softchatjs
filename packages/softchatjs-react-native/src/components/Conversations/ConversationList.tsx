@@ -1,3 +1,4 @@
+import React from 'react';
 import { TouchableOpacity, View, StyleSheet, Text, FlatList } from "react-native";
 import { Conversation, ConversationType, GroupChatMeta, ParticipantListInfo, PrivateChatMeta } from "../../types";
 import { useRef } from "react";

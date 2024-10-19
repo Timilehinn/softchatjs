@@ -1,3 +1,4 @@
+import React from 'react';
 import { Dimensions } from "react-native";
 import { useSharedValue, withTiming } from "react-native-reanimated";
 import SheetBackDrop from "./BackDrop";

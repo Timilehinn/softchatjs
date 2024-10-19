@@ -1,0 +1,19 @@
+.avatar{
+    height: 35px;
+    width: 35px;
+    background-color: grey;
+    border-radius: 300px;
+}
+
+.avatar img{
+    height: 100%;
+    border-radius: 300px;
+    width: 100%;
+}
+
+@media screen and (max-width:768px) {
+    .avatar{
+        height: 30px;
+        width: 30px;
+    }
+}

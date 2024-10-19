@@ -1,0 +1,34 @@
+.edit {
+  height: 80px;
+  background-color: #1b1d21;
+  width: 100%;
+  position: absolute;
+  bottom: 70px;
+  padding: 10px 30px 10px 65px;
+  opacity: 0;
+  display: none;
+  transform: translateY(200px);
+  z-index: 200;
+}
+
+.editOpen {
+  opacity: 1;
+  display: block;
+  transform: translateY(0px);
+}
+
+.edit__message {
+  height: 100%;
+  width: 100%;
+  background-color: #222529;
+  border-radius: 5px;
+  border-left: 6px solid greenyellow;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-left: 10px;
+}
+
+.edit__message p {
+  text-align: left;
+}

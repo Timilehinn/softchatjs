@@ -1,3 +1,4 @@
+import React from 'react';
 import {
   ActivityIndicator,
   Button,
@@ -214,16 +215,6 @@ const Conversations = forwardRef((props: ConversationProps, ref) => {
     [renderItem, conversationList]
   );
 
-  const conversationTest = () => {
-    if (client) {
-      const conn = client?.newConversation([
-        { uid: "69", username: "John" },
-        { uid: "30", username: "Oscar" },
-      ]);
-      // const conn = client?.newConversation({ id: "69", username: '6ix9ine' });
-      conn?.create("Hey there");
-    }
-  };
 
   const startChat = () => {
     if(client){

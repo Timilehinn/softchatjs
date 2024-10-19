@@ -88,53 +88,6 @@ export default function VoiceMessage(props: VoiceMessageProps) {
   const { media, textColor = theme.text.primary } = props;
   const { sound, audioState, playVoiceMessage, pauseVoiceMessage, resumeVoiceMessage, unload, activeVoiceMessage, avPlayBackStatus } = useMessageState();
 
-
-  // const onPlaybackStatusUpdate = (data: AVPlaybackStatus) => {
-  //   console.log(data);
-  //   if(data?.didJustFinish){
-  //     setAudioState("null");
-  //     unload();
-  //   }
-  // };
-
-  // async function playSound() {
-  //   console.log('Loading Sound');
-  //   const { sound } = await Audio.Sound.createAsync({ uri: media.mediaUrl }, {}, onPlaybackStatusUpdate);
-  //   setSound(sound);
-
-  //   console.log('Playing Sound');
-  //   setAudioState("playing")
-  //   await sound.playAsync();
-  // }
-
-  // const pause = async () => {
-  //   await sound?.pauseAsync();
-  //   setAudioState("paused")
-  // }
-
-  // const play = async () => {
-  //   if(audioState === "paused"){
-  //     await sound?.playAsync();
-  //     setAudioState("playing")
-  //   }
-  // }
-
-  // const unload = () => {
-  //   sound
-  //     ? () => {
-  //         console.log('Unloading Sound');
-  //         sound.unloadAsync();
-  //       }
-  //     : undefined;
-  // }
-
-  // useEffect(() => {
-  //   return unload();
-  // }, []);
-
-  var defualtMeterings = generateDefaultAudioMeterings();
-
-
   const renderVoiceMessageControls = useCallback(() => {
     var isActiveVoiceMessage = media.mediaId === activeVoiceMessage?.mediaId
     if(isActiveVoiceMessage && audioState === "loading"){
@@ -193,8 +146,6 @@ export default function VoiceMessage(props: VoiceMessageProps) {
     
   }, [ media, avPlayBackStatus, audioState ]);
 
-  // console.log(progress, 'prog')
-
   return (
     <View style={{ flex: 1, flexDirection: "row", alignItems: "center", width: '100%' }}>
       <>{renderVoiceMessageControls()}</>
@@ -202,12 +153,6 @@ export default function VoiceMessage(props: VoiceMessageProps) {
         <View style={{ width: `${progress.percentage}%`, maxWidth: '100%', height: 3, backgroundColor: theme?.icon }} />
       </View>
         <Text style={{ marginStart: 5, color: textColor }}>{convertToMinutes(progress.timePlayed)}</Text>
-{/*      
-      <AudioWaves
-        type="play"
-        audioTime={media.audioDurationSec?? 0}
-        audioWaves={media?.audioMetering || defualtMeterings}
-      /> */}
     </View>
   );
 }
