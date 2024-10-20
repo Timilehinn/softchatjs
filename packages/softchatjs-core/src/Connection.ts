@@ -141,6 +141,9 @@ export default class Connection extends EventEmitter {
             fetchingConversations: false,
           });
         } else {
+          if(this.socket){
+            this.socket.close();
+          }
           // If socket is not open, create a new WebSocket connection
           const ws = new WebSocket(`wss://${this.wsAccessConfig.url}`);
   
@@ -349,8 +352,13 @@ export default class Connection extends EventEmitter {
   private retryConnection() {
     // Retry logic or call _initiateConnection() after delay
     setTimeout(() => {
+      this.emit(Events.CONNECTION_CHANGED, {
+        connecting: true,
+        isConnected: false,
+        fetchingConversations: false,
+      });
       this._initiateConnection();
-    }, 10000);
+    }, 5000);
   }
 
   private setupEventHandlers() {
