@@ -229,7 +229,9 @@ export default function Default(props: DefaultProps) {
                     : theme?.chatBubble.right.messageTimeColor,
               }}
             >
-              {message.deletedAt && "Edited"}{" "}
+              <Text style={{ fontStyle: 'italic' }}>
+              {message.lastEdited && "Edited"}{" "}
+              </Text>
               {formatMessageTime(message.createdAt)}
             </Text>
             {position === "right" && (

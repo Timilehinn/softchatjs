@@ -143,7 +143,7 @@ const ChatInput = ({
       // }
       const attachmentType = mediaData.length
         ? { attachmentType: "media" as any }
-        : {};
+        : { attachmentType: "none" };
 
       if (editProps?.isEditing) {
         msClient.editMessage({

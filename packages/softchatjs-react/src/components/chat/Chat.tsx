@@ -99,7 +99,7 @@ const Chat = () => {
   const handleDeletedMessage = (event: any) => {
     setMessages((prev) => {
       return prev.filter(
-        (i: Message) => i.messageId !== event.message.messageId
+        (m: Message) => m.messageId !== event.message.messageId
       );
     });
   }

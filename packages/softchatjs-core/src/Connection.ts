@@ -82,30 +82,43 @@ export default class Connection extends EventEmitter {
 
   async _initiateConnection() {
     try {
-      
-      if (!this.userMeta.uid) return null;
+      // Ensure we have a valid userMeta.uid
+      if (!this.userMeta?.uid) return null;
+  
+      // Clear previous health check interval
       clearInterval(this.healthCheckRef);
+  
+      // Create a session to retrieve token and wsURI
       const res = await CREATE_SESSION<{ token: string; wsURI: string }>({
         userId: this.userMeta.uid,
         projectId: this.projectConfig.projectId,
         apiKey: this.projectConfig.apiKey,
       });
+
+      console.log(res)
+  
+      // Emit connecting status
       this.emit(Events.CONNECTION_CHANGED, {
         connecting: true,
         isConnected: false,
         fetchingConversations: true,
       });
-      console.log(res);
+  
+      // If session creation was successful
       if (res.success) {
         this.wsAccessConfig = {
           url: res.data.wsURI,
           token: res.data.token,
         };
+  
+        // Fetch conversations after acquiring the session
         await this._getConversations({
           token: res.data.token,
           userId: this.userMeta.uid,
         });
-        var message = JSON.stringify({
+  
+        // Define the message to send on connection
+        const message = JSON.stringify({
           from: this.userMeta.uid,
           to: "",
           action: ServerActions.INITIALIZE,
@@ -114,38 +127,69 @@ export default class Connection extends EventEmitter {
           recipientMeta: {},
           projectId: this.projectConfig.projectId,
         });
-        if (this.socket && this.socket?.readyState === WebSocket.OPEN) {
+  
+        // Check if WebSocket is already open
+        if (this.socket && this.socket.readyState === WebSocket.OPEN) {
           console.log("already socket opened");
-          this.socket.send(message); // send a message
+          this.socket.send(message); // send the message
           this.wsConnected = true;
+  
+          // Emit successful connection state
           this.emit(Events.CONNECTION_CHANGED, {
             connecting: false,
             isConnected: true,
             fetchingConversations: false,
           });
         } else {
-          var ws = new WebSocket(
-            `wss://${this.wsAccessConfig.url || res.data.wsURI}`
-          );
+          // If socket is not open, create a new WebSocket connection
+          const ws = new WebSocket(`wss://${this.wsAccessConfig.url}`);
+  
+          // // Handle WebSocket error
+          // ws.onerror = (error: any) => {
+          //   console.log(":::socket error:::", error);
+  
+          //   // Ensure cleanup of open or connecting socket
+          //   if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
+          //     ws.close();
+          //   }
+  
+          //   // Retry connection after a delay
+          //   setTimeout(() => {
+          //     console.log("Retrying connection...");
+          //     this._initiateConnection(); // Re-attempt the connection
+          //   }, 3000); // Retry after 3 seconds
+          // };
+  
+          // Handle WebSocket open event
           ws.onopen = () => {
             console.log("socket opened");
-            this.socket = ws;
-            ws.send(message); // send a message
+            this.socket = ws; // Set the active socket
+  
+            // Send the initial message
+            ws.send(message);
             this.wsConnected = true;
+  
+            // Setup event handlers and start health checks
             this.setupEventHandlers();
-            this.startHealthCheck();
+            // this.startHealthCheck();
+  
+            // Emit connection success
             this.connecting = false;
             this.emit(Events.CONNECTION_CHANGED, {
               connecting: false,
               isConnected: true,
               fetchingConversations: false,
             });
+  
+            // Emit updated conversation list
             this.emit(Events.CONVERSATION_LIST_CHANGED, {
               conversations: this.conversations,
             });
           };
         }
       } else {
+        // Handle unsuccessful session creation
+        console.log("Session creation failed.");
         this.wsConnected = false;
         this.emit(Events.CONNECTION_CHANGED, {
           connecting: false,
@@ -154,14 +198,20 @@ export default class Connection extends EventEmitter {
         });
       }
     } catch (error) {
-      console.log(error);
+      // Handle general errors
+      console.error("Connection error:", error);
       this.wsConnected = false;
       this.emit(Events.CONNECTION_CHANGED, {
         connecting: false,
         isConnected: false,
         fetchingConversations: false,
       });
+
+      // Needs to be handled better
+      console.warn("Connection error. Attempting to reconnect...");
+      this.retryConnection()
     } finally {
+      // Any additional cleanup logic if necessary
     }
   }
 
@@ -269,31 +319,38 @@ export default class Connection extends EventEmitter {
   }
 
   private startHealthCheck() {
-    // if (this.socket) {
-    //   if (this.healthCheckRef) {
-    //     clearInterval(this.healthCheckRef);
-    //     console.log(this.healthCheckRef, "---ref");
-    //   }
+    if (this.socket) {
+      if (this.healthCheckRef) {
+        clearInterval(this.healthCheckRef);
+        console.log(this.healthCheckRef, "---ref");
+      }
 
-    //   // Set the new interval
-    //   this.healthCheckRef = setInterval(() => {
+      // Set the new interval
+      this.healthCheckRef = setInterval(() => {
 
-    //     // Check WebSocket connection status
-    //     if (this.socket?.readyState === WebSocket.OPEN) {
-    //       console.log("--Sending health check...");
-    //       const data = JSON.stringify({
-    //         action: ServerActions.HEALTH_CHECK,
-    //         message: {
-    //           message: "Hello!",
-    //           from: this.userMeta.uid,
-    //           token: this.wsAccessConfig.token,
-    //         },
-    //       });
+        // Check WebSocket connection status
+        if (this.socket?.readyState === WebSocket.OPEN) {
+          console.log("--Sending health check...");
+          const data = JSON.stringify({
+            action: ServerActions.HEALTH_CHECK,
+            message: {
+              message: "Hello!",
+              from: this.userMeta.uid,
+              token: this.wsAccessConfig.token,
+            },
+          });
 
-    //       this.socket.send(data); // send the health check message
-    //     }
-    //   }, 30000);
-    // }
+          this.socket.send(data); // send the health check message
+        }
+      }, 30000);
+    }
+  }
+
+  private retryConnection() {
+    // Retry logic or call _initiateConnection() after delay
+    setTimeout(() => {
+      this._initiateConnection();
+    }, 10000);
   }
 
   private setupEventHandlers() {
@@ -303,9 +360,19 @@ export default class Connection extends EventEmitter {
         msClient.messageEventHandler(event);
       };
 
+      // Handle errors
       this.socket.onerror = (event: ErrorEvent) => {
         console.error("Socket error: ", event);
+        this.retryConnection();
       };
+
+      // Handle disconnection (socket closes)
+      this.socket.onclose = () => {
+        console.warn("Socket closed. Attempting to reconnect...");
+        this.retryConnection();
+      };
+
+      this.startHealthCheck();
     }
   }
 }

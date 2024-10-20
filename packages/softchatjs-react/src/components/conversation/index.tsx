@@ -96,7 +96,7 @@ export const Conversation = (props: ConversationProps) => {
       if(message.messageState === MessageStates.SENT){
         return <BsCheck style={{ marginTop: "12px", color: "grey" }} />
       }
-      if(message.messageState === MessageStates.SENT || message.messageState === MessageStates.DELIVERED){
+      if(message.messageState === MessageStates.DELIVERED || message.messageState === MessageStates.READ){
         return <BsCheckAll style={{ marginTop: "12px", color: "grey" }} />
       }
       if(message.messageState === MessageStates.LOADING){
@@ -198,9 +198,12 @@ export const Conversation = (props: ConversationProps) => {
                 <div
                   style={{
                     display: "flex",
+                    alignItems:'center',
                     paddingLeft: hasAttachments && "10px",
                   }}
                 >
+              
+                  
                   <Text
                     styles={{
                       textAlign: "left",
@@ -221,6 +224,18 @@ export const Conversation = (props: ConversationProps) => {
                   )}
                 </div>
               ) : null}
+                  {message.lastEdited && (
+ <Text
+ styles={{
+   textAlign: "right",
+   marginRight: '8px',
+   color: messageDateColor,
+   fontSize: '9px'
+ }}
+ size="sm"
+ text={'(Edited)'}
+/>
+                  )}
             </div>
             {!oppositBubbleBoxes && (
               <div className={styles.conversation__text__container__reactions}>

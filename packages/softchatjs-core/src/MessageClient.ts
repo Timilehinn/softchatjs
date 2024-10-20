@@ -111,7 +111,7 @@ export default class MessageClient {
             messageState: MessageStates.LOADING,
           },
         });
-        if (this.connection.socket) {
+        if (this.connection.socket && this.connection.socket?.readyState === WebSocket.OPEN) {
           console.log('has socket')
           this.connection.socket.send(JSON.stringify(socketMessage));
           this.connection.emit(Events.EDITED_MESSAGE, {
@@ -121,8 +121,7 @@ export default class MessageClient {
               messageState: MessageStates.SENT,
             },
           });
-          if (newMessage.from !== this.connection.userMeta.uid) {
-          }
+          
           var conversationMeta = this.connection.conversationListMeta[newMessage.conversationId]
           var updatedMessages = this.rotateAndInsertMessageList(conversationMeta.conversation.messages, {
             ...newMessage,
@@ -148,19 +147,17 @@ export default class MessageClient {
               messageState: MessageStates.FAILED,
             },
           });
-          const unread = [
-            ...this.connection.conversationListMeta[newMessage.conversationId]
-              .unread,
-            newMessage.messageId,
-          ];
+          // const unread = [
+          //   ...this.connection.conversationListMeta[newMessage.conversationId].unread,
+          //   newMessage.messageId,
+          // ];
           this.connection.conversationListMeta[newMessage.conversationId] = {
-            conversation:
-              this.connection.conversationListMeta[newMessage.conversationId]
-                .conversation,
+            conversation: this.connection.conversationListMeta[newMessage.conversationId].conversation,
             lastMessage: {
               ...newMessage,
+              messageState: MessageStates.FAILED,
             },
-            unread: unread,
+            unread: [],
           };
           this.connection.emit(Events.CONVERSATION_LIST_META_CHANGED, {
             conversationListMeta: this.connection.conversationListMeta,

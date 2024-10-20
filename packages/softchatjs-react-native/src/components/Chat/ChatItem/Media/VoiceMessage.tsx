@@ -1,16 +1,15 @@
 import { View, Text, TouchableOpacity, ActivityIndicator } from "react-native";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useMemo } from "react";
 import { PauseIcon, PlayIcon } from "../../../../assets/icons";
 import { convertToMinutes } from "../../../../utils";
 import { useConfig } from "../../../../contexts/ChatProvider";
 import { Media } from "softchatjs-core/src/types";
-import { Audio, AVPlaybackStatus } from 'expo-av';
 import { useMessageState } from "softchatjs-react-native/src/contexts/MessageStateContext";
 import theme from "softchatjs-react-native/src/theme";
 
 type VoiceMessageProps = {
-  media: Media,
-  textColor?: string
+  media: Media;
+  textColor?: string;
 };
 
 var generateDefaultAudioMeterings = () => {
@@ -18,14 +17,14 @@ var generateDefaultAudioMeterings = () => {
   for (let i = 1; i <= 50; i++) {
     ui[i] = {
       metering: -50,
-      height: 10
+      height: 10,
     };
   }
-  return ui
-}
+  return ui;
+};
 
 export const AudioWaves = ({
-  type = 'record',
+  type = "record",
   audioTime,
   audioWaves,
 }: {
@@ -42,7 +41,7 @@ export const AudioWaves = ({
       style={{
         flex: 1,
         marginHorizontal: 5,
-        borderWidth: type === 'record'? 1 : 0,
+        borderWidth: type === "record" ? 1 : 0,
         overflow: "hidden",
         borderColor: theme?.divider,
         borderRadius: 100,
@@ -52,7 +51,13 @@ export const AudioWaves = ({
         alignItems: "center",
       }}
     >
-      <Text style={{ color: type === 'play'? theme?.text.primary : "white", fontSize: 12, marginEnd: 5 }}>
+      <Text
+        style={{
+          color: type === "play" ? theme?.text.primary : "white",
+          fontSize: 12,
+          marginEnd: 5,
+        }}
+      >
         {convertToMinutes(Number(audioTime.toFixed(0)))}
       </Text>
       <View
@@ -61,7 +66,7 @@ export const AudioWaves = ({
           flexDirection: "row",
           alignItems: "center",
           height: "100%",
-          justifyContent: type === 'play'? 'flex-start' : "flex-end",
+          justifyContent: type === "play" ? "flex-start" : "flex-end",
           overflow: "hidden",
           paddingHorizontal: 0,
         }}
@@ -84,75 +89,100 @@ export const AudioWaves = ({
 };
 
 export default function VoiceMessage(props: VoiceMessageProps) {
-
   const { media, textColor = theme.text.primary } = props;
-  const { sound, audioState, playVoiceMessage, pauseVoiceMessage, resumeVoiceMessage, unload, activeVoiceMessage, avPlayBackStatus } = useMessageState();
+  const {
+    sound,
+    audioState,
+    playVoiceMessage,
+    pauseVoiceMessage,
+    resumeVoiceMessage,
+    unload,
+    activeVoiceMessage,
+    avPlayBackStatus,
+  } = useMessageState();
 
   const renderVoiceMessageControls = useCallback(() => {
-    var isActiveVoiceMessage = media.mediaId === activeVoiceMessage?.mediaId
-    if(isActiveVoiceMessage && audioState === "loading"){
-      return <ActivityIndicator size={25} />
-    }else if(isActiveVoiceMessage && audioState === null){
+    var isActiveVoiceMessage = media.mediaId === activeVoiceMessage?.mediaId;
+    if (isActiveVoiceMessage && audioState === "loading") {
+      return <ActivityIndicator size={25} />;
+    } else if (isActiveVoiceMessage && audioState === null) {
       return (
         <TouchableOpacity onPress={() => playVoiceMessage(media)}>
           <PlayIcon color={theme?.icon} />
         </TouchableOpacity>
-      )
-    }else if(isActiveVoiceMessage && audioState === "playing"){
+      );
+    } else if (isActiveVoiceMessage && audioState === "playing") {
       return (
         <TouchableOpacity onPress={pauseVoiceMessage}>
           <PauseIcon color={theme?.icon} />
         </TouchableOpacity>
-      )
-    }else if(isActiveVoiceMessage && audioState === 'paused'){
+      );
+    } else if (isActiveVoiceMessage && audioState === "paused") {
       return (
         <TouchableOpacity onPress={resumeVoiceMessage}>
-        <PlayIcon color={theme?.icon} />
-      </TouchableOpacity>
-      )
-    }else{
+          <PlayIcon color={theme?.icon} />
+        </TouchableOpacity>
+      );
+    } else {
       return (
         <TouchableOpacity onPress={() => playVoiceMessage(media)}>
           <PlayIcon color={theme?.icon} />
         </TouchableOpacity>
-      )
+      );
     }
-  }, [
-    media,
-    activeVoiceMessage,
-    audioState
-  ]);
+  }, [media, activeVoiceMessage, audioState]);
 
   var progress = useMemo(() => {
     try {
-      var isActiveVoiceMessage = media.mediaId === activeVoiceMessage?.mediaId
-      if(isActiveVoiceMessage){
-        if(audioState === null || audioState === "loading"){
+      var isActiveVoiceMessage = media.mediaId === activeVoiceMessage?.mediaId;
+      if (isActiveVoiceMessage) {
+        if (audioState === null || audioState === "loading") {
           return {
-            percentage: 0, 
-            timePlayed: media?.meta?.audioDurationSec?? 0 / 1000
-          }
+            percentage: 0,
+            timePlayed: media?.meta?.audioDurationSec ?? 0 / 1000,
+          };
         }
         var curr = avPlayBackStatus?.positionMillis / 1000;
-        var duration = media?.meta?.audioDurationSec?? 0 / 1000;
-        var percentage = (curr/duration) * 100
-    return { percentage, timePlayed: curr }
-
+        var duration = media?.meta?.audioDurationSec ?? 0 / 1000;
+        var percentage = (curr / duration) * 100;
+        return { percentage, timePlayed: curr };
       }
-      return { percentage: 0, timePlayed: media.meta?.audioDurationSec?? 0 }
+      return { percentage: 0, timePlayed: media.meta?.audioDurationSec ?? 0 };
     } catch (error) {
-      return { percentage: 0, timePlayed: media.meta?.audioDurationSec?? 0 }
+      return { percentage: 0, timePlayed: media.meta?.audioDurationSec ?? 0 };
     }
-    
-  }, [ media, avPlayBackStatus, audioState ]);
+  }, [media, avPlayBackStatus, audioState]);
 
   return (
-    <View style={{ flex: 1, flexDirection: "row", alignItems: "center", width: '100%' }}>
+    <View
+      style={{
+        flex: 1,
+        flexDirection: "row",
+        alignItems: "center",
+        width: "100%",
+      }}
+    >
       <>{renderVoiceMessageControls()}</>
-      <View style={{ flex: 1, height: 3, backgroundColor: theme?.divider, marginHorizontal: 10 }}>
-        <View style={{ width: `${progress.percentage}%`, maxWidth: '100%', height: 3, backgroundColor: theme?.icon }} />
+      <View
+        style={{
+          flex: 1,
+          height: 3,
+          backgroundColor: theme?.divider,
+          marginHorizontal: 10,
+        }}
+      >
+        <View
+          style={{
+            width: `${progress.percentage}%`,
+            maxWidth: "100%",
+            height: 3,
+            backgroundColor: theme?.icon,
+          }}
+        />
       </View>
-        <Text style={{ marginStart: 5, color: textColor }}>{convertToMinutes(progress.timePlayed)}</Text>
+      <Text style={{ marginStart: 5, color: textColor }}>
+        {convertToMinutes(progress.timePlayed)}
+      </Text>
     </View>
   );
 }

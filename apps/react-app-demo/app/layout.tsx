@@ -1,8 +1,8 @@
-"use client"
+"use client";
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import { SoftChatProvider } from "softchatjs-react"
+import { SoftChatProvider } from "softchatjs-react";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -27,23 +27,20 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <title>Title</title>
-        <meta name='description' content='Description' />
+        <meta name="description" content="Description" />
       </head>
-       <SoftChatProvider
+      <SoftChatProvider
         config={{
           userId: "20",
           username: "Tolu",
-          apiKey: '1234',
-          projectId: '5909b61d-e6be-47b5-bb54-a60e56344580'
+          apiKey: "1234",
+          projectId: "5909b61d-e6be-47b5-bb54-a60e56344580",
         }}
       >
-        
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
-     
-        <>{children}</>
-      </body>
+        <body className={`${geistSans.variable} ${geistMono.variable}`}>
+          <>{children}</>
+        </body>
       </SoftChatProvider>
-
     </html>
   );
 }

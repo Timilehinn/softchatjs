@@ -6,7 +6,7 @@ export enum ClientActions {
   NEW_MESSAGE_REACTION = 'newMessageReaction',
   ACK_HEALTH_CHECK = 'acknowledgeHealthCheck',
   EDITED_MESSAGE = 'editedMessage',
-  MESSAGE_DELETED = 'messageDeleted',
+  MESSAGE_DELETED = 'deletedMessage',
 }
 
 // sent to the server

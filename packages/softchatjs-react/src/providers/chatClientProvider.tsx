@@ -67,6 +67,7 @@ export const ChatClientProvider = ({
   client.initializeUser({
     uid: config.userId,
     username: config.username,
+    color: "green",
     profileUrl:
       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRiBNx0Gn_wuUhj9u7ncTMf31YGgCg9JBM3Hg&s",
   });
