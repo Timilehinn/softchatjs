@@ -92,21 +92,24 @@ export const Conversation = (props: ConversationProps) => {
   const oppositBubbleBoxes =
     message.messageOwner.uid === config.userId && stacked;
 
-    const messageState = () => {
-      if(message.messageState === MessageStates.SENT){
-        return <BsCheck style={{ marginTop: "12px", color: "grey" }} />
-      }
-      if(message.messageState === MessageStates.DELIVERED || message.messageState === MessageStates.READ){
-        return <BsCheckAll style={{ marginTop: "12px", color: "grey" }} />
-      }
-      if(message.messageState === MessageStates.LOADING){
-        return <BsClock style={{ marginTop: "12px", color: "grey" }} />
-      }
-      if(message.messageState === MessageStates.FAILED){
-        return <BsX style={{ marginTop: "12px", color: "red" }} />
-      }
-      return <BsClock style={{ marginTop: "12px", color: "grey" }} />
+  const messageState = () => {
+    if (message.messageState === MessageStates.SENT) {
+      return <BsCheck style={{ marginTop: "12px", color: "grey" }} />;
     }
+    if (
+      message.messageState === MessageStates.DELIVERED ||
+      message.messageState === MessageStates.READ
+    ) {
+      return <BsCheckAll style={{ marginTop: "12px", color: "grey" }} />;
+    }
+    if (message.messageState === MessageStates.LOADING) {
+      return <BsClock style={{ marginTop: "12px", color: "grey" }} />;
+    }
+    if (message.messageState === MessageStates.FAILED) {
+      return <BsX style={{ marginTop: "12px", color: "red" }} />;
+    }
+    return <BsClock style={{ marginTop: "12px", color: "grey" }} />;
+  };
 
   return (
     <div
@@ -198,12 +201,12 @@ export const Conversation = (props: ConversationProps) => {
                 <div
                   style={{
                     display: "flex",
-                    alignItems:'center',
+                    alignItems: "center",
                     paddingLeft: hasAttachments && "10px",
+                    paddingRight: hasAttachments && "10px",
+                    justifyContent:"space-between"
                   }}
                 >
-              
-                  
                   <Text
                     styles={{
                       textAlign: "left",
@@ -219,23 +222,21 @@ export const Conversation = (props: ConversationProps) => {
                     styles={{ marginTop: "12px", color: messageDateColor }}
                     text={formatMessageTime(message.createdAt as string)}
                   />
-                  {oppositBubbleBoxes && (
-                    <>{messageState()}</>
-                  )}
+                  {oppositBubbleBoxes && <>{messageState()}</>}
                 </div>
               ) : null}
-                  {message.lastEdited && (
- <Text
- styles={{
-   textAlign: "right",
-   marginRight: '8px',
-   color: messageDateColor,
-   fontSize: '9px'
- }}
- size="sm"
- text={'(Edited)'}
-/>
-                  )}
+              {message.lastEdited && (
+                <Text
+                  styles={{
+                    textAlign: "right",
+                    marginRight: "8px",
+                    color: messageDateColor,
+                    fontSize: "9px",
+                  }}
+                  size="sm"
+                  text={"(Edited)"}
+                />
+              )}
             </div>
             {!oppositBubbleBoxes && (
               <div className={styles.conversation__text__container__reactions}>
@@ -339,9 +340,7 @@ const AttachmentList = ({ attachments }: { attachments: Media[] }) => {
           );
         }
         if (i.type === "audio") {
-          return (
-            <audio src={i.mediaUrl} controls  />
-          );
+          return <audio src={i.mediaUrl} controls />;
         }
       })}
     </div>

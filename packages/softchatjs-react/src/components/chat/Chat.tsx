@@ -14,13 +14,31 @@ import ChatInput from "../inputs/chat-input";
 import MessageList from "../conversation-list/conversation-list";
 import { ConversationList as MainList } from "../user-conversations";
 import { SoftChatContext } from "../../providers/softChatProvider";
-import { useChatState } from "../../providers/clientStateProvider";
+import {
+  ConversationItem,
+  useChatState,
+} from "../../providers/clientStateProvider";
 import { useChatClient } from "../../providers/chatClientProvider";
 import { ImageViewer } from "../modals";
 
-const Chat = () => {
+type ChatProps = {
+  renderChatBubble?: (message: Message) => JSX.Element;
+  renderConversationList?: (props: {
+    conversations: ConversationItem[];
+    onCoversationItemClick: (conversationItem: ConversationItem) => void;
+  }) => JSX.Element;
+  renderChatHeader?: () => JSX.Element;
+  renderChatInput?: (props: { onChange: (e: string) => void }) => JSX.Element;
+};
+
+const Chat = (props: ChatProps) => {
   const { client, config } = useChatClient();
-  const { activeConversation, showImageModal } = useChatState();
+  const {
+    activeConversation,
+    showImageModal,
+    setActiveConversation,
+    setConversations,conversations
+  } = useChatState();
   const [isConnected, setIsConnected] = useState(false);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [fecthingmore, setFetchingMore] = useState(false);
@@ -38,7 +56,7 @@ const Chat = () => {
   const [scrollToKey, setScrollToKey] = useState<string>("");
   const messagesEndRef: any = useRef<null | HTMLDivElement>(null);
   const [forceScrollCount, setForceScrollCount] = useState(0);
-  const [ recipientId, setRecipientId ] = useState("")
+  const [recipientId, setRecipientId] = useState("");
 
   const conversationId = activeConversation?.conversation.conversationId!;
 
@@ -71,9 +89,12 @@ const Chat = () => {
   }, [generalMenuRef, closeGeneralMenu]);
 
   const handleMessage = (event?: any) => {
-    console.log('fuckinglogthis')
-    if(activeConversation){
-      if(event.message.conversationId === activeConversation.conversation.conversationId){
+    console.log("fuckinglogthis");
+    if (activeConversation) {
+      if (
+        event.message.conversationId ===
+        activeConversation.conversation.conversationId
+      ) {
         setMessages((prev) => {
           return [...prev, event.message];
         });
@@ -84,17 +105,22 @@ const Chat = () => {
   };
 
   const handleTypingStarted = (event: any) => {
-    if(activeConversation){
-      console.log(activeConversation.conversation.conversationId, event.conversationId)
-      if(activeConversation.conversation.conversationId === event.conversationId){
+    if (activeConversation) {
+      console.log(
+        activeConversation.conversation.conversationId,
+        event.conversationId
+      );
+      if (
+        activeConversation.conversation.conversationId === event.conversationId
+      ) {
         setRecipientTyping(true);
       }
     }
-  }
+  };
 
   const handleTypingStopped = (event: any) => {
     setRecipientTyping(false);
-  }
+  };
 
   const handleDeletedMessage = (event: any) => {
     setMessages((prev) => {
@@ -102,7 +128,7 @@ const Chat = () => {
         (m: Message) => m.messageId !== event.message.messageId
       );
     });
-  }
+  };
 
   const handleEditedMessage = (event: any) => {
     setMessages((prev: any) => {
@@ -113,25 +139,33 @@ const Chat = () => {
             ...event.message,
           };
         } else {
-          return item
+          return item;
         }
       });
     });
-  }
+  };
 
-  const handleConnectionChanged = (event: ChatEventGenerics<ConnectionEvent>) => {
+  const handleConnectionChanged = (
+    event: ChatEventGenerics<ConnectionEvent>
+  ) => {
     setIsConnected(event.isConnected);
-  }
+  };
 
   const clearUnread = () => {
-    console.log('should clear here', config, activeConversation.conversation.conversationId)
-    const messageIds = activeConversation.unread
-    const msClient = client.messageClient(activeConversation.conversation.conversationId);
+    console.log(
+      "should clear here",
+      config,
+      activeConversation.conversation.conversationId
+    );
+    const messageIds = activeConversation.unread;
+    const msClient = client.messageClient(
+      activeConversation.conversation.conversationId
+    );
     msClient.readMessages(activeConversation?.conversation.conversationId, {
       uid: config.userId,
       messageIds,
     });
-  }
+  };
 
   useEffect(() => {
     if (client && activeConversation) {
@@ -140,12 +174,11 @@ const Chat = () => {
       );
       setRecipientId(recipients[0]);
       client
-      .messageClient(activeConversation.conversation.conversationId)
-      .setActiveConversation();
+        .messageClient(activeConversation.conversation.conversationId)
+        .setActiveConversation();
       clearUnread();
     }
-
-  },[activeConversation, client])
+  }, [activeConversation, client]);
 
   useEffect(() => {
     if (client) {
@@ -160,7 +193,6 @@ const Chat = () => {
       client.subscribe("connection_changed" as any, handleConnectionChanged);
 
       client.subscribe("new_message" as any, handleMessage);
-
 
       client.subscribe("edited_message" as any, handleEditedMessage);
 
@@ -178,7 +210,7 @@ const Chat = () => {
       client.unsubscribe("edited_message" as any, handleEditedMessage);
       client.unsubscribe("new_message" as any, handleMessage);
       client.unsubscribe("connection_changed" as any, handleConnectionChanged);
-    }
+    };
   }, [client, activeConversation]);
 
   useEffect(() => {
@@ -220,9 +252,35 @@ const Chat = () => {
     }
   }, [presentPage]);
 
+  const handleConversationsListChanged = (e: {
+    conversationListMeta: ConversationListMeta;
+  }) => {
+    const conversationList = Object.values(
+      e.conversationListMeta
+    ).flat() as ConversationItem[];
+    setConversations(conversationList);
+  };
+
+  useEffect(() => {
+    if (client) {
+      client.subscribe(
+        "conversation_list_meta_changed" as any,
+        handleConversationsListChanged
+      );
+      return () => {
+        client.unsubscribe(
+          "conversation_list_meta_changed" as any,
+          handleConversationsListChanged
+        );
+      };
+    }
+  }, [client]);
+
+
+
   return (
     <div
-      style={{ background: theme?.background.primary || "#1b1d21" }}
+      style={{ background: theme?.background?.primary || "#1b1d21" }}
       className={styles.chat}
     >
       <div
@@ -232,12 +290,23 @@ const Chat = () => {
             : styles.chat__conversations__hidden
         }`}
       >
-        <MainList
-          setShowUserList={setShowUserList}
-          showUserList={showUserList}
-          setMainListOpen={setMainListOpen}
-          userListRef={userListRef}
-        />
+        {props.renderConversationList ? (
+          props.renderConversationList({
+            conversations,
+            onCoversationItemClick: (item) => {
+              setActiveConversation(item);
+              setMainListOpen(false);
+            },
+          })
+        ) : (
+          <MainList
+            setShowUserList={setShowUserList}
+            showUserList={showUserList}
+            setMainListOpen={setMainListOpen}
+            userListRef={userListRef}
+           
+          />
+        )}
       </div>
       {activeConversation && (
         <div className={styles.chat__messages}>
@@ -256,6 +325,8 @@ const Chat = () => {
             scrollToKey={scrollToKey}
             fetchingMore={fecthingmore}
             messagesEndRef={messagesEndRef}
+            renderChatBubble={props.renderChatBubble}
+            renderChatHeader={props.renderChatHeader}
           />
           <ChatInput
             closeGeneralMenu={() => setMenuDetails({ element: null })}
@@ -269,6 +340,7 @@ const Chat = () => {
             client={client}
             recipientTyping={recipientTyping}
             textInputRef={textInputRef}
+            renderChatInput={props.renderChatInput}
           />
         </div>
       )}

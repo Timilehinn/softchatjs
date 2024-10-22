@@ -30,6 +30,7 @@ const ChatInput = ({
   generalMenuRef,
   closeGeneralMenu,
   textInputRef,
+  renderChatInput,
 }: {
   client: ChatClient;
   conversationId: string;
@@ -51,6 +52,7 @@ const ChatInput = ({
   generalMenuRef: any;
   closeGeneralMenu: () => void;
   textInputRef: any;
+  renderChatInput?: (props: { onChange: (e: string) => void }) => JSX.Element;
 }) => {
   const [message, setMessage] = useState<Partial<Message>>();
   const [base64Images, setBase64Images] = useState<string[]>([]);
@@ -74,7 +76,7 @@ const ChatInput = ({
   useEffect(() => {
     let debounceTimer: NodeJS.Timeout | undefined;
     let idleTimer: NodeJS.Timeout | undefined;
-    console.log(conversationId, ':::conversationif')
+    console.log(conversationId, ":::conversationif");
     if (message?.message && message.message.length > 0) {
       clearTimeout(debounceTimer);
       // set a new debounce timer to send a typing notification after 350ms
@@ -101,7 +103,7 @@ const ChatInput = ({
   }, [message?.message, conversationId]);
 
   const sendHandler = async () => {
-    console.log(recipientId, ":::recipientId")
+    console.log(recipientId, ":::recipientId");
     if (!message?.message?.length) {
       return;
     }
@@ -182,7 +184,7 @@ const ChatInput = ({
         quotedMessage: null,
         ...attachmentType,
       });
-      console.log('message sent')
+      console.log("message sent");
       close();
       setBase64Images([]);
     } catch (err) {
@@ -198,7 +200,7 @@ const ChatInput = ({
     audio.src = url;
     audio.controls = true;
     document.body.appendChild(audio);
-    console.log(url)
+    console.log(url);
   };
 
   // if (1)
@@ -216,7 +218,7 @@ const ChatInput = ({
 
   return (
     <div
-      style={{ backgroundColor: theme?.background.secondary || "#1b1d21" }}
+      style={{ backgroundColor: theme?.background?.secondary || "#1b1d21" }}
       className={styles.input}
     >
       <div className={styles.input__icon}>
@@ -250,25 +252,37 @@ const ChatInput = ({
         className={styles.input__inner}
         style={{ width: "85%", fontStyle: "italic" }}
       >
-        <div style={{ display: "flex", alignItems: "center" }}>
-          <input
-            ref={textInputRef}
-            value={message?.message}
-            onChange={(e) =>
+        {renderChatInput ? (
+          renderChatInput({
+            onChange: (e) => {
               setMessage({
                 ...message,
-                message: e.target.value,
-              })
-            }
-            placeholder="Type your message"
-          />
-          <CiFaceSmile
-            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-            className={styles.input__emoji}
-            size={24}
-            color={primaryActionColor}
-          />
-        </div>
+                message: e,
+              });
+            },
+          })
+        ) : (
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <input
+              ref={textInputRef}
+              value={message?.message}
+              onChange={(e) =>
+                setMessage({
+                  ...message,
+                  message: e.target.value,
+                })
+              }
+              placeholder="Type your message"
+            />
+
+            <CiFaceSmile
+              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+              className={styles.input__emoji}
+              size={24}
+              color={primaryActionColor}
+            />
+          </div>
+        )}
 
         {base64Images.length ? (
           <ChatAttachments

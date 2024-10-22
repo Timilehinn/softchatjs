@@ -24,7 +24,8 @@
   border-radius: 5px;
   border-left: 6px solid greenyellow;
   display: flex;
-  flex-direction: column;
+  padding: 5px;
+
   justify-content: center;
   padding-left: 10px;
 }
