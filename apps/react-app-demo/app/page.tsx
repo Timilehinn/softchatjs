@@ -40,8 +40,6 @@ export default function Home() {
         //     ))}
         //   </div>
         // )}
-      
-        recipientId=""
       />
     </div>
   );
