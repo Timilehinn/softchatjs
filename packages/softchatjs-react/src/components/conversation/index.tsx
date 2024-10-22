@@ -22,6 +22,7 @@ import { ThreeDots } from "react-loader-spinner";
 import { BsCheck, BsCheckAll, BsClock, BsX } from "react-icons/bs";
 import { useChatState } from "../../providers/clientStateProvider";
 import { MessageStates } from "softchatjs-core/src";
+import AudioPlayer from "../audio/audio-player";
 
 export const regex = {
   URL_REGEX:
@@ -340,7 +341,8 @@ const AttachmentList = ({ attachments }: { attachments: Media[] }) => {
           );
         }
         if (i.type === "audio") {
-          return <audio src={i.mediaUrl} controls />;
+          // return <audio src={i.mediaUrl} controls />;
+          return <AudioPlayer url={i.mediaUrl} duration={i.meta.audioDurationSec} blob={null} />
         }
       })}
     </div>

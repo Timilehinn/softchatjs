@@ -40,33 +40,6 @@ function AudioRecorder() {
   };
 
   return (
-    // <div
-    //   style={{
-    //     display: "flex",
-    //     alignItems: "center",
-    //     justifyContent: "flex-end",
-    //   }}
-    // >
-    //   {audioURL && (
-    //     <div style={{ paddingRight: "10px" }}>
-    //       <audio src={audioURL} controls style={{ color: "#343434" }} />
-    //     </div>
-    //   )}
-    //   {!audioURL && (
-    //     <div
-    //       style={{
-    //         display: "flex",
-    //         alignItems: "center",
-    //         padding: "20px",
-    //       }}
-    //     >
-    //       <MdDelete color="grey" size={24} />
-    //       <Text text="0:00" />
-    //       <div className="audio__recording"></div>
-    //       <ImStop onClick={stopRecording} color="red" size={24} />
-    //     </div>
-    //   )}
-    // </div>
     <div
       style={{
         display: "flex",

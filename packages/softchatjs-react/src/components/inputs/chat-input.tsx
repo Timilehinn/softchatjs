@@ -16,6 +16,9 @@ import { CiFaceSmile } from "react-icons/ci";
 import { InputEmojis } from "../emoji";
 import "./input.module.css";
 import { useChatClient } from "../../providers/chatClientProvider";
+import { convertToMinutes } from "../../helpers/date";
+import AudioPlayer from "../audio/audio-player";
+import TrashIcon from "../assets/icons";
 // import { AudioRecorder } from "react-audio-voice-recorder";
 
 const ChatInput = ({
@@ -58,6 +61,13 @@ const ChatInput = ({
   const [base64Images, setBase64Images] = useState<string[]>([]);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [sending, setSending] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [audioChunks, setAudioChunks] = useState([]);
+  const [audioRecorder, setAudioRecorder] = useState<MediaRecorder | null>(
+    null
+  );
+  const [ voiceMessageDuration, setVoiceMessageDuration ] = useState(0);
+  const [ audioBlob, setAudioBlob ] = useState<Blob | null>(null);
 
   const msClient = client.messageClient(conversationId);
   const { config } = useChatClient();
@@ -73,10 +83,61 @@ const ChatInput = ({
     }
   }, [editProps?.isEditing]);
 
+
+  useEffect(() => {
+    if (navigator.mediaDevices) {
+      console.log("getUserMedia supported.");
+
+      const constraints = { audio: true };
+      navigator.mediaDevices
+        .getUserMedia(constraints)
+        .then((stream) => {
+          const mediaRecorder = new MediaRecorder(stream);
+          console.log(mediaRecorder, ":::mediarecorder")
+          setAudioRecorder(mediaRecorder);
+
+          var chunks = [];
+
+          mediaRecorder.onstop = (e) => {
+            const blob = new Blob(chunks, { type: "audio/ogg; codecs=opus" });
+            console.log(blob, ':audio blob')
+            // const audioURL = URL.createObjectURL(blob);
+            setAudioBlob(blob);
+            chunks = []
+          }
+
+          mediaRecorder.onstart = () => {
+            console.log('recording started')
+          }
+
+          mediaRecorder.ondataavailable = (e) => {
+            console.log(e.data, '--audio data')
+            chunks.push(e.data);
+            if(voiceMessageDuration >= 300000){
+              mediaRecorder.stop();
+            }else{
+              setVoiceMessageDuration(v => v + 1)
+            }
+          };
+        })
+        .catch((err) => {
+          console.error(`The following error occurred: ${err}`);
+        });
+
+    } else {
+      console.log("not media devices found");
+    }
+  }, []);
+
+  // useEffect(() => {
+  //   if(audioRecorder) {
+      
+  //   }
+  // },[audioRecorder]);
+
   useEffect(() => {
     let debounceTimer: NodeJS.Timeout | undefined;
     let idleTimer: NodeJS.Timeout | undefined;
-    console.log(conversationId, ":::conversationif");
     if (message?.message && message.message.length > 0) {
       clearTimeout(debounceTimer);
       // set a new debounce timer to send a typing notification after 350ms
@@ -216,6 +277,83 @@ const ChatInput = ({
   //     />
   //   );
 
+  const recordVoiceMessage = () => {
+    audioRecorder.start(1000);
+    setIsRecording(true)
+  };
+
+  const stopRecording = () => {
+    audioRecorder.stop();
+    setIsRecording(false)
+  }
+
+  if (isRecording) {
+    return (
+      <div
+        style={{
+          backgroundColor: theme?.background?.secondary || "#1b1d21",
+          justifyContent: "center",
+        }}
+        className={styles.input}
+      >
+        <div
+          className={styles.input__inner}
+          style={{
+            width: "90%",
+            fontStyle: "italic",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "10px",
+          }}
+        >
+          <button onClick={stopRecording} style={{ backgroundColor: 'transparent', border: 0, marginRight: '12px' }}>
+            <TrashIcon />
+          </button>
+          <div style={{ flex: 1, width: '100%', height: '2px', backgroundColor: 'grey' }} >
+            <div style={{ height: '100%', backgroundColor: 'white', width: `${voiceMessageDuration/300 * 100}%` }} />
+          </div>
+          <p style={{ fontSize: '11.5px', marginLeft: '15px' }}>{convertToMinutes(voiceMessageDuration)} : {convertToMinutes(300)}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if(audioBlob){
+    return (
+      <div
+        style={{
+          backgroundColor: theme?.background?.secondary || "#1b1d21",
+          justifyContent: "center",
+        }}
+        className={styles.input}
+      >
+        <div
+          className={styles.input__inner}
+          style={{
+            width: "90%",
+            fontStyle: "italic",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "10px",
+            marginRight: '10px'
+          }}
+        >
+          <button onClick={() => { setAudioBlob(null);  setVoiceMessageDuration(0)}} style={{ backgroundColor: 'transparent', border: 0 }}>
+            <TrashIcon />
+          </button>
+          <AudioPlayer blob={audioBlob} duration={voiceMessageDuration} />
+        </div>
+        <VscSend
+              onClick={() => {}}
+              size={22}
+              color={primaryActionColor}
+            />
+        </div>
+    )
+  }
+
   return (
     <div
       style={{ backgroundColor: theme?.background?.secondary || "#1b1d21" }}
@@ -250,7 +388,7 @@ const ChatInput = ({
 
       <div
         className={styles.input__inner}
-        style={{ width: "85%", fontStyle: "italic" }}
+        style={{ flex: 1, fontStyle: "italic" }}
       >
         {renderChatInput ? (
           renderChatInput({
@@ -303,8 +441,16 @@ const ChatInput = ({
             />
           )}
         </div>
-
-        <AiOutlineAudio color={primaryActionColor} size={20} />
+        <button
+          onClick={recordVoiceMessage}
+          style={{
+            backgroundColor: "transparent",
+            border: 0,
+            cursor: "pointer",
+          }}
+        >
+          <AiOutlineAudio color={primaryActionColor} size={20} />
+        </button>
       </div>
 
       {menuDetails.element ? (

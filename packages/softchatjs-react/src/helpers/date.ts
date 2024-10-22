@@ -72,3 +72,18 @@ export function formatConversationTime(time: Date | string) {
   // If duration is less than 1 minute
   return 'Just now';
 }
+
+export function convertToMinutes(seconds: number) {
+  if(seconds === 0) {
+    return '00:00'
+  }
+  var _seconds = Number(seconds.toFixed(0))
+  const minutes = Math.floor(_seconds / 60);
+  const remainingSeconds = _seconds % 60;
+
+  // Pad the numbers to always have two digits
+  const paddedMinutes = String(minutes).padStart(2, '0');
+  const paddedSeconds = String(remainingSeconds).padStart(2, '0');
+
+  return `${paddedMinutes}:${paddedSeconds}`;
+}
