@@ -96,7 +96,7 @@ export default function Home() {
           Go to nextjs.org →
         </a>
       </footer> */}
-      <Chat recipientId="" />
+      <Chat />
     </div>
   );
 }
