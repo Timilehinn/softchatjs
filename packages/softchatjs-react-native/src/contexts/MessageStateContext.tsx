@@ -9,6 +9,7 @@ import {
 } from "../types";
 import { Message, SendMessageGenerics } from "softchatjs-core/src/types";
 import { Audio, AVPlaybackStatus } from 'expo-av';
+import { Emoticon } from "softchatjs-core/src/emoticon.type";
 
 type MessageStateContext = {
   globalTextMessage: string,

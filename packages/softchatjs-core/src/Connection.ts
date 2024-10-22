@@ -351,12 +351,16 @@ export default class Connection extends EventEmitter {
 
   private retryConnection() {
     // Retry logic or call _initiateConnection() after delay
+    if(this.retry_count >= this.max_retry_count){
+      return console.warn('Max retry limit reached, connection failed.')
+    }
+    this.emit(Events.CONNECTION_CHANGED, {
+      connecting: true,
+      isConnected: false,
+      fetchingConversations: false,
+    });
     setTimeout(() => {
-      this.emit(Events.CONNECTION_CHANGED, {
-        connecting: true,
-        isConnected: false,
-        fetchingConversations: false,
-      });
+      this.retry_count += 1;
       this._initiateConnection();
     }, 5000);
   }
