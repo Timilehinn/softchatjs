@@ -301,7 +301,7 @@ const ChatTopNav = ({
 
   return (
     <div
-      style={{ backgroundColor: theme?.background.secondary || "#222529" }}
+      style={{ backgroundColor: theme?.background?.secondary || "#222529" }}
       className={styles.topnav}
     >
       {renderChatHeader ? (

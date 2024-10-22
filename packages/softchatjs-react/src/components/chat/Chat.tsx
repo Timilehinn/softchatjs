@@ -280,7 +280,7 @@ const Chat = (props: ChatProps) => {
 
   return (
     <div
-      style={{ background: theme?.background.primary || "#1b1d21" }}
+      style={{ background: theme?.background?.primary || "#1b1d21" }}
       className={styles.chat}
     >
       <div

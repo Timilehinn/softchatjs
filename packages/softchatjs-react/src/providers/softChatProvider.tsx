@@ -9,7 +9,7 @@ type SoftChatConfigType = {
   userId: string;
   username: string;
   theme?: {
-    background: {
+    background?: {
       primary?: string; // White background for light mode
       secondary?: string; // Light grey for secondary background
       disabled?: string;

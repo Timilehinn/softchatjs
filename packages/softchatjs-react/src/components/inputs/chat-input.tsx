@@ -218,7 +218,7 @@ const ChatInput = ({
 
   return (
     <div
-      style={{ backgroundColor: theme?.background.secondary || "#1b1d21" }}
+      style={{ backgroundColor: theme?.background?.secondary || "#1b1d21" }}
       className={styles.input}
     >
       <div className={styles.input__icon}>
