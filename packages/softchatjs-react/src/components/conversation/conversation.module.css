@@ -137,6 +137,7 @@ display: none;
   display: flex;
   justify-content: flex-start;
   cursor:zoom-in;
+  padding: 5px;
  
 
 }
@@ -144,7 +145,7 @@ display: none;
 .attachments img{
   height: 220px;
   width: 200px;
-  border-radius: 8px;
+  border-radius: 12px;
   
   object-fit: cover;
  
