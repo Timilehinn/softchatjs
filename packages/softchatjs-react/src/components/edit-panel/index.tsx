@@ -26,12 +26,15 @@ const EditPanel = (props: EditPanelProps) => {
           <Text text="You" weight="bold" />
           <Text text={message?.message} weight="medium" />
         </div>
+        =
         <div style={{ width: "10%" }}>
-          <img
-            style={{ height: "100%", width: "100%",borderRadius:'5px' }}
-            src={message?.attachedMedia[0]?.mediaUrl}
-            alt=""
-          />
+          {message?.attachedMedia[0]?.mediaUrl && (
+            <img
+              style={{ height: "100%", width: "100%", borderRadius: "5px" }}
+              src={message?.attachedMedia[0]?.mediaUrl}
+              alt=""
+            />
+          )}
         </div>
       </div>
     </div>
