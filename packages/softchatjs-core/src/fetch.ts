@@ -1,7 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
 import { MediaType, Prettify, UploadContent } from './types';
 
-let API = 'https://wl71g0p8f5.execute-api.eu-west-2.amazonaws.com/staging';
+let API = 'https://wlw2w86sy5.execute-api.eu-west-2.amazonaws.com/staging';
 
 enum ENDPOINTS {
     CONVERSATIONS = '/conversations',
