@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState } from "react";
 import { Conversation, Media, Message } from "softchatjs-core";
 
-type ConversationItem = {
+export type ConversationItem = {
   conversation: Conversation;
   lastMessage: Message;
   unread: string[];

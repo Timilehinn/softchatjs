@@ -43,6 +43,8 @@ type MessageListProps = {
   scrollToKey: string;
   fetchingMore: boolean;
   messagesEndRef: any;
+  renderChatBubble?: (message: Message) => JSX.Element;
+  renderChatHeader?: () => JSX.Element;
 };
 
 const MessageList = (props: MessageListProps) => {
@@ -60,6 +62,8 @@ const MessageList = (props: MessageListProps) => {
     scrollToKey,
     fetchingMore,
     messagesEndRef,
+    renderChatBubble,
+    renderChatHeader,
   } = props;
 
   const [showOptions, setShowOPtions] = useState(false);
@@ -180,7 +184,6 @@ const MessageList = (props: MessageListProps) => {
   //   }
   // };
 
-  
   const onScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
     const { scrollTop } = e.target as HTMLDivElement;
     if (scrollTop <= 0) {
@@ -204,6 +207,7 @@ const MessageList = (props: MessageListProps) => {
       <ChatTopNav
         setMainListOpen={props.setMainListOpen}
         message={activeConversation?.lastMessage!}
+        renderChatHeader={renderChatHeader}
       />
       {fetchingMore && (
         <div className={styles.loading}>
@@ -237,32 +241,36 @@ const MessageList = (props: MessageListProps) => {
                 }
               >
                 <div ref={refMap[item?.messageId]}>
-                  <Conversation
-                    hideAvartar={
-                      item.messageOwner.uid ===
-                      _item.messages[index + 1]?.messageOwner.uid
-                    }
-                    textInputRef={textInputRef}
-                    show={showOptions && activeIndex == item.messageId}
-                    showEmojiPanel={
-                      showEmojiPanel && activeIndex == item.messageId
-                    }
-                    index={index}
-                    key={index}
-                    message={item}
-                    onPress={(e) => handlePress(e, item.messageId)}
-                    setEditDetails={setEditDetails}
-                    canEdit={item.from === config.userId}
-                    openEmojiPanel={() => openEmojiPanel(item.messageId)}
-                    optionsMenuRef={optionsMenuRef}
-                    emojiPickerRef={emojiPickerRef}
-                    mousePosition={mousePosition}
-                    client={client}
-                    conversationId={conversationId}
-                    closeOptionsMenu={() => setShowOPtions(false)}
-                    scrollToQuote={scrollToQuote}
-                    recipientId={recipientId}
-                  />
+                  {props.renderChatBubble ? (
+                    renderChatBubble(item)
+                  ) : (
+                    <Conversation
+                      hideAvartar={
+                        item.messageOwner.uid ===
+                        _item.messages[index + 1]?.messageOwner.uid
+                      }
+                      textInputRef={textInputRef}
+                      show={showOptions && activeIndex == item.messageId}
+                      showEmojiPanel={
+                        showEmojiPanel && activeIndex == item.messageId
+                      }
+                      index={index}
+                      key={index}
+                      message={item}
+                      onPress={(e) => handlePress(e, item.messageId)}
+                      setEditDetails={setEditDetails}
+                      canEdit={item.from === config.userId}
+                      openEmojiPanel={() => openEmojiPanel(item.messageId)}
+                      optionsMenuRef={optionsMenuRef}
+                      emojiPickerRef={emojiPickerRef}
+                      mousePosition={mousePosition}
+                      client={client}
+                      conversationId={conversationId}
+                      closeOptionsMenu={() => setShowOPtions(false)}
+                      scrollToQuote={scrollToQuote}
+                      recipientId={recipientId}
+                    />
+                  )}
                 </div>
               </div>
             ))}
@@ -280,27 +288,37 @@ const MessageList = (props: MessageListProps) => {
 const ChatTopNav = ({
   message,
   setMainListOpen,
+  renderChatHeader,
 }: {
   message: Message;
   setMainListOpen: any;
+  renderChatHeader?: () => JSX.Element;
 }) => {
   const { client, config } = useChatClient();
   const { theme } = config;
+
+  
 
   return (
     <div
       style={{ backgroundColor: theme?.background.secondary || "#222529" }}
       className={styles.topnav}
     >
-      <div className={styles.topnav__menu} style={{ marginRight: "10px" }}>
-        <MdOutlineMenu
-          color="white"
-          onClick={() => setMainListOpen(true)}
-          size={22}
-        />
-      </div>
+      {renderChatHeader ? (
+        renderChatHeader()
+      ) : (
+        <div style={{paddingLeft:'10px'}}>
+          <div className={styles.topnav__menu} style={{ marginRight: "10px" }}>
+            <MdOutlineMenu
+              color="white"
+              onClick={() => setMainListOpen(true)}
+              size={22}
+            />
+          </div>
 
-      <Avartar message={message} />
+          <Avartar message={message} />
+        </div>
+      )}
     </div>
   );
 };

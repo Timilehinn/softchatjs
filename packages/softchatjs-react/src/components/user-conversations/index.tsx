@@ -4,7 +4,7 @@ import {
   useContext,
   useEffect,
   useState,
-  useCallback
+  useCallback,
 } from "react";
 import styles from "./index.module.css";
 import { ChatEventGenerics, Conversation, Message } from "softchatjs-core/src";
@@ -29,46 +29,19 @@ export const ConversationList = ({
   setShowUserList,
   showUserList,
   userListRef,
+ 
 }: {
   setMainListOpen: any;
   setShowUserList: Dispatch<SetStateAction<boolean>>;
   showUserList: boolean;
   userListRef: any;
+
 }) => {
   const { client } = useChatClient();
+  const { setActiveConversation,conversations } = useChatState();
   // const [conversations, setConversations] = useState<
   //   { conversation: Conversation; lastMessage: Message; unread: string[] }[]
   // >([]);
-  const {
-    activeConversation,
-    setActiveConversation,
-    conversations,
-    setConversations,
-  } = useChatState();
-
-  const handleConversationsListChanged = (e: {
-    conversationListMeta: ConversationListMeta;
-  }) => {
-    const conversationList = Object.values(
-      e.conversationListMeta
-    ).flat() as ConversationItem[];
-    setConversations(conversationList);
-  };
-
-  useEffect(() => {
-    if (client) {
-      client.subscribe(
-        "conversation_list_meta_changed" as any,
-        handleConversationsListChanged
-      );
-      return () => {
-        client.unsubscribe(
-          "conversation_list_meta_changed" as any,
-          handleConversationsListChanged
-        );
-      };
-    }
-  }, [client]);
 
   if (conversations.length === 0) {
     return (
@@ -115,9 +88,7 @@ const ConversationItem = ({
   onClick: () => void;
 }) => {
   const { config } = useChatClient();
-  const {
-    activeConversation,
-  } = useChatState();
+  const { activeConversation } = useChatState();
 
   const user = item.conversation.participantList.filter(
     (p) => p.participantId !== config.userId
@@ -147,7 +118,17 @@ const ConversationItem = ({
     );
   };
   return (
-    <div style={{ backgroundColor: activeConversation?.conversation.conversationId === item.conversation.conversationId? "#4a515a" : "transparent" }} className={styles.item} onClick={onClick}>
+    <div
+      style={{
+        backgroundColor:
+          activeConversation?.conversation.conversationId ===
+          item.conversation.conversationId
+            ? "#4a515a"
+            : "transparent",
+      }}
+      className={styles.item}
+      onClick={onClick}
+    >
       <div className={styles.item__image}>
         <Avartar url={user[0].participantDetails?.profileUrl} />
         {/* <Avartar url={user[0].participantDetails.profileUrl} /> */}
@@ -203,7 +184,6 @@ const UserList = ({ userListRef }: { userListRef: any }) => {
   const { client } = useChatClient();
 
   const dummyUserList = [
-   
     {
       id: "80",
       name: "Romanreins",
@@ -227,15 +207,14 @@ const UserList = ({ userListRef }: { userListRef: any }) => {
   ];
 
   const startConvo = useCallback(() => {
-    if(selectedUsers){
+    if (selectedUsers) {
       const conn = client.newConversation({
         uid: selectedUsers.id,
-        username: selectedUsers.name
+        username: selectedUsers.name,
       });
       conn.create("Hey there");
     }
-  },[selectedUsers])
-  
+  }, [selectedUsers]);
 
   return (
     <div ref={userListRef} className={styles.userList}>
