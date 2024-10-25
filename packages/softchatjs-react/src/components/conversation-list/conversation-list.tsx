@@ -80,6 +80,7 @@ const MessageList = (props: MessageListProps) => {
 
   const itemRefs = useRef<Record<string, HTMLDivElement>>({});
   const theme = config.theme;
+  const textColor = config?.theme?.text?.primary || "white";
 
   const handlePress = (event: any, id: string) => {
     event.preventDefault();
@@ -219,7 +220,7 @@ const MessageList = (props: MessageListProps) => {
         return (
           <div
             style={{
-              borderTop: `1px solid ${
+              borderTop: `${config?.theme?.hideDivider ? "0" : "1"}px solid ${
                 theme?.divider || "rgba(128, 128, 128, 0.136)"
               }`,
             }}
@@ -229,8 +230,17 @@ const MessageList = (props: MessageListProps) => {
               style={{ justifyContent: "center", display: "flex" }}
               key={`${i}-sec`}
             >
-              <div className={styles.wrapper__date}>
-                <Text size="xs" text={formatSectionTime(_item.date)} />
+              <div
+                style={{
+                  background: config?.theme?.background?.secondary || "#1b1d21",
+                }}
+                className={styles.wrapper__date}
+              >
+                <Text
+                  styles={{ color: textColor }}
+                  size="xs"
+                  text={formatSectionTime(_item.date)}
+                />
               </div>
             </div>
 
@@ -297,8 +307,6 @@ const ChatTopNav = ({
   const { client, config } = useChatClient();
   const { theme } = config;
 
-  
-
   return (
     <div
       style={{ backgroundColor: theme?.background?.secondary || "#222529" }}
@@ -307,7 +315,7 @@ const ChatTopNav = ({
       {renderChatHeader ? (
         renderChatHeader()
       ) : (
-        <div style={{paddingLeft:'10px'}}>
+        <div style={{ paddingLeft: "10px" }}>
           <div className={styles.topnav__menu} style={{ marginRight: "10px" }}>
             <MdOutlineMenu
               color="white"
