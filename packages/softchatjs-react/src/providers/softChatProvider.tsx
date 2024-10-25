@@ -39,6 +39,7 @@ type SoftChatConfigType = {
     };
     icon?: string; // Dark grey for icons
     divider?: string; // Light grey for dividers
+    hideDivider?:boolean
   } | null;
 };
 

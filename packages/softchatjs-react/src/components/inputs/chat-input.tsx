@@ -1,7 +1,12 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import styles from "./input.module.css";
 import ChatClient, { Media, Message } from "softchatjs-core/src";
-import { AiOutlineAudio, AiOutlineClose, AiOutlinePlus } from "react-icons/ai";
+import {
+  AiOutlineAudio,
+  AiOutlineClose,
+  AiOutlineDelete,
+  AiOutlinePlus,
+} from "react-icons/ai";
 import EditPanel from "../edit-panel";
 import Text from "../text/text";
 import { AttachmentMenu, Menu } from "../menu";
@@ -16,7 +21,12 @@ import { CiFaceSmile } from "react-icons/ci";
 import { InputEmojis } from "../emoji";
 import "./input.module.css";
 import { useChatClient } from "../../providers/chatClientProvider";
+import { convertToMinutes } from "../../helpers/date";
+import AudioPlayer from "../audio/audio-player";
+import TrashIcon from "../assets/icons";
 // import { AudioRecorder } from "react-audio-voice-recorder";
+import { IoStopCircleOutline } from "react-icons/io5";
+import { useChatState } from "../../providers/clientStateProvider";
 
 const ChatInput = ({
   client,
@@ -55,15 +65,26 @@ const ChatInput = ({
   renderChatInput?: (props: { onChange: (e: string) => void }) => JSX.Element;
 }) => {
   const [message, setMessage] = useState<Partial<Message>>();
-  const [base64Images, setBase64Images] = useState<string[]>([]);
+  const [files, setFiles] = useState<any[]>([]);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [sending, setSending] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [audioChunks, setAudioChunks] = useState([]);
+  const [audioRecorder, setAudioRecorder] = useState<MediaRecorder | null>(
+    null
+  );
+  const [voiceMessageDuration, setVoiceMessageDuration] = useState(0);
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const [audioBlobPLaceHolder, setAudioBlobPlaceHolder] = useState<Blob | null>(
+    null
+  );
 
   const msClient = client.messageClient(conversationId);
   const { config } = useChatClient();
   const { theme } = config;
 
-  const primaryActionColor = theme?.action?.primary || "white";
+  const primaryActionColor = theme?.icon || "white";
+  const inputBg = config?.theme?.background?.secondary || "#222529";
 
   useEffect(() => {
     if (editProps?.isEditing) {
@@ -74,9 +95,59 @@ const ChatInput = ({
   }, [editProps?.isEditing]);
 
   useEffect(() => {
+    if (navigator.mediaDevices) {
+      console.log("getUserMedia supported.");
+
+      const constraints = { audio: true };
+      navigator.mediaDevices
+        .getUserMedia(constraints)
+        .then((stream) => {
+          const mediaRecorder = new MediaRecorder(stream);
+          console.log(mediaRecorder, ":::mediarecorder");
+          setAudioRecorder(mediaRecorder);
+
+          var chunks = [];
+
+          mediaRecorder.onstop = (e) => {
+            const blob = new Blob(chunks, { type: "audio/ogg; codecs=opus" });
+            console.log(blob, ":audio blob");
+            // const audioURL = URL.createObjectURL(blob);
+            setAudioBlob(blob);
+            // setVoiceMessageDuration(0)
+            chunks = [];
+          };
+
+          mediaRecorder.onstart = () => {
+            console.log("recording started");
+          };
+
+          mediaRecorder.ondataavailable = (e) => {
+            console.log(e.data, "--audio data");
+            chunks.push(e.data);
+            if (voiceMessageDuration >= 300000) {
+              mediaRecorder.stop();
+            } else {
+              setVoiceMessageDuration((v) => v + 1);
+            }
+          };
+        })
+        .catch((err) => {
+          console.error(`The following error occurred: ${err}`);
+        });
+    } else {
+      console.log("not media devices found");
+    }
+  }, []);
+
+  // useEffect(() => {
+  //   if(audioRecorder) {
+
+  //   }
+  // },[audioRecorder]);
+
+  useEffect(() => {
     let debounceTimer: NodeJS.Timeout | undefined;
     let idleTimer: NodeJS.Timeout | undefined;
-    console.log(conversationId, ":::conversationif");
     if (message?.message && message.message.length > 0) {
       clearTimeout(debounceTimer);
       // set a new debounce timer to send a typing notification after 350ms
@@ -103,8 +174,7 @@ const ChatInput = ({
   }, [message?.message, conversationId]);
 
   const sendHandler = async () => {
-    console.log(recipientId, ":::recipientId");
-    if (!message?.message?.length) {
+    if (!message?.message?.length && !files.length && !audioBlob) {
       return;
     }
     setSending(true);
@@ -118,34 +188,53 @@ const ChatInput = ({
 
     try {
       let imageResData: any = [];
-      let mediaData: Media[] = [];
-      if (base64Images.length) {
+      let mediaData: Media[];
+      console.log(files[0]);
+      if (files.length) {
         // Wait for all uploads to complete using Promise.all
-        imageResData = await Promise.all(
-          base64Images.map(async (item) => {
-            const res = await msClient.uploadAttachment({
-              base64: item.split(",")[1],
-              fileKey: uuidv4(),
-            });
-            return res; // Return the result to accumulate in the array
-          })
-        );
 
-        mediaData = imageResData.map((i: any) => ({
-          type: "image",
-          ext: ".png",
-          mediaId: uuidv4(),
-          mediaUrl: i.data.url,
-        }));
+        const res = await msClient.uploadFile(files[0], {
+          filename: files[0].name,
+          mimeType: files[0].type,
+        });
+
+        mediaData = [
+          {
+            type: "image" as any,
+            ext: ".png",
+            mediaId: uuidv4(),
+            mediaUrl: res.link,
+            mimeType: files[0].type,
+          },
+        ];
       }
-      console.log(imageResData, "media res");
 
-      // if(editProps.isEditing){
-      //   msClient.
-      // }
-      const attachmentType = mediaData.length
-        ? { attachmentType: "media" as any }
-        : { attachmentType: "none" };
+      if (audioBlob) {
+        const url = URL.createObjectURL(audioBlob);
+
+        const res = await msClient.uploadFile(url, {
+          filename: "random",
+          mimeType: audioBlob.type,
+        });
+
+        mediaData = [
+          {
+            type: "audio" as any,
+            ext: ".mp3",
+            mediaId: uuidv4(),
+            mediaUrl: res.link as any,
+            mimeType: "audio/mp3",
+            meta: {
+              audioDurationSec: voiceMessageDuration,
+            },
+          },
+        ];
+      }
+
+      const attachmentType =
+        files.length || audioBlob
+          ? { attachmentType: "media" as any }
+          : { attachmentType: "none" };
 
       if (editProps?.isEditing) {
         msClient.editMessage({
@@ -186,11 +275,12 @@ const ChatInput = ({
       });
       console.log("message sent");
       close();
-      setBase64Images([]);
     } catch (err) {
       console.log(err);
     } finally {
       setSending(false);
+      setFiles([]);
+      setAudioBlob(null);
     }
   };
 
@@ -216,149 +306,315 @@ const ChatInput = ({
   //     />
   //   );
 
+  const recordVoiceMessage = () => {
+    audioRecorder.start(1000);
+    setIsRecording(true);
+  };
+
+  const stopRecording = () => {
+    audioRecorder.stop();
+    setIsRecording(false);
+  };
+
+  const cancelAudioAttachments = () => {
+    setAudioBlob(null);
+    setAudioBlobPlaceHolder(null);
+  };
+
+  if (isRecording) {
+    return (
+      <div
+        style={{
+          backgroundColor: theme?.background?.secondary || "#1b1d21",
+          justifyContent: "flex-end",
+          width: "100%",
+        }}
+        className={styles.input}
+      >
+        <div
+          className={styles.input__inner}
+          style={{
+            width: "30%",
+            fontStyle: "italic",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "10px",
+          }}
+        >
+          <button
+            onClick={stopRecording}
+            style={{
+              backgroundColor: "transparent",
+              border: 0,
+              marginRight: "12px",
+            }}
+          >
+            <IoStopCircleOutline
+              style={{ marginTop: "5px" }}
+              color="red"
+              size={23}
+            />
+          </button>
+          <div
+            style={{
+              flex: 1,
+              width: "100%",
+              height: "2px",
+              backgroundColor: "grey",
+            }}
+          >
+            <div
+              style={{
+                height: "100%",
+                backgroundColor: "white",
+                width: `${(voiceMessageDuration / 300) * 100}%`,
+              }}
+            />
+          </div>
+          <p style={{ fontSize: "11.5px", marginLeft: "15px" }}>
+            {convertToMinutes(voiceMessageDuration)} : {convertToMinutes(300)}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (audioBlob && !audioBlobPLaceHolder) {
+    return (
+      <div
+        style={{
+          width: "100%",
+          backgroundColor: theme?.background?.secondary || "#1b1d21",
+          justifyContent: "flex-start",
+          display: "flex",
+          alignItems: "center",
+        }}
+        className={styles.input}
+      >
+        <div
+          className={styles.input__inner}
+          style={{
+            width: "30%",
+            fontStyle: "italic",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "10px",
+            marginRight: "10px",
+          }}
+        >
+          <button
+            onClick={() => {
+              setAudioBlob(null);
+              setVoiceMessageDuration(0);
+            }}
+            style={{ backgroundColor: "transparent", border: 0 }}
+          >
+            <AiOutlineDelete size={22} color={"red"} />
+          </button>
+          <AudioPlayer blob={audioBlob} duration={voiceMessageDuration} />
+        </div>
+        <VscSend
+          onClick={() => {
+            setAudioBlobPlaceHolder(audioBlob);
+          }}
+          size={22}
+          color={primaryActionColor}
+        />
+      </div>
+    );
+  }
+
   return (
     <div
       style={{ backgroundColor: theme?.background?.secondary || "#1b1d21" }}
       className={styles.input}
     >
-      <div className={styles.input__icon}>
-        <div>
-          {editProps?.isEditing || editProps?.isReplying ? (
-            <AiOutlineClose
-              onClick={() => setEditDetails(undefined)}
-              color={primaryActionColor}
-              size={24}
-            />
-          ) : (
-            <AiOutlinePlus
-              onClick={() =>
-                setMenuDetails?.({
-                  element: (
-                    <AttachmentMenu
-                      closeGeneralMenu={closeGeneralMenu}
-                      setBase64Strings={setBase64Images}
-                    />
-                  ),
-                })
-              }
-              color={primaryActionColor}
-              size={22}
-            />
+      {
+        <EditPanel
+          message={editProps?.message}
+          isEditing={editProps?.isEditing}
+          isReplying={editProps?.isReplying}
+          closePanel={() => setEditDetails(undefined)}
+        />
+      }
+      <div className={styles.input__wrap}>
+        <div className={styles.input__icon}>
+          {!audioBlob && (
+            <div>
+              <AiOutlinePlus
+                onClick={() =>
+                  setMenuDetails?.({
+                    element: (
+                      <AttachmentMenu
+                        closeGeneralMenu={closeGeneralMenu}
+                        setFiles={setFiles}
+                      />
+                    ),
+                  })
+                }
+                color={primaryActionColor}
+                size={22}
+              />
+            </div>
           )}
         </div>
-      </div>
-
-      <div
-        className={styles.input__inner}
-        style={{ width: "85%", fontStyle: "italic" }}
-      >
-        {renderChatInput ? (
-          renderChatInput({
-            onChange: (e) => {
-              setMessage({
-                ...message,
-                message: e,
-              });
-            },
-          })
-        ) : (
-          <div style={{ display: "flex", alignItems: "center" }}>
-            <input
-              ref={textInputRef}
-              value={message?.message}
-              onChange={(e) =>
+        <div
+          className={styles.input__inner}
+          style={{ flex: 1, fontStyle: "italic", background: inputBg }}
+        >
+          {renderChatInput ? (
+            renderChatInput({
+              onChange: (e) => {
                 setMessage({
                   ...message,
-                  message: e.target.value,
-                })
-              }
-              placeholder="Type your message"
-            />
-
-            <CiFaceSmile
-              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-              className={styles.input__emoji}
-              size={24}
-              color={primaryActionColor}
-            />
-          </div>
-        )}
-
-        {base64Images.length ? (
-          <ChatAttachments
-            setBase64Images={setBase64Images}
-            images={base64Images}
-          />
-        ) : null}
-      </div>
-      <div className={styles.input__button}>
-        <div style={{ marginRight: "10px" }}>
-          {sending ? (
-            "..."
+                  message: e,
+                });
+              },
+            })
           ) : (
-            <VscSend
-              onClick={sendHandler}
-              size={22}
-              color={primaryActionColor}
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <input
+                style={{ background: inputBg }}
+                ref={textInputRef}
+                value={message?.message}
+                onChange={(e) =>
+                  setMessage({
+                    ...message,
+                    message: e.target.value,
+                  })
+                }
+                placeholder="Type your message"
+              />
+
+              <CiFaceSmile
+                onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                className={styles.input__emoji}
+                size={24}
+                color={primaryActionColor}
+              />
+            </div>
+          )}
+
+          {files.length || audioBlob ? (
+            <ChatAttachments
+              files={files}
+              setFiles={setFiles}
+              audioBlob={audioBlobPLaceHolder}
+              voiceMessageDuration={voiceMessageDuration}
+              cancelAudioAttachment={cancelAudioAttachments}
             />
+          ) : null}
+        </div>
+        <div className={styles.input__button}>
+          <div style={{ marginRight: "10px" }}>
+            {sending ? (
+              "..."
+            ) : (
+              <VscSend
+                onClick={sendHandler}
+                size={22}
+                color={primaryActionColor}
+              />
+            )}
+          </div>
+          {!files.length && (
+            <button
+              onClick={recordVoiceMessage}
+              style={{
+                backgroundColor: "transparent",
+                border: 0,
+                cursor: "pointer",
+              }}
+            >
+              <AiOutlineAudio color={primaryActionColor} size={20} />
+            </button>
           )}
         </div>
-
-        <AiOutlineAudio color={primaryActionColor} size={20} />
+        {menuDetails.element ? (
+          <div className={styles.input__menu}>
+            <Menu
+              generalMenuRef={generalMenuRef}
+              element={menuDetails.element}
+            />
+          </div>
+        ) : null}
+        {showEmojiPicker ? (
+          <div className={styles.input__emoji__picker}>
+            <InputEmojis
+              onEmojiPick={(e) => {
+                setMessage({
+                  ...message,
+                  message: e,
+                });
+                setShowEmojiPicker(false);
+              }}
+            />
+          </div>
+        ) : null}
       </div>
-
-      {menuDetails.element ? (
-        <div className={styles.input__menu}>
-          <Menu generalMenuRef={generalMenuRef} element={menuDetails.element} />
-        </div>
-      ) : null}
-      {showEmojiPicker ? (
-        <div className={styles.input__emoji__picker}>
-          <InputEmojis
-            onEmojiPick={(e) => {
-              setMessage({
-                ...message,
-                message: e,
-              });
-              setShowEmojiPicker(false);
-            }}
-          />
-        </div>
-      ) : null}
-
-      <EditPanel
-        message={editProps?.message}
-        isEditing={editProps?.isEditing}
-        isReplying={editProps?.isReplying}
-      />
     </div>
   );
 };
 
 const ChatAttachments = ({
-  images,
-  setBase64Images,
+  audioBlob,
+  voiceMessageDuration,
+  cancelAudioAttachment,
+  files,
+  setFiles,
 }: {
-  images: string[];
-  setBase64Images: Dispatch<SetStateAction<string[]>>;
+  audioBlob: Blob;
+  voiceMessageDuration: number;
+  files: any[];
+  setFiles: any;
+  cancelAudioAttachment: () => void;
 }) => {
   const deleteAttachment = (id: string) => {
-    const imgs = images.filter((i) => i !== id);
-    setBase64Images(imgs);
+    const imgs = files.filter((i) => i.name !== id);
+    setFiles(imgs);
   };
+
+  const { config } = useChatClient();
+
+  const { theme } = config;
+
   return (
     <div className={styles.chatPhotos}>
-      {images.map((item) => (
-        <div className={styles.chatPhotos__item}>
-          <img src={item} alt="" />
-          <div
-            onClick={() => deleteAttachment(item)}
-            className={styles.chatPhotos__cancel}
-          >
+      {audioBlob ? (
+        <div
+          style={{
+            padding: "10px",
+            background: theme?.background?.primary || "#1b1d21",
+            borderRadius: "30px",
+            cursor: "pointer",
+            position: "relative",
+          }}
+        >
+          <div onClick={cancelAudioAttachment} className={styles.audioCancel}>
             <MdCancel size={20} color="grey" />
           </div>
+          <AudioPlayer blob={audioBlob} duration={voiceMessageDuration} />
         </div>
-      ))}
+      ) : null}
+      {files.length
+        ? files.map((item) => {
+            const url = URL.createObjectURL(item);
+
+            return (
+              <div className={styles.chatPhotos__item}>
+                <img src={url as any} alt="" />
+                <div
+                  onClick={() => deleteAttachment(item.name)}
+                  className={styles.chatPhotos__cancel}
+                >
+                  <MdCancel size={20} color="grey" />
+                </div>
+              </div>
+            );
+          })
+        : null}
     </div>
   );
 };

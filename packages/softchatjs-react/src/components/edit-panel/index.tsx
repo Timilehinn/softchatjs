@@ -3,15 +3,22 @@ import { useEffect, useRef, useState } from "react";
 import styles from "./edit.module.css";
 import Text from "../text/text";
 import { Message } from "softchatjs-core";
+import { AiOutlineClose } from "react-icons/ai";
+import { useChatClient } from "../../providers/chatClientProvider";
 
 type EditPanelProps = {
   message: Message;
   isEditing?: boolean;
   isReplying?: boolean;
+  closePanel:()=>void
 };
 
 const EditPanel = (props: EditPanelProps) => {
-  const { isEditing, message, isReplying } = props;
+  const { isEditing, message, isReplying,closePanel } = props;
+  const { config } = useChatClient();
+  const { theme } = config;
+
+  const primaryActionColor = theme?.action?.primary || "white";
 
   return (
     <div
@@ -26,6 +33,7 @@ const EditPanel = (props: EditPanelProps) => {
           <Text text="You" weight="bold" />
           <Text text={message?.message} weight="medium" />
         </div>
+
         <div style={{ width: "10%" }}>
           {message?.attachedMedia[0]?.mediaUrl && (
             <img
@@ -35,6 +43,12 @@ const EditPanel = (props: EditPanelProps) => {
             />
           )}
         </div>
+        <AiOutlineClose
+          onClick={closePanel}
+          color={primaryActionColor}
+          size={20}
+          style={{cursor:"pointer"}}
+        />
       </div>
     </div>
   );

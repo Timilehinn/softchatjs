@@ -35,6 +35,27 @@ export default function RootLayout({
           username: "Tolu",
           apiKey: "1234",
           projectId: "5909b61d-e6be-47b5-bb54-a60e56344580",
+          // theme: {
+          //   background: {
+          //     primary: "white",
+          //     secondary: "white",
+          //   },
+          //   // text:"black",
+          //   icon: "black",
+          //   chatBubble: {
+          //     left: {
+          //       bgColor: "#F9E4CB",
+          //       messageColor:"black",
+          //       messageTimeColor:"black"
+          //     },
+          //   },
+          //   divider:"grey",
+          //   text:{
+          //     primary:"black"
+          //   },
+          //   hideDivider:true
+
+          // },
         }}
       >
         <body className={`${geistSans.variable} ${geistMono.variable}`}>
