@@ -1,3 +1,4 @@
+import React from 'react'
 import {
   StyleSheet,
   View,
@@ -28,11 +29,11 @@ type QuotedProps = {
   layout?: "stacked";
   theme?: ChatTheme;
   position?: "left" | "right";
-  messageOwner?: UserMeta
+  chatUserId?: string
 };
 
 export default function Quoted(props: QuotedProps) {
-  const { quotedMessage, layout, onPress, theme, position, messageOwner } = props;
+  const { quotedMessage, layout, onPress, theme, position, chatUserId } = props;
 
   if (!quotedMessage) {
     return null;
@@ -199,7 +200,7 @@ export default function Quoted(props: QuotedProps) {
     >
       <Text style={{ color: quotedMessage.messageOwner.color, textTransform: 'capitalize', marginBottom: 5, fontWeight: 'bold',  textShadowColor: 'rgba(0, 0, 0, 0.3)',
   textShadowOffset: { width: .5, height: .5 },
-  textShadowRadius: 5, }}>{quotedMessage.messageOwner.uid === messageOwner?.uid? "You" : quotedMessage.messageOwner.username}</Text>
+  textShadowRadius: 5, }}>{quotedMessage.messageOwner.uid === chatUserId? "You" : quotedMessage.messageOwner.username}</Text>
       <>{renderMediaIcon()}</>
       <Preview
         message={quotedMessage.message}

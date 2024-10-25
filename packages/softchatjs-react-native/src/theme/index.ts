@@ -24,8 +24,8 @@ const theme: ChatTheme = {
       replyBorderColor: stone[200]
     },
     right: {
-      bgColor: "#CDD8DD",
-      messageColor: 'black',
+      bgColor: "#474952",
+      messageColor: 'white',
       messageTimeColor: 'grey',
       replyBorderColor: green[900]
     },

@@ -174,7 +174,7 @@ export default function Default(props: DefaultProps) {
       >
         <View style={[getStyle, { padding: 8 }]}>
           <Quoted
-            messageOwner={message.messageOwner}
+            chatUserId={chatUserId}
             quotedMessage={message.quotedMessage}
             onPress={() => onScrollToIndex(message.quotedMessage?.messageId as string)}
             theme={theme}
@@ -235,7 +235,7 @@ export default function Default(props: DefaultProps) {
               {formatMessageTime(message.createdAt)}
             </Text>
             {position === "right" && (
-              <>{renderStateIcon(theme?.text.primary as string)}</>
+              <>{renderStateIcon(theme?.chatBubble.right.messageTimeColor as string)}</>
             )}
           </View>
         </View>

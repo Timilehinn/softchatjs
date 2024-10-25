@@ -54,7 +54,11 @@ export default function MediaMessage(props: Props) {
               </TouchableOpacity>
           )
         }else if(media.type === MediaType.AUDIO){
-          return <VoiceMessage key={i} media={media} textColor={theme?.text.disabled} />
+          return (
+            <View key={i} style={{ marginBottom: 5 }}>
+              <VoiceMessage media={media} textColor={theme?.text.secondary} />
+            </View>
+          )
         }
       })}
     </View>
