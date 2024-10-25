@@ -5,10 +5,18 @@
   padding: 10px 10px 10px 10px;
 
   width: 70%;
+  /* display: flex;
+  align-items: center;
+  z-index: 600;
+  padding-bottom: 20px; */
+}
+
+.input__wrap{
   display: flex;
   align-items: center;
   z-index: 600;
   padding-bottom: 20px;
+  width: 100%;
 }
 
 .input__inner {
@@ -66,7 +74,7 @@
 }
 
 .input__icon div:hover{
-  background-color: #222529;
+  opacity: 0.5;
   height: 35px;
   width: 35px;
   border-radius: 100px;
@@ -91,22 +99,27 @@
   width: 300px;
   display: flex;
   margin-bottom: 20px;
- 
+  padding-left: 20px;
 }
 
 .chatPhotos__item {
-  height: 60px;
-  width: 60px;
+  height: 35px;
+  width: 35px;
   margin-right: 10px; position: relative;
 }
 
 .chatPhotos__cancel {
   position: absolute;
-  top: 5px;
-  right: 5px;
+  top: 3px;
+  right: 2px;
   cursor: pointer;
 }
-
+.audioCancel {
+  position: absolute;
+  top: 6px;
+  right: 7px;
+  cursor: pointer;
+}
 .chatPhotos img {
   height: 100%;
   width: 100%;

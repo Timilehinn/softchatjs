@@ -19,12 +19,12 @@ export const Menu = (props: MenuProps) => {
 
 export const AttachmentMenu = ({
   onChange,
-  setBase64Strings,
+  setFiles,
   closeGeneralMenu,
 }: {
   onChange?: (event: any) => void;
-  setBase64Strings: Dispatch<SetStateAction<string[]>>;
   closeGeneralMenu: () => void;
+  setFiles:Dispatch<SetStateAction<any[]>>
 }) => {
   const fileInputRef: any = useRef();
   const options = [
@@ -37,24 +37,7 @@ export const AttachmentMenu = ({
   const handleChange = (event: any) => {
     closeGeneralMenu();
     const files = event.target.files;
-    const promises = Array.from(files).map((file: any) => {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          resolve(reader.result);
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-    });
-
-    Promise.all(promises)
-      .then((base64Strings) => {
-        setBase64Strings(base64Strings as any);
-      })
-      .catch((error) => {
-        console.error("Error converting files to Base64:", error);
-      });
+    setFiles(Array.from(files))
   };
 
   return (

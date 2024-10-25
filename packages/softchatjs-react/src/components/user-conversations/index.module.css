@@ -6,15 +6,14 @@
   } */
 
 .list{
-    background-color:#202326;
     height: 100%;
     /* padding: 10px; */
-position: relative;
+    position: relative;
 }
 
 .item:hover{
     opacity: .7;
-    background-color: #4a515a;
+    
   
 }
 

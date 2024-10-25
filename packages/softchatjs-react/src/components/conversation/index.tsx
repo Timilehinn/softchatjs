@@ -81,7 +81,7 @@ export const Conversation = (props: ConversationProps) => {
     hideAvartar,
   } = props;
 
-  const hasAttachments = message.attachedMedia.length;
+  const hasAttachments = message?.attachedMedia?.length;
   const { config } = useChatClient();
   const stacked = true;
 
@@ -342,7 +342,7 @@ const AttachmentList = ({ attachments }: { attachments: Media[] }) => {
         }
         if (i.type === "audio") {
           // return <audio src={i.mediaUrl} controls />;
-          return <AudioPlayer url={i.mediaUrl} duration={i.meta.audioDurationSec} blob={null} />
+          return <AudioPlayer url={i?.mediaUrl} duration={i?.meta?.audioDurationSec || 0} blob={null} />
         }
       })}
     </div>

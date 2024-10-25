@@ -29,16 +29,14 @@ export const ConversationList = ({
   setShowUserList,
   showUserList,
   userListRef,
- 
 }: {
   setMainListOpen: any;
   setShowUserList: Dispatch<SetStateAction<boolean>>;
   showUserList: boolean;
   userListRef: any;
-
 }) => {
-  const { client } = useChatClient();
-  const { setActiveConversation,conversations } = useChatState();
+  const { client, config } = useChatClient();
+  const { setActiveConversation, conversations } = useChatState();
   // const [conversations, setConversations] = useState<
   //   { conversation: Conversation; lastMessage: Message; unread: string[] }[]
   // >([]);
@@ -52,7 +50,10 @@ export const ConversationList = ({
   }
 
   return (
-    <div className={styles.list}>
+    <div
+      style={{ background: config?.theme?.background?.secondary || "#202326" }}
+      className={styles.list}
+    >
       {conversations.map((item, index) => (
         <ConversationItem
           item={item}
@@ -94,6 +95,8 @@ const ConversationItem = ({
     (p) => p.participantId !== config.userId
   );
 
+  const textColor =  config?.theme?.text?.primary || "white"
+
   const renderLastMessage = () => {
     if (item.lastMessage?.attachmentType === "media") {
       return (
@@ -105,13 +108,20 @@ const ConversationItem = ({
             }
             alt=""
           />
-          <Text styles={{ textAlign: "left" }} size="sm" text={"Photo"} />
+          <Text
+            styles={{
+              textAlign: "left",
+              color: textColor
+            }}
+            size="sm"
+            text={"Photo"}
+          />
         </div>
       );
     }
     return (
       <Text
-        styles={{ textAlign: "left" }}
+        styles={{ textAlign: "left", color: textColor }}
         size="sm"
         text={item.lastMessage?.message}
       />
@@ -120,11 +130,11 @@ const ConversationItem = ({
   return (
     <div
       style={{
-        backgroundColor:
-          activeConversation?.conversation.conversationId ===
-          item.conversation.conversationId
-            ? "#4a515a"
-            : "transparent",
+        // backgroundColor:
+        //   activeConversation?.conversation.conversationId ===
+        //   item.conversation.conversationId
+        //     ? "#4a515a"
+        //     : "transparent",
       }}
       className={styles.item}
       onClick={onClick}
@@ -143,12 +153,13 @@ const ConversationItem = ({
           }}
         >
           <Text
-            styles={{ textAlign: "left" }}
+            styles={{ textAlign: "left", color: textColor }}
             weight="bold"
             text={user[0].participantDetails?.username}
           />
           <Text
             size="sm"
+            styles={{ color: textColor }}
             text={formatConversationTime(item.lastMessage?.createdAt as any)}
           />
         </div>
