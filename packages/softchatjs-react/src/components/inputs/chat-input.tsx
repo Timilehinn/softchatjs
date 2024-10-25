@@ -124,7 +124,7 @@ const ChatInput = ({
           mediaRecorder.ondataavailable = (e) => {
             console.log(e.data, "--audio data");
             chunks.push(e.data);
-            if (voiceMessageDuration >= 300000) {
+            if (voiceMessageDuration >= 300) {
               mediaRecorder.stop();
             } else {
               setVoiceMessageDuration((v) => v + 1);
