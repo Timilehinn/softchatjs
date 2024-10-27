@@ -46,7 +46,7 @@ export default function MediaMessage(props: Props) {
                   <Image source={{ uri: isPending? media.mediaUrl : media.mediaUrl }} 
                     style={{ 
                       height: 200, width: 250,
-                      borderRadius: 10, 
+                      borderRadius: 5, 
                       marginBottom: 10,
                       resizeMode: "cover"
                     }} 

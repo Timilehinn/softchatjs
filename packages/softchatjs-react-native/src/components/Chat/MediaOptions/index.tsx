@@ -220,6 +220,7 @@ export const MediaOptions = forwardRef((props: MediaOptionsProps, ref: any) => {
                   marginStart: 15,
                   textTransform: "capitalize",
                   fontWeight: "700",
+                  fontSize: 17,
                   color:
                     option.label === "Delete" ? "red" : theme?.text.secondary,
                 }}

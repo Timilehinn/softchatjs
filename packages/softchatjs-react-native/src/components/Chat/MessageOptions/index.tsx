@@ -304,6 +304,7 @@ export const MessageOptions = forwardRef(
                     <Text
                       style={{
                         marginStart: 15,
+                        fontSize: 17,
                         fontWeight: "700",
                         color:
                           option.label === "Delete"

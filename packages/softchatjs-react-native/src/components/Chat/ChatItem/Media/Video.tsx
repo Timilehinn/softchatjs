@@ -42,14 +42,13 @@ export default function VideoPlayer(props: { media: Media }) {
 
 const styles = StyleSheet.create({
   container: {
-   
+    height: 200, minWidth: 250,
   },
   buttons: {
 
   },
   video: {
-    height: 250,
-    width: 250,
+    flex: 1,
     borderRadius: 5
   }
 })

@@ -7,14 +7,14 @@ import {
   TouchableWithoutFeedback,
   ActivityIndicator,
 } from "react-native";
-import React, { useRef, useState } from "react";
-import { Video, ResizeMode, AVPlaybackStatus } from "expo-av";
+import React, { useRef, useState, useCallback } from "react";
+import { Video, ResizeMode, AVPlaybackStatus, AVPlaybackStatusSuccess } from "expo-av";
 import { Media, Message } from "softchatjs-core/src";
 import TrashIcon, { PauseIcon, PlayIcon, SendIcon, XIcon } from "../../assets/icons";
 import { useConfig } from "../../contexts/ChatProvider";
 import { generateFillerTimestamps } from "softchatjs-core/src/utils";
 import { useMessageState } from "../../contexts/MessageStateContext";
-import { generateId } from "../../utils";
+import { convertToMinutes, generateId } from "../../utils";
 import { AttachmentTypes, MediaType } from "../../types";
 import { useModalProvider } from "../../contexts/ModalProvider";
 
@@ -27,6 +27,28 @@ type VideoViewProps = {
   media: Media;
   view?: boolean;
 };
+
+type AVPlaybackStatusMeta = {
+  isLoaded: boolean;
+  didJustFinish?: boolean;
+  durationMillis?: number;
+  hasJustBeenInterrupted?: boolean;
+  isBuffering?: boolean;
+  isLooping?: boolean;
+  isMuted?: boolean;
+  isPlaying?: boolean;
+  pitchCorrectionQuality?: "Varispeed" | "TimeDomain" | "Spectral";
+  playableDurationMillis?: number;
+  positionMillis?: number;
+  progressUpdateIntervalMillis?: number;
+  rate?: number;
+  shouldCorrectPitch?: boolean;
+  shouldPlay?: boolean;
+  target?: number;
+  uri?: string;
+  volume?: number;
+};
+
 
 export default function VideoViewer(props: VideoViewProps) {
   const {
@@ -43,8 +65,10 @@ export default function VideoViewer(props: VideoViewProps) {
   const { resetModal } = useModalProvider();
   const { addNewPendingMessages } = useMessageState();
   const video = useRef<Video>(null);
-  const [status, setStatus] = useState<AVPlaybackStatus | null>(null);
-  const [ loading, setLoading ] = useState(false)
+  const [status, setStatus] = useState<AVPlaybackStatus | AVPlaybackStatusSuccess>({ isLoaded: false });
+  const [ loading, setLoading ] = useState(false);
+  const [ timePlayedSecs, setTimePlayedSecs ] = useState(0)
+  
 
   const uploadImage = async () => {
     try {
@@ -97,6 +121,16 @@ export default function VideoViewer(props: VideoViewProps) {
     }
   };
 
+  const renderVideoDuration = useCallback(() => {
+
+    var duration = status?.durationMillis?? 0
+    var position = status?.positionMillis?? 0
+
+    return (
+      <Text style={{ color: 'white' }}>{convertToMinutes(position / 1000)} : {convertToMinutes(duration / 1000)}</Text>
+    )
+  },[status])
+
   return (
     <View style={styles.container}>
       <Video
@@ -110,17 +144,17 @@ export default function VideoViewer(props: VideoViewProps) {
         isLooping
         onLoadStart={() => { setLoading(true); video?.current?.pauseAsync(); }}
         onLoad={() => { setLoading(false); video?.current?.playAsync() }}
-        onPlaybackStatusUpdate={(status) => setStatus(() => status)}
+        onPlaybackStatusUpdate={(status) => { setStatus(() => status); setTimePlayedSecs(prev => prev + 1)}}
       />
 
       <TouchableWithoutFeedback>
         <View style={{ ...styles.overlay, position: "absolute" }}>
           <View style={styles.header}>
+            {renderVideoDuration()}
             {/* <TouchableOpacity onPress={() => resetModal()}>
               <XIcon size={30} color="white" />
             </TouchableOpacity> */}
           </View>
-          {loading && <ActivityIndicator />}
           <View style={styles.footer}>
             <TouchableOpacity
               onPress={() => resetModal()}

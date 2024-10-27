@@ -239,7 +239,7 @@ export function ClockIcon(props: Icon) {
       />
       <Path
         d="M16.5 12H12.25C12.1837 12 12.1201 11.9737 12.0732 11.9268C12.0263 11.8799 12 11.8163 12 11.75V8.5"
-        stroke="black"
+        stroke={color}
         strokeWidth="2"
         strokeLinecap="round"
       />
