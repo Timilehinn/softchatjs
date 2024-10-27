@@ -188,6 +188,7 @@ export default class Connection extends EventEmitter {
             this.emit(Events.CONVERSATION_LIST_CHANGED, {
               conversations: this.conversations,
             });
+            this.retry_count = 0;
           };
         }
       } else {

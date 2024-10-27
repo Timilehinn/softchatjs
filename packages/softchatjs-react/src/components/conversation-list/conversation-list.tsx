@@ -143,8 +143,7 @@ const MessageList = (props: MessageListProps) => {
         }, 1500);
         selectedRef?.current.scrollIntoView({
           behavior: "smooth",
-          block: "start",
-          // inline: "nearest",
+          block: "center",
         });
       }
     } catch (error) {

@@ -71,6 +71,8 @@ const Conversations = forwardRef((props: ConversationProps, ref) => {
   const { onOpen, renderItem, renderHeader, user } = props;
   const { client, theme } = useConfig();
   const { activeVoiceMessage, unload } = useMessageState();
+  const [ searchVal, setSearchVal ] = useState("");
+
   const flatListRef =
     useRef<
       FlatList<{
@@ -226,6 +228,8 @@ const Conversations = forwardRef((props: ConversationProps, ref) => {
     }
   }
 
+  // const filteredConversations = conversationList.filter(c => c.conversation.participantList[0].participantDetails.username.toLowerCase().includes(searchVal.toLowerCase()))
+
   return (
     <>
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -370,7 +374,7 @@ const Conversations = forwardRef((props: ConversationProps, ref) => {
               >
                 Chats
               </Text>
-              <Search value="" setValue={() => {}} placeholder="Search chats" containerStyle={{ paddingHorizontal: 0 }} />
+              <Search value={searchVal} setValue={setSearchVal} placeholder="Search chats" containerStyle={{ paddingHorizontal: 0 }} />
             </View>
           }
           ListEmptyComponent={

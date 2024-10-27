@@ -188,7 +188,7 @@ const ChatInput = ({
 
     try {
       let imageResData: any = [];
-      let mediaData: Media[];
+      let mediaData: Media[] = []
       console.log(files[0]);
       if (files.length) {
         // Wait for all uploads to complete using Promise.all

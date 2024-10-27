@@ -214,10 +214,15 @@ export default function ImagePreview(props: ImagePreviewProps) {
             },
             attachmentType: AttachmentTypes.MEDIA,
             quotedMessage: null,
+            quotedMessageId: activeQuote?.messageId || "",
             createdAt: new Date()
           }
       );
-      resetModal()
+      if (activeQuote?.message) {
+        clearActiveQuote();
+      }
+      resetModal();
+     
     }
 
     } catch (error) {

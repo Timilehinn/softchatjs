@@ -8,6 +8,7 @@ import AudioMessage from './VoiceMessage'
 import VoiceMessage from './VoiceMessage'
 import { useConfig } from 'softchatjs-react-native/src/contexts/ChatProvider'
 import { Image } from 'expo-image'
+import VideoPlayer from './Video'
 
 type Props = {
   message: Message
@@ -58,6 +59,10 @@ export default function MediaMessage(props: Props) {
             <View key={i} style={{ marginBottom: 5 }}>
               <VoiceMessage media={media} textColor={theme?.text.secondary} />
             </View>
+          )
+        }else if(media.type === MediaType.VIDEO) {
+          return (
+            <VideoPlayer key={i} media={media} />
           )
         }
       })}
