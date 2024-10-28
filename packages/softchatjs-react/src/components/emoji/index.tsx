@@ -13,6 +13,7 @@ import { CiFaceSmile } from "react-icons/ci";
 import { BsReply } from "react-icons/bs";
 import { AiOutlineDelete } from "react-icons/ai";
 import { useChatClient } from "../../providers/chatClientProvider";
+import { useChatState } from "../../providers/clientStateProvider";
 
 const emojis = ["👍", "😔", "🙂", "😮", "😃"];
 
@@ -48,7 +49,8 @@ type ReactionPanelProps = {
 
 export const EmojiPanel = (props: EmojiPanelProps) => {
   const { client, message, conversationId, recipientId } = props;
-  const { config } = useContext(SoftChatContext);
+  const { config } = useChatClient();
+  const bgColor = config?.theme?.background?.secondary || "#222529";
 
   const reactToMessage = ({ emoji }: { emoji: string }) => {
     const msClient = client.messageClient(conversationId);
@@ -66,7 +68,11 @@ export const EmojiPanel = (props: EmojiPanelProps) => {
     });
   };
   return (
-    <div ref={props.emojiPickerRef} className={styles.emoji}>
+    <div
+      ref={props.emojiPickerRef}
+      style={{ background: bgColor }}
+      className={styles.emoji}
+    >
       {/* <EmojiPicker
         onEmojiClick={(e) => {
           reactToMessage({ emoji: e.emoji });
@@ -96,10 +102,8 @@ export const ReactionPanel = ({
   canEdit,
   conversationId,
 }: ReactionPanelProps) => {
-  
   const { config } = useChatClient();
   const iconColor = config.theme?.icon || "#72767D";
-
 
   const emojiList = [
     {
@@ -151,12 +155,13 @@ export const InputEmojis = ({
 }: {
   onEmojiPick: (emoji: string) => void;
 }) => {
+  const { config } = useChatClient();
   return (
     <EmojiPicker
       onEmojiClick={(e) => {
         onEmojiPick(e.emoji);
       }}
-      theme={"dark" as any}
+      theme={config?.theme?.input?.emojiPickerTheme || ("dark" as any)}
     />
   );
 };

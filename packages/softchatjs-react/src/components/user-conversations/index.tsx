@@ -29,11 +29,13 @@ export const ConversationList = ({
   setShowUserList,
   showUserList,
   userListRef,
+  renderAddConversationIcon,
 }: {
   setMainListOpen: any;
   setShowUserList: Dispatch<SetStateAction<boolean>>;
   showUserList: boolean;
   userListRef: any;
+  renderAddConversationIcon?: () => JSX.Element;
 }) => {
   const { client, config } = useChatClient();
   const { setActiveConversation, conversations } = useChatState();
@@ -63,15 +65,19 @@ export const ConversationList = ({
           }}
         />
       ))}
-
-      <MdMessage
+      <div
         onClick={() => {
           setShowUserList(true);
         }}
         className={styles.newMessage}
-        size={40}
-        color="#015EFF"
-      />
+      >
+        {renderAddConversationIcon ? (
+          renderAddConversationIcon()
+        ) : (
+          <MdMessage size={40} color="#015EFF" />
+        )}
+      </div>
+
       {showUserList && <UserList userListRef={userListRef} />}
     </div>
   );
@@ -95,7 +101,7 @@ const ConversationItem = ({
     (p) => p.participantId !== config.userId
   );
 
-  const textColor =  config?.theme?.text?.primary || "white"
+  const textColor = config?.theme?.text?.primary || "white";
 
   const renderLastMessage = () => {
     if (item.lastMessage?.attachmentType === "media") {
@@ -111,7 +117,7 @@ const ConversationItem = ({
           <Text
             styles={{
               textAlign: "left",
-              color: textColor
+              color: textColor,
             }}
             size="sm"
             text={"Photo"}
@@ -129,13 +135,15 @@ const ConversationItem = ({
   };
   return (
     <div
-      style={{
-        // backgroundColor:
-        //   activeConversation?.conversation.conversationId ===
-        //   item.conversation.conversationId
-        //     ? "#4a515a"
-        //     : "transparent",
-      }}
+      style={
+        {
+          // backgroundColor:
+          //   activeConversation?.conversation.conversationId ===
+          //   item.conversation.conversationId
+          //     ? "#4a515a"
+          //     : "transparent",
+        }
+      }
       className={styles.item}
       onClick={onClick}
     >
@@ -192,7 +200,7 @@ const UserList = ({ userListRef }: { userListRef: any }) => {
     id: string;
     name: string;
   } | null>(null);
-  const { client } = useChatClient();
+  const { client, config } = useChatClient();
 
   const dummyUserList = [
     {
@@ -228,7 +236,11 @@ const UserList = ({ userListRef }: { userListRef: any }) => {
   }, [selectedUsers]);
 
   return (
-    <div ref={userListRef} className={styles.userList}>
+    <div
+      ref={userListRef}
+      style={{ background: config?.theme?.background?.secondary || "#202326" }}
+      className={styles.userList}
+    >
       {dummyUserList.map((item, index) => (
         <div
           onClick={() => {
@@ -238,9 +250,16 @@ const UserList = ({ userListRef }: { userListRef: any }) => {
         >
           <div className={styles.userList__user}>
             <div className={styles.userList__avartar}>
-              <Text text={item.name[0]} />
+              <Text
+                styles={{ color: config?.theme?.text?.primary || "white" }}
+                text={item.name[0]}
+              />
             </div>
-            <Text size="sm" text={item.name} />
+            <Text
+              size="sm"
+              text={item.name}
+              styles={{ color: config?.theme?.text?.primary || "white" }}
+            />
           </div>
           {selectedUsers?.id === item.id && (
             <FaCheck color="#015EFF" size={14} />

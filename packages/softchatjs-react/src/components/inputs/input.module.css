@@ -128,6 +128,14 @@
   border: 0.5px solid rgba(142, 139, 139, 0.344);
 }
 
+.chatPhotos video{
+  height: 100%;
+  width: 100%;
+
+  border-radius: 10px;
+  border: 0.5px solid rgba(142, 139, 139, 0.344);
+}
+
 .audioContainer{
   background: red;
   width: 500px;

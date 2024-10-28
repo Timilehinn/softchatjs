@@ -10,15 +10,17 @@ type EditPanelProps = {
   message: Message;
   isEditing?: boolean;
   isReplying?: boolean;
-  closePanel:()=>void
+  closePanel: () => void;
 };
 
 const EditPanel = (props: EditPanelProps) => {
-  const { isEditing, message, isReplying,closePanel } = props;
+  const { isEditing, message, isReplying, closePanel } = props;
   const { config } = useChatClient();
   const { theme } = config;
 
-  const primaryActionColor = theme?.action?.primary || "white";
+  const secondaryColor = theme?.background?.secondary;
+  const textColor = theme?.text?.primary;
+  const iconColor = theme?.icon;
 
   return (
     <div
@@ -27,11 +29,19 @@ const EditPanel = (props: EditPanelProps) => {
           ? `${styles.edit} ${styles.editOpen}`
           : `${styles.edit}`
       }
+      style={{ background: secondaryColor || "#1b1d21" }}
     >
-      <div className={styles.edit__message}>
+      <div
+        style={{ background: secondaryColor || "#222529" }}
+        className={styles.edit__message}
+      >
         <div style={{ width: "90%" }}>
-          <Text text="You" weight="bold" />
-          <Text text={message?.message} weight="medium" />
+          <Text text="You" styles={{ color: textColor }} weight="bold" />
+          <Text
+            text={message?.message}
+            styles={{ color: textColor }}
+            weight="medium"
+          />
         </div>
 
         <div style={{ width: "10%" }}>
@@ -45,9 +55,9 @@ const EditPanel = (props: EditPanelProps) => {
         </div>
         <AiOutlineClose
           onClick={closePanel}
-          color={primaryActionColor}
+          color={iconColor}
           size={20}
-          style={{cursor:"pointer"}}
+          style={{ cursor: "pointer" }}
         />
       </div>
     </div>

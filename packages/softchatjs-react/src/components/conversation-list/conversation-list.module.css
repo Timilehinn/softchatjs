@@ -43,6 +43,7 @@
   top:70px;
   right: 20px;
   position: absolute;
+  z-index: 3000
 }
 
 .topnav__menu{

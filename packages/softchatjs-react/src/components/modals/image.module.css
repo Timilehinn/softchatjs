@@ -52,3 +52,10 @@
     object-fit:contain;
     user-select: none;
 }
+
+.images__center__items video{
+    height: 100%;
+    width: 100%;
+    object-fit:cover;
+    user-select: none;
+}
