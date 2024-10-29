@@ -28,6 +28,7 @@ type ChatProps = {
     onCoversationItemClick: (conversationItem: ConversationItem) => void;
   }) => JSX.Element;
   renderChatHeader?: () => JSX.Element;
+  renderAddConversationIcon?: () => JSX.Element;
   renderChatInput?: (props: { onChange: (e: string) => void }) => JSX.Element;
 };
 
@@ -37,7 +38,8 @@ const Chat = (props: ChatProps) => {
     activeConversation,
     showImageModal,
     setActiveConversation,
-    setConversations,conversations
+    setConversations,
+    conversations,
   } = useChatState();
   const [isConnected, setIsConnected] = useState(false);
   const [loadingMessages, setLoadingMessages] = useState(false);
@@ -152,11 +154,6 @@ const Chat = (props: ChatProps) => {
   };
 
   const clearUnread = () => {
-    console.log(
-      "should clear here",
-      config,
-      activeConversation.conversation.conversationId
-    );
     const messageIds = activeConversation.unread;
     const msClient = client.messageClient(
       activeConversation.conversation.conversationId
@@ -215,7 +212,6 @@ const Chat = (props: ChatProps) => {
 
   useEffect(() => {
     if (activeConversation) {
-      setpresentPage(1);
       messagesEndRef.current.scrollIntoView({});
       setMessages(activeConversation.conversation.messages);
       setForceScrollCount(forceScrollCount + 1); //to trigger rerender
@@ -229,12 +225,12 @@ const Chat = (props: ChatProps) => {
   }, [forceScrollCount]);
 
   useEffect(() => {
-    if (presentPage < 2) {
+    if (presentPage > 2) {
       return;
     }
     try {
-      setFetchingMore(true);
       const getMoreMessages = async () => {
+        setFetchingMore(true);
         const messageList = (await client
           .messageClient(activeConversation?.conversation?.conversationId!)
           .getMessages(presentPage)) as Array<Message>;
@@ -275,9 +271,7 @@ const Chat = (props: ChatProps) => {
       };
     }
   }, [client]);
-
-
-
+  console.log(fecthingmore, "ftj");
   return (
     <div
       style={{ background: theme?.background?.primary || "#1b1d21" }}
@@ -304,7 +298,7 @@ const Chat = (props: ChatProps) => {
             showUserList={showUserList}
             setMainListOpen={setMainListOpen}
             userListRef={userListRef}
-           
+            renderAddConversationIcon={props.renderAddConversationIcon}
           />
         )}
       </div>

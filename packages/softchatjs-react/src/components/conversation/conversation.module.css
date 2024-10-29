@@ -151,6 +151,15 @@ display: none;
  
 }
 
+.attachments video{
+  height: 220px;
+  width: 200px;
+  border-radius: 12px;
+  
+  object-fit: cover;
+ 
+}
+
 .quote{
   /* height: 40px; */
   margin-bottom: 5px;
@@ -171,9 +180,6 @@ display: none;
   padding: 0px 10px 0px 10px;
   display: flex;
   align-items: flex-end;
-  /* background: red; */
-  
-  /* flex-direction: row; */
 }
 
 .roboto-regular {

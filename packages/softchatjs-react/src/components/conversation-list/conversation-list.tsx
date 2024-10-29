@@ -289,7 +289,7 @@ const MessageList = (props: MessageListProps) => {
       {recipientTyping && (
         <TypingIndicator message={sectionedMessages[0]?.messages[0]} />
       )}
-      <div ref={messagesEndRef} style={{ height: "10px", width: "100%" }} />
+      <div ref={messagesEndRef} style={{ height: "20px", width: "100%" }} />
     </div>
   );
 };
@@ -314,10 +314,12 @@ const ChatTopNav = ({
       {renderChatHeader ? (
         renderChatHeader()
       ) : (
-        <div style={{ paddingLeft: "10px" }}>
+        <div
+          style={{ paddingLeft: "10px", display: "flex", alignItems: "center" }}
+        >
           <div className={styles.topnav__menu} style={{ marginRight: "10px" }}>
             <MdOutlineMenu
-              color="white"
+              color={theme?.icon}
               onClick={() => setMainListOpen(true)}
               size={22}
             />

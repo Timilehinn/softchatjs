@@ -40,7 +40,19 @@ export default function Home() {
         //     ))}
         //   </div>
         // )}
-        
+        //  renderChatHeader={() => (
+        //   <div style={{ height: "100%", background: "green",width:"100%" }}></div>
+        // )}
+        // renderAddConversationIcon={() => (
+        //   <div
+        //     style={{
+        //       height: "40px",
+        //       width: "40px",
+        //       background: "black",
+        //       borderRadius: "100%",
+        //     }}
+        //   ></div>
+        // )}
       />
     </div>
   );

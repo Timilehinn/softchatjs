@@ -84,7 +84,7 @@ const ChatInput = ({
   const { theme } = config;
 
   const primaryActionColor = theme?.icon || "white";
-  const inputBg = config?.theme?.background?.secondary || "#222529";
+  const inputBg = config?.theme?.input.bgColor || "#222529";
 
   useEffect(() => {
     if (editProps?.isEditing) {
@@ -188,8 +188,8 @@ const ChatInput = ({
 
     try {
       let imageResData: any = [];
-      let mediaData: Media[] = []
-      console.log(files[0]);
+      let mediaData: Media[];
+      console.log(files[0], "uploda");
       if (files.length) {
         // Wait for all uploads to complete using Promise.all
 
@@ -198,10 +198,12 @@ const ChatInput = ({
           mimeType: files[0].type,
         });
 
+        const type = files[0].type.split("/")[0];
+        console.log(type, "type");
         mediaData = [
           {
-            type: "image" as any,
-            ext: ".png",
+            type: type as any,
+            ext: type === "image" ? ".png" : ".mp4",
             mediaId: uuidv4(),
             mediaUrl: res.link,
             mimeType: files[0].type,
@@ -340,6 +342,8 @@ const ChatInput = ({
             alignItems: "center",
             justifyContent: "space-between",
             padding: "10px",
+            backgroundColor: theme?.background?.secondary || "#1b1d21",
+            boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
           }}
         >
           <button
@@ -372,7 +376,13 @@ const ChatInput = ({
               }}
             />
           </div>
-          <p style={{ fontSize: "11.5px", marginLeft: "15px" }}>
+          <p
+            style={{
+              fontSize: "11.5px",
+              marginLeft: "15px",
+              color: theme?.text?.primary,
+            }}
+          >
             {convertToMinutes(voiceMessageDuration)} : {convertToMinutes(300)}
           </p>
         </div>
@@ -402,6 +412,8 @@ const ChatInput = ({
             justifyContent: "space-between",
             padding: "10px",
             marginRight: "10px",
+            backgroundColor: theme?.background?.secondary || "#1b1d21",
+            boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
           }}
         >
           <button
@@ -476,7 +488,10 @@ const ChatInput = ({
           ) : (
             <div style={{ display: "flex", alignItems: "center" }}>
               <input
-                style={{ background: inputBg }}
+                style={{
+                  background: inputBg,
+                  color: theme?.input?.textColor || "white",
+                }}
                 ref={textInputRef}
                 value={message?.message}
                 onChange={(e) =>
@@ -508,17 +523,20 @@ const ChatInput = ({
           ) : null}
         </div>
         <div className={styles.input__button}>
-          <div style={{ marginRight: "10px" }}>
-            {sending ? (
-              "..."
-            ) : (
-              <VscSend
-                onClick={sendHandler}
-                size={22}
-                color={primaryActionColor}
-              />
-            )}
-          </div>
+          {audioBlob || message?.message || files.length ? (
+            <div style={{ marginRight: "10px" }}>
+              {sending ? (
+                "..."
+              ) : (
+                <VscSend
+                  onClick={sendHandler}
+                  size={22}
+                  color={primaryActionColor}
+                />
+              )}
+            </div>
+          ) : null}
+
           {!files.length && (
             <button
               onClick={recordVoiceMessage}
@@ -579,7 +597,7 @@ const ChatAttachments = ({
   const { config } = useChatClient();
 
   const { theme } = config;
-
+  console.log(files, "vid");
   return (
     <div className={styles.chatPhotos}>
       {audioBlob ? (
@@ -604,7 +622,12 @@ const ChatAttachments = ({
 
             return (
               <div className={styles.chatPhotos__item}>
-                <img src={url as any} alt="" />
+                {item.type === "video/quicktime" ? (
+                  <video style={{ height: "35px", width: "35px" }} src={url} />
+                ) : (
+                  <img src={url as any} alt="" />
+                )}
+
                 <div
                   onClick={() => deleteAttachment(item.name)}
                   className={styles.chatPhotos__cancel}

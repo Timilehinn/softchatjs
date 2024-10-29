@@ -33,13 +33,24 @@ export const ImageViewer = () => {
       </div>
       <div className={styles.images__center}>
         <div className={styles.images__center__items}>
-          <img
-            onClick={(e) => {
-              e.stopPropagation();
-            }}
-            src={showImageModal[activeIndex].mediaUrl}
-            alt=""
-          />
+          {showImageModal[activeIndex].type === "image" && (
+            <img
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+              src={showImageModal[activeIndex].mediaUrl}
+              alt=""
+            />
+          )}
+          {showImageModal[activeIndex].type === "video" && (
+            <video
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+              src={showImageModal[activeIndex].mediaUrl}
+             controls
+            />
+          )}
         </div>
       </div>
       <div className={styles.images__next}>

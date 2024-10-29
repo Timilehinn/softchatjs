@@ -44,17 +44,26 @@ export default function RootLayout({
           //   icon: "black",
           //   chatBubble: {
           //     left: {
-          //       bgColor: "#F9E4CB",
-          //       messageColor:"black",
-          //       messageTimeColor:"black"
+          //       bgColor: "#F7F7F7",
+          //       messageColor: "black",
+          //       messageTimeColor: "black",
+          //     },
+          //     right: {
+          //       bgColor: "#14D39D",
+          //       messageColor: "black",
+          //       messageTimeColor: "black",
           //     },
           //   },
-          //   divider:"grey",
-          //   text:{
-          //     primary:"black"
+          //   divider: "grey",
+          //   text: {
+          //     primary: "black",
           //   },
-          //   hideDivider:true
-
+          //   hideDivider: true,
+          //   input: {
+          //     bgColor: "#F2F2F2",
+          //     textColor: "black",
+          //     emojiPickerTheme: "light",
+          //   },
           // },
         }}
       >

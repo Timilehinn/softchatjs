@@ -64,7 +64,7 @@ export default function AudioPlayer(props: AudioPlayerProps) {
 
   const renderAction = useCallback(() => {
     if (isLoading) {
-      return <FaSpinner style={{ marginRight: "3px" }} />;
+      return <FaSpinner style={{ marginRight: "3px", color:textColor} } />;
     }
 
     return (
