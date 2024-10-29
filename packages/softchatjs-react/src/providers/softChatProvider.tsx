@@ -31,15 +31,20 @@ type SoftChatConfigType = {
         replyBorderColor?: string;
       };
       right?: {
-        bgColor: string; // Light teal for outgoing message background
-        messageColor: string; // Black for outgoing message text
-        messageTimeColor: string; // Medium grey for message time
-        replyBorderColor: string;
+        bgColor?: string; // Light teal for outgoing message background
+        messageColor?: string; // Black for outgoing message text
+        messageTimeColor?: string; // Medium grey for message time
+        replyBorderColor?: string;
       };
     };
     icon?: string; // Dark grey for icons
     divider?: string; // Light grey for dividers
     hideDivider?:boolean
+    input?:{
+      bgColor?:string,
+      textColor?:string
+      emojiPickerTheme?:"dark" | "light"
+    }
   } | null;
 };
 

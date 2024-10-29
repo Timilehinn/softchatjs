@@ -85,13 +85,23 @@ export const Conversation = (props: ConversationProps) => {
   const { config } = useChatClient();
   const stacked = true;
 
-  const chatBoxColor = config.theme?.chatBubble?.left?.bgColor || "#343434";
-  const messageColor = config.theme?.chatBubble?.left?.messageColor || "white";
-  const messageDateColor =
-    config.theme?.chatBubble?.left?.messageTimeColor || "grey";
-
   const oppositBubbleBoxes =
     message.messageOwner.uid === config.userId && stacked;
+
+  const chatBoxColor =
+    message.messageOwner.uid === config.userId
+      ? config.theme?.chatBubble?.right?.bgColor
+      : config.theme?.chatBubble?.left?.bgColor || "#343434";
+
+  const messageColor =
+    message.messageOwner.uid === config.userId
+      ? config.theme?.chatBubble?.right?.messageColor
+      : config.theme?.chatBubble?.left?.messageColor || "white";
+
+  const messageDateColor =
+    message.messageOwner.uid === config.userId
+      ? config.theme?.chatBubble?.right?.messageTimeColor
+      : config.theme?.chatBubble?.left?.messageTimeColor|| "grey";
 
   const messageState = () => {
     if (message.messageState === MessageStates.SENT) {
@@ -205,7 +215,7 @@ export const Conversation = (props: ConversationProps) => {
                     alignItems: "center",
                     paddingLeft: hasAttachments && "10px",
                     paddingRight: hasAttachments && "10px",
-                    justifyContent:"space-between"
+                    justifyContent: "space-between",
                   }}
                 >
                   <Text
@@ -329,6 +339,7 @@ const AttachmentList = ({ attachments }: { attachments: Media[] }) => {
   return (
     <div className={styles.attachments}>
       {attachments.map((i, index) => {
+      
         if (i.type === "image") {
           return (
             <img
@@ -340,9 +351,27 @@ const AttachmentList = ({ attachments }: { attachments: Media[] }) => {
             />
           );
         }
+        if (i.type === "video") {
+          return (
+            <video
+              onClick={() => setShowImageModal(attachments)}
+              key={`${index}-attch`}
+              src={i.mediaUrl}
+              className={styles.image}
+              controls
+              
+            />
+          );
+        }
         if (i.type === "audio") {
           // return <audio src={i.mediaUrl} controls />;
-          return <AudioPlayer url={i?.mediaUrl} duration={i?.meta?.audioDurationSec || 0} blob={null} />
+          return (
+            <AudioPlayer
+              url={i?.mediaUrl}
+              duration={i?.meta?.audioDurationSec || 0}
+              blob={null}
+            />
+          );
         }
       })}
     </div>
