@@ -26,7 +26,6 @@ import EventEmitter from "events";
 import { Events } from "./events";
 import { Emoticon } from "./emoticon.type";
 import moment from 'moment'
-// import Socket from "./Socket";
 
 export default class Connection extends EventEmitter {
   private static connection: Connection;
@@ -45,7 +44,7 @@ export default class Connection extends EventEmitter {
   projectConfig: Config;
   activeConversationId: string;
   screen: Screens;
-  conversationListMeta: ConversationListMeta;
+  conversationListMeta: ConversationListMeta; // lastMessage field should be changed to use the last message in the conversation
   private healthCheckRef: NodeJS.Timeout | undefined;
 
   constructor(client_instance: ChatClient) {
@@ -353,7 +352,7 @@ export default class Connection extends EventEmitter {
   private retryConnection() {
     // Retry logic or call _initiateConnection() after delay
     if(this.retry_count >= this.max_retry_count){
-      return console.warn(`Max retry limit reached [${this.retry_count} trys], connection failed.`)
+      return console.warn(`Connection attempt failed after multiple retries. Please check your network settings or try again.`)
     }
     this.emit(Events.CONNECTION_CHANGED, {
       connecting: true,

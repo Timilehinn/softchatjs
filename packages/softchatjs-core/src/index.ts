@@ -1,6 +1,6 @@
 import ChatClient from "./ChatClient";
 
-export type { 
+export type {
   AttachmentTypes,
   UserMeta,
   MediaType,
@@ -11,8 +11,11 @@ export type {
   Config,
   ConnectionEvent,
   ChatEventGenerics,
+  ConversationListMeta,
+  SendMessageGenerics
 } from "./types";
-export { 
-  MessageStates
- } from './types'
-export default ChatClient
+export { Emoticon } from './emoticon.type'
+export { generateFillerTimestamps, generateConversationId, generateId } from './utils'
+export { MessageStates } from "./types";
+export { Events } from "./events";
+export default ChatClient;

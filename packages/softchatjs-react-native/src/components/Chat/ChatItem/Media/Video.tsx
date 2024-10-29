@@ -1,23 +1,37 @@
 import React, { useRef, useState } from 'react'
 import { View, Text, StyleSheet, Button, TouchableOpacity } from 'react-native'
 import { Video, ResizeMode } from 'expo-av';
-import { Media } from 'softchatjs-core/src';
+import { Media, Message } from 'softchatjs-core';
 import { useModalProvider } from '../../../../contexts/ModalProvider';
 import VideoViewer from '../../../Modals/VideoViewer';
 import { MediaType } from '../../../../types';
 import { PlayIcon } from '../../../../assets/icons';
+import { useConfig } from '../../../../contexts/ChatProvider';
 
-export default function VideoPlayer(props: { media: Media }) {
+export default function VideoPlayer(props: { media: Media, message: Message, recipientId: string }) {
 
+  const { client } = useConfig()
   const video = useRef(null);
   const [status, setStatus] = useState({});
   const { displayModal } = useModalProvider();
+
+  const deleteMessage = () => {
+    if (client) {
+      client
+        .messageClient(props.message.conversationId)
+        .deleteMessage(
+          props.message.messageId,
+          props.recipientId,
+          props.message.conversationId
+        );
+    }
+  };
 
   return (
     <TouchableOpacity onPress={() =>
       displayModal({
         justifyContent: 'flex-start',
-        children: <VideoViewer conversationId={''} clearActiveQuote={() => {}} view activeQuote={null} chatUserId={''} recipientId={''} media={
+        children: <VideoViewer onDelete={deleteMessage} conversationId={''} clearActiveQuote={() => {}} view activeQuote={null} chatUserId={''} recipientId={''} media={
           props.media
         } />
       })

@@ -10,7 +10,7 @@ import {
   useLayoutEffect,
 } from "react";
 import styles from "./conversation-list.module.css";
-import ChatClient, { Message } from "softchatjs-core/src";
+import ChatClient, { Message } from "softchatjs-core";
 import { Conversation, TypingIndicator } from "../conversation";
 import Text from "../text/text";
 import { formatSectionTime } from "../../helpers/date";

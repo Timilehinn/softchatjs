@@ -8,7 +8,7 @@ import {
 import Avartar from "../avartar/avartar";
 
 import styles from "./conversation.module.css";
-import ChatClient, { Message } from "softchatjs-core/src";
+import ChatClient, { Message } from "softchatjs-core";
 import Text from "../text/text";
 import dayjs from "dayjs";
 import { formatMessageTime } from "../../helpers/date";
@@ -21,7 +21,7 @@ import { useChatClient } from "../../providers/chatClientProvider";
 import { ThreeDots } from "react-loader-spinner";
 import { BsCheck, BsCheckAll, BsClock, BsX } from "react-icons/bs";
 import { useChatState } from "../../providers/clientStateProvider";
-import { MessageStates } from "softchatjs-core/src";
+import { MessageStates } from "softchatjs-core";
 import AudioPlayer from "../audio/audio-player";
 
 export const regex = {

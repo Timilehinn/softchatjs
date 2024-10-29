@@ -1,5 +1,5 @@
 import { createContext, useContext } from "react";
-import ChatClient from "softchatjs-core/src";
+import ChatClient from "softchatjs-core";
 
 type ChatClientConfigType = {
   apiKey: string;

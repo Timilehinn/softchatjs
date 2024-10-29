@@ -107,7 +107,7 @@ export default function Default(props: DefaultProps) {
         case AttachmentTypes.STICKER:
           return <Sticker message={data} />;
         case AttachmentTypes.MEDIA:
-          return <MediaMessage message={data} isPending={isPending} />;
+          return <MediaMessage message={data} isPending={isPending} recipientId={recipientId} />;
         default:
           return <></>;
       }

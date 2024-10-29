@@ -7,7 +7,7 @@ import {
 } from "react";
 import EmojiPicker from "emoji-picker-react";
 import styles from "./emoji.module.css";
-import ChatClient, { Message } from "softchatjs-core/src";
+import ChatClient, { Message } from "softchatjs-core";
 import { SoftChatContext } from "../../providers/softChatProvider";
 import { CiFaceSmile } from "react-icons/ci";
 import { BsReply } from "react-icons/bs";

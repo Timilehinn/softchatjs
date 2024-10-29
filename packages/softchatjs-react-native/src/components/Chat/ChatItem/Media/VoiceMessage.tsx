@@ -3,7 +3,7 @@ import React, { useCallback, useMemo } from "react";
 import { PauseIcon, PlayIcon } from "../../../../assets/icons";
 import { convertToMinutes } from "../../../../utils";
 import { useConfig } from "../../../../contexts/ChatProvider";
-import { Media } from "softchatjs-core/src/types";
+import { Media } from "softchatjs-core";
 import { useMessageState } from "softchatjs-react-native/src/contexts/MessageStateContext";
 import theme from "softchatjs-react-native/src/theme";
 

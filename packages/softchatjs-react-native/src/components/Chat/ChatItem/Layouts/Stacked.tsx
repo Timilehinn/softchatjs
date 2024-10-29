@@ -46,7 +46,7 @@ export default function Stacked(props: StackedProps) {
       case AttachmentTypes.STICKER:
         return <Sticker message={message} />;
       case AttachmentTypes.MEDIA:
-        return <MediaMessage message={message} isPending={isPending} />;
+        return <MediaMessage message={message} isPending={isPending} recipientId={recipientId} />;
       default:
         return <></>;
     }

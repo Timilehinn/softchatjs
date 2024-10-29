@@ -9,7 +9,8 @@
     "run": "ts-node src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsup ./src",
-    "pub": "npm publish --access public"
+    "pub": "npm publish --access public",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch"
   },
   "author": "",
   "license": "ISC",
@@ -43,3 +44,4 @@
     }
   }
 }
+

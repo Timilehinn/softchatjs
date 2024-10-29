@@ -3,7 +3,6 @@ import React from 'react'
 import { MediaType, Message } from '../../../../types'
 import { useModalProvider } from '../../../../contexts/ModalProvider'
 import ImagePreview from '../../../Modals/ImagePreview'
-import { AttachmentTypes } from 'softchatjs-core/src'
 import AudioMessage from './VoiceMessage'
 import VoiceMessage from './VoiceMessage'
 import { useConfig } from 'softchatjs-react-native/src/contexts/ChatProvider'
@@ -12,14 +11,16 @@ import VideoPlayer from './Video'
 
 type Props = {
   message: Message
-  isPending?: boolean
+  isPending?: boolean,
+  recipientId: string
 }
 
 export default function MediaMessage(props: Props) {
 
   const {
     message,
-    isPending
+    isPending,
+    recipientId
   } = props;
 
   const { theme } = useConfig();
@@ -62,7 +63,7 @@ export default function MediaMessage(props: Props) {
           )
         }else if(media.type === MediaType.VIDEO) {
           return (
-            <VideoPlayer key={i} media={media} />
+            <VideoPlayer key={i} media={media} message={message} recipientId={recipientId} />
           )
         }
       })}

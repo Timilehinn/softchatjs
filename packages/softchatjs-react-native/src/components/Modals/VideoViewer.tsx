@@ -7,12 +7,22 @@ import {
   TouchableWithoutFeedback,
   ActivityIndicator,
 } from "react-native";
-import React, { useRef, useState, useCallback } from "react";
-import { Video, ResizeMode, AVPlaybackStatus, AVPlaybackStatusSuccess } from "expo-av";
-import { Media, Message } from "softchatjs-core/src";
-import TrashIcon, { PauseIcon, PlayIcon, SendIcon, XIcon } from "../../assets/icons";
+import React, { useRef, useState, useCallback, useEffect } from "react";
+import {
+  Video,
+  ResizeMode,
+  AVPlaybackStatus,
+  AVPlaybackStatusSuccess,
+} from "expo-av";
+import { Media, Message } from "softchatjs-core";
+import TrashIcon, {
+  PauseIcon,
+  PlayIcon,
+  SendIcon,
+  XIcon,
+} from "../../assets/icons";
 import { useConfig } from "../../contexts/ChatProvider";
-import { generateFillerTimestamps } from "softchatjs-core/src/utils";
+import { generateFillerTimestamps } from "softchatjs-core";
 import { useMessageState } from "../../contexts/MessageStateContext";
 import { convertToMinutes, generateId } from "../../utils";
 import { AttachmentTypes, MediaType } from "../../types";
@@ -20,12 +30,13 @@ import { useModalProvider } from "../../contexts/ModalProvider";
 
 type VideoViewProps = {
   conversationId?: string;
-  clearActiveQuote?: () => {};
+  clearActiveQuote?: () => void;
   activeQuote: Message | null;
   chatUserId: string;
   recipientId: string;
   media: Media;
   view?: boolean;
+  onDelete?: () => void;
 };
 
 type AVPlaybackStatusMeta = {
@@ -49,10 +60,10 @@ type AVPlaybackStatusMeta = {
   volume?: number;
 };
 
-
 export default function VideoViewer(props: VideoViewProps) {
   const {
     conversationId,
+    onDelete,
     clearActiveQuote,
     activeQuote,
     chatUserId,
@@ -65,10 +76,11 @@ export default function VideoViewer(props: VideoViewProps) {
   const { resetModal } = useModalProvider();
   const { addNewPendingMessages } = useMessageState();
   const video = useRef<Video>(null);
-  const [status, setStatus] = useState<AVPlaybackStatus | AVPlaybackStatusSuccess>({ isLoaded: false });
-  const [ loading, setLoading ] = useState(false);
-  const [ timePlayedSecs, setTimePlayedSecs ] = useState(0)
-  
+  const [status, setStatus] = useState<
+    AVPlaybackStatus
+  >({ isLoaded: false });
+  const [loading, setLoading] = useState(false);
+  const [timePlayedSecs, setTimePlayedSecs] = useState(0);
 
   const uploadImage = async () => {
     try {
@@ -110,7 +122,6 @@ export default function VideoViewer(props: VideoViewProps) {
           clearActiveQuote?.();
         }
         resetModal();
-        
       }
     } catch (error) {
       if (error instanceof Error) {
@@ -121,15 +132,44 @@ export default function VideoViewer(props: VideoViewProps) {
     }
   };
 
+  useEffect(() => {
+    if (status?.isBuffering || status.isLoaded === false) {
+      setLoading(true);
+    }else{
+      setLoading(false)
+    }
+
+    return () => {};
+  }, [status]);
+
   const renderVideoDuration = useCallback(() => {
 
-    var duration = status?.durationMillis?? 0
-    var position = status?.positionMillis?? 0
-
+    var duration = status?.durationMillis ?? 0;
+    var position = status?.positionMillis ?? 0;
+    
     return (
-      <Text style={{ color: 'white' }}>{convertToMinutes(position / 1000)} : {convertToMinutes(duration / 1000)}</Text>
-    )
-  },[status])
+      <View>
+        <View style={{ height: 4, width: '100%', backgroundColor: 'grey', borderRadius: 5, marginBottom: 10 }}>
+          <View style={{ height: '100%', backgroundColor: 'white', width: `${position/duration * 100}%`, borderRadius: 5 }} />
+        </View>
+      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+        <Text style={{ color: "white" }}>
+          {convertToMinutes(position / 1000)}
+        </Text>
+        <Text style={{ color: "white" }}>
+          {convertToMinutes(duration / 1000)}
+        </Text>
+      </View>
+      </View>
+    );
+  }, [status]);
+
+  const deleteMessage = () => {
+    resetModal();
+    if(view) {
+      onDelete?.()
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -142,53 +182,68 @@ export default function VideoViewer(props: VideoViewProps) {
         useNativeControls
         resizeMode={ResizeMode.COVER}
         isLooping
-        onLoadStart={() => { setLoading(true); video?.current?.pauseAsync(); }}
-        onLoad={() => { setLoading(false); video?.current?.playAsync() }}
-        onPlaybackStatusUpdate={(status) => { setStatus(() => status); setTimePlayedSecs(prev => prev + 1)}}
+        onLoadStart={() => {
+          setLoading(true);
+          video?.current?.pauseAsync();
+        }}
+        onLoad={() => {
+          video?.current?.playAsync();
+          setLoading(false);
+        }}
+        onPlaybackStatusUpdate={(status) => {
+
+          setStatus(() => status);
+          setTimePlayedSecs((prev) => prev + 1);
+        }}
       />
 
       <TouchableWithoutFeedback>
         <View style={{ ...styles.overlay, position: "absolute" }}>
-          <View style={styles.header}>
-            {renderVideoDuration()}
-            {/* <TouchableOpacity onPress={() => resetModal()}>
+          <View style={styles.header} />
+          {/* <TouchableOpacity onPress={() => resetModal()}>
               <XIcon size={30} color="white" />
             </TouchableOpacity> */}
-          </View>
+          {/* </View> */}
+          {loading && (
+            <View style={{ padding: 10, alignSelf: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,.5)', borderRadius: 10 }}>
+              <ActivityIndicator size="large" color={'white'} />
+            </View>
+          )}
           <View style={styles.footer}>
-            <TouchableOpacity
-              onPress={() => resetModal()}
-            >
-              <TrashIcon color="white" size={30} />
-            </TouchableOpacity>
-            <TouchableOpacity
-              disabled={loading}
-              onPress={() =>
-                status?.isPlaying
-                  ? video?.current?.pauseAsync()
-                  : video?.current?.playAsync()
-              }
-            >
-              {status?.isPlaying ? (
-                <PauseIcon color="white" size={30} />
-              ) : (
-                <PlayIcon color="white" size={30} />
-              )}
-            </TouchableOpacity>
-            {view? (
-              <TouchableOpacity onPress={() => resetModal()}>
-                <XIcon color="white" size={30} />
+            {renderVideoDuration()}
+            <View style={styles.controls}>
+              <TouchableOpacity onPress={deleteMessage}>
+                <TrashIcon color="white" size={30} />
               </TouchableOpacity>
-            ):(
-            <TouchableOpacity
-              disabled={view}
-              style={{ opacity: view ? 0.3 : 1 }}
-              onPress={uploadImage}
-            >
-              <SendIcon color="white" size={35} />
-            </TouchableOpacity>
-            )}
-
+              <TouchableOpacity
+                disabled={loading}
+                onPress={() =>
+                  status?.isPlaying
+                    ? video?.current?.pauseAsync()
+                    : video?.current?.playAsync()
+                }
+              >
+                {status?.isPlaying ? (
+                  <PauseIcon color="white" size={30} />
+                ) : (
+                  <PlayIcon color="white" size={30} />
+                )}
+              </TouchableOpacity>
+              {view ? (
+                <TouchableOpacity onPress={() => resetModal()}>
+                  <XIcon color="white" size={30} />
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity
+                  disabled={view}
+                  style={{ opacity: view ? 0.3 : 1 }}
+                  onPress={uploadImage}
+                >
+                  <SendIcon color="white" size={35} />
+                </TouchableOpacity>
+              )}
+            </View>
+            <View style={{ height: 20 }} />
           </View>
         </View>
       </TouchableWithoutFeedback>
@@ -219,18 +274,22 @@ const styles = StyleSheet.create({
     height: 100,
     width: "100%",
     // backgroundColor: "rgba(0,0,0,.6)",
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    paddingHorizontal: 15
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    paddingHorizontal: 10,
   },
   footer: {
-    height: 100,
+    height: 140,
     width: "100%",
     backgroundColor: "rgba(0,0,0,.6)",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingTop: 10
+  },
+  controls: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 30,
   },
 });

@@ -4,7 +4,7 @@ import ChatClient, {
   ChatEventGenerics,
   Conversation,
   Message,
-} from "softchatjs-core/src";
+} from "softchatjs-core";
 import {
   ConnectionEvent,
   ConversationListMeta,

@@ -3,7 +3,7 @@ import Avartar from "../avartar/avartar";
 
 import styles from "./options-panel.module.css";
 import Text from "../text/text";
-import ChatClient, { Message } from "softchatjs-core/src";
+import ChatClient, { Message } from "softchatjs-core";
 
 type ConversationListProps = {
   message: Message;

@@ -32,12 +32,12 @@ import {
   restructureMessages,
 } from "../../utils";
 import { useConfig } from "../../contexts/ChatProvider";
-import { Events } from "softchatjs-core/src/events";
+import { Events } from "softchatjs-core";
 import {
   ChatEventGenerics,
   ConnectionEvent,
   ConversationListMeta,
-} from "softchatjs-core/src/types";
+} from "softchatjs-core";
 import { ChatIcon, XIcon } from "../../assets/icons";
 import Search from "../Search";
 import { StatusBar } from "expo-status-bar";
@@ -328,7 +328,7 @@ const Conversations = forwardRef((props: ConversationProps, ref) => {
                 )}
               </View>
 
-              {!connectionStatus.isConnected ? (
+              {!connectionStatus.isConnected && (
                 <TouchableOpacity
                   style={{
                     padding: 5,
@@ -341,20 +341,22 @@ const Conversations = forwardRef((props: ConversationProps, ref) => {
                 >
                   <Text style={{ color: "white" }}>Connect</Text>
                 </TouchableOpacity>
-              ) : (
-                <TouchableOpacity
-                  style={{
-                    padding: 5,
-                    backgroundColor: "red",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    display: connectionStatus.connecting? 'none' : 'flex',
-                  }}
-                  onPress={() => {}}
-                >
-                  <Text style={{ color: "white" }}>Disconnect</Text>
-                </TouchableOpacity>
-              )}
+              )
+              //  : (
+              //   <TouchableOpacity
+              //     style={{
+              //       padding: 5,
+              //       backgroundColor: "red",
+              //       alignItems: "center",
+              //       justifyContent: "center",
+              //       display: connectionStatus.connecting? 'none' : 'flex',
+              //     }}
+              //     onPress={() => {}}
+              //   >
+              //     <Text style={{ color: "white" }}>Disconnect</Text>
+              //   </TouchableOpacity>
+              // )
+              }
             </View>
           </>
         )}

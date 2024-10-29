@@ -24,10 +24,16 @@ import {
   generateId,
 } from "./utils";
 import { Events } from "./events";
-import { GET_EMOJIS, GET_MESSAGES, GET_PRESIGNED_URL, UPLOAD_ATTACHMENT, UPLOAD_MEDIA } from "./fetch";
+import {
+  GET_EMOJIS,
+  GET_MESSAGES,
+  GET_PRESIGNED_URL,
+  UPLOAD_ATTACHMENT,
+  UPLOAD_MEDIA,
+} from "./fetch";
 import { Emoticon } from "./emoticon.type";
 import moment from "moment";
-import { Readable } from 'stream';
+import { Readable } from "stream";
 
 let CLEAR_UNREAD_TIMEOUT = 1000;
 
@@ -47,16 +53,17 @@ export default class MessageClient {
 
   static getInstace(connection: Connection, conversationId: string) {
     if (MessageClient.message_client) {
-      if(conversationId){
-        MessageClient.message_client.connection.activeConversationId = conversationId;
+      if (conversationId) {
+        MessageClient.message_client.connection.activeConversationId =
+          conversationId;
       }
-      return MessageClient.message_client
+      return MessageClient.message_client;
     } else {
       MessageClient.message_client = new MessageClient(
         connection,
         conversationId
       );
-      return MessageClient.message_client
+      return MessageClient.message_client;
     }
   }
 
@@ -73,22 +80,28 @@ export default class MessageClient {
 
   private getConversationType(conversationId?: string) {
     // const conversationMeta = this.connection.conversationListMeta[conversationId? conversationId : this.connection.activeConversationId];
-    const conversationMeta = this.connection.conversationListMeta[conversationId? conversationId : this.connection.activeConversationId]
-    return conversationMeta.conversation.conversationType
+    const conversationMeta =
+      this.connection.conversationListMeta[
+        conversationId ? conversationId : this.connection.activeConversationId
+      ];
+    return conversationMeta.conversation.conversationType;
   }
 
   // removes the last item in the list and adds a new one to the end keeping the original length
-  private rotateAndInsertMessageList = (messageList: Array<Message>, message: Message) => {
-    var list = [ ...messageList ];
-    if(messageList.length >= 25){
-      var list = [ ...messageList ];
+  private rotateAndInsertMessageList = (
+    messageList: Array<Message>,
+    message: Message
+  ) => {
+    var list = [...messageList];
+    if (messageList.length >= 25) {
+      var list = [...messageList];
       list.unshift();
-      list.push(message)
-      return list
+      list.push(message);
+      return list;
     }
-    list.push(message)
-    return list
-  }
+    list.push(message);
+    return list;
+  };
 
   private _createMessage(newMessage: Message) {
     try {
@@ -111,8 +124,11 @@ export default class MessageClient {
             messageState: MessageStates.LOADING,
           },
         });
-        if (this.connection.socket && this.connection.socket?.readyState === WebSocket.OPEN) {
-          console.log('has socket')
+        if (
+          this.connection.socket &&
+          this.connection.socket?.readyState === WebSocket.OPEN
+        ) {
+          console.log("has socket");
           this.connection.socket.send(JSON.stringify(socketMessage));
           this.connection.emit(Events.EDITED_MESSAGE, {
             message: {
@@ -121,16 +137,23 @@ export default class MessageClient {
               messageState: MessageStates.SENT,
             },
           });
-          
-          var conversationMeta = this.connection.conversationListMeta[newMessage.conversationId]
-          var updatedMessages = this.rotateAndInsertMessageList(conversationMeta.conversation.messages, {
-            ...newMessage,
-            reactions: [],
-            messageState: MessageStates.SENT,
-          },)
+
+          var conversationMeta =
+            this.connection.conversationListMeta[newMessage.conversationId];
+          var updatedMessages = this.rotateAndInsertMessageList(
+            conversationMeta.conversation.messages,
+            {
+              ...newMessage,
+              reactions: [],
+              messageState: MessageStates.SENT,
+            }
+          );
           const unread = conversationMeta.unread;
           this.connection.conversationListMeta[newMessage.conversationId] = {
-            conversation: { ...conversationMeta.conversation, messages: updatedMessages },
+            conversation: {
+              ...conversationMeta.conversation,
+              messages: updatedMessages,
+            },
             lastMessage: {
               ...newMessage,
             },
@@ -152,7 +175,9 @@ export default class MessageClient {
           //   newMessage.messageId,
           // ];
           this.connection.conversationListMeta[newMessage.conversationId] = {
-            conversation: this.connection.conversationListMeta[newMessage.conversationId].conversation,
+            conversation:
+              this.connection.conversationListMeta[newMessage.conversationId]
+                .conversation,
             lastMessage: {
               ...newMessage,
               messageState: MessageStates.FAILED,
@@ -165,8 +190,8 @@ export default class MessageClient {
         }
       }
     } catch (error) {
-      if(error instanceof Error) {
-        console.error(error.message)
+      if (error instanceof Error) {
+        console.error(error.message);
         this.connection.emit(Events.NEW_MESSAGE, {
           message: {
             ...newMessage,
@@ -185,29 +210,44 @@ export default class MessageClient {
           ...message,
           message: message.textMessage,
           lastEdited: new Date(),
-        }
+        };
         this.connection.emit(Events.EDITED_MESSAGE, {
           message: updatedMessage,
         });
         if (this.connection.socket) {
           const socketMessage = {
             action: ServerActions.EDIT_MESSAGE,
-            message: { ...updatedMessage, token: this.connection.wsAccessConfig.token, },
+            message: {
+              ...updatedMessage,
+              token: this.connection.wsAccessConfig.token,
+            },
           };
-          console.log(message)
+          console.log(message);
           this.connection.socket.send(JSON.stringify(socketMessage));
-          var conversationMeta = this.connection.conversationListMeta[message.conversationId];
-          var prevMessage = conversationMeta.conversation.messages.find(m => m.messageId === message.messageId);
-          if(prevMessage){
-            var editedMessage = { ...prevMessage, message: message.textMessage, lastEdited: new Date() }
-            var updatedMessageList = conversationMeta.conversation.messages.map(m => {
-              if(m.messageId === message.messageId){
-                return editedMessage
+          var conversationMeta =
+            this.connection.conversationListMeta[message.conversationId];
+          var prevMessage = conversationMeta.conversation.messages.find(
+            (m) => m.messageId === message.messageId
+          );
+          if (prevMessage) {
+            var editedMessage = {
+              ...prevMessage,
+              message: message.textMessage,
+              lastEdited: new Date(),
+            };
+            var updatedMessageList = conversationMeta.conversation.messages.map(
+              (m) => {
+                if (m.messageId === message.messageId) {
+                  return editedMessage;
+                }
+                return m;
               }
-              return m
-            })
+            );
             this.connection.conversationListMeta[message.conversationId] = {
-              conversation: { ...conversationMeta.conversation, messages: updatedMessageList },
+              conversation: {
+                ...conversationMeta.conversation,
+                messages: updatedMessageList,
+              },
               lastMessage: { ...editedMessage },
               unread: conversationMeta.unread,
             };
@@ -219,7 +259,7 @@ export default class MessageClient {
       }
     } catch (error) {
       // maybe an error listener instead
-      console.error(error)
+      console.error(error);
     }
   }
 
@@ -248,25 +288,31 @@ export default class MessageClient {
       this.connection.socket.send(JSON.stringify(reactionPayload));
     }
 
-    var conversationMeta = this.connection.conversationListMeta[conversationId]
-    var prevLastMessage = conversationMeta?.lastMessage
+    var conversationMeta = this.connection.conversationListMeta[conversationId];
+    var prevLastMessage = conversationMeta?.lastMessage;
 
-
-    if(prevLastMessage && prevLastMessage.messageId === messageId){
+    if (prevLastMessage && prevLastMessage.messageId === messageId) {
       var updatedMessage = {
         ...prevLastMessage,
-        reactions
-      }
-      var updatedMessages = this.rotateAndInsertMessageList(conversationMeta.conversation.messages, updatedMessage)
+        reactions,
+      };
+      var updatedMessages = this.rotateAndInsertMessageList(
+        conversationMeta.conversation.messages,
+        updatedMessage
+      );
 
       var updatedConversationListMeta = {
-        conversation: { ...conversationMeta.conversation, messages: updatedMessages },
+        conversation: {
+          ...conversationMeta.conversation,
+          messages: updatedMessages,
+        },
         unread: conversationMeta.unread,
         lastMessage: {
-          ...updatedMessage
-        }
-      }
-      this.connection.conversationListMeta[conversationId] = updatedConversationListMeta
+          ...updatedMessage,
+        },
+      };
+      this.connection.conversationListMeta[conversationId] =
+        updatedConversationListMeta;
       this.connection.emit(Events.CONVERSATION_LIST_META_CHANGED, {
         conversationListMeta: this.connection.conversationListMeta,
       });
@@ -274,8 +320,7 @@ export default class MessageClient {
   }
 
   private storeEditedMessage(data: EditedMessage) {
-    const conversation =
-      this.connection.conversationMap[data.conversationId];
+    const conversation = this.connection.conversationMap[data.conversationId];
     // const conversation = this.connection.conversationMap[data.conversationId];
     if (conversation) {
       var message = conversation.messages.find(
@@ -318,11 +363,9 @@ export default class MessageClient {
     }
   };
   // sent to message recipient
-  private _sendTypingNotification(
-    uid: string,
-  ) {
-    console.log(this.connection.activeConversationId)
-    console.log(uid, '--the uid')
+  private _sendTypingNotification(uid: string) {
+    console.log(this.connection.activeConversationId);
+    console.log(uid, "--the uid");
     if (this.connection.socket) {
       this.connection.socket.send(
         JSON.stringify({
@@ -331,7 +374,9 @@ export default class MessageClient {
             uid,
             conversationId: this.connection.activeConversationId,
             action: "START",
-            conversationType: this.getConversationType(this.connection.activeConversationId),
+            conversationType: this.getConversationType(
+              this.connection.activeConversationId
+            ),
             token: this.connection.wsAccessConfig.token,
           },
         })
@@ -339,9 +384,7 @@ export default class MessageClient {
     }
   }
 
-  private _sendStoppedTypingNotification(
-    uid: string,
-  ) {
+  private _sendStoppedTypingNotification(uid: string) {
     if (this.connection.socket) {
       this.connection.socket.send(
         JSON.stringify({
@@ -350,7 +393,9 @@ export default class MessageClient {
             uid,
             conversationId: this.connection.activeConversationId,
             action: "STOP",
-            conversationType: this.getConversationType(this.connection.activeConversationId),
+            conversationType: this.getConversationType(
+              this.connection.activeConversationId
+            ),
             token: this.connection.wsAccessConfig.token,
           },
         })
@@ -360,55 +405,62 @@ export default class MessageClient {
 
   private addMessageToConversation(newMessage: Message, screen: string) {
     try {
-      console.log(newMessage, ":::new mesage")
-    const conversation = this.connection.conversationMap[newMessage.conversationId];
-    if (conversation) {
-      const updatedMessages = [
-        ...conversation.messages,
-        {
-          ...newMessage,
-          messageState:
-            screen === Screens.CHAT ? MessageStates.READ : MessageStates.SENT,
-        },
-      ];
+      console.log(newMessage, ":::new mesage");
+      const conversation =
+        this.connection.conversationMap[newMessage.conversationId];
+      if (conversation) {
+        const updatedMessages = [
+          ...conversation.messages,
+          {
+            ...newMessage,
+            messageState:
+              screen === Screens.CHAT ? MessageStates.READ : MessageStates.SENT,
+          },
+        ];
 
-      this.connection.conversationMap[newMessage.conversationId] = {
-        ...conversation,
-        messages: updatedMessages,
-      };
-      this.connection.emit(Events.NEW_MESSAGE, {
-        message: {
-          ...newMessage,
-          messageState:
-            screen === Screens.CHAT ? MessageStates.READ : MessageStates.SENT,
-        },
-      });
+        this.connection.conversationMap[newMessage.conversationId] = {
+          ...conversation,
+          messages: updatedMessages,
+        };
+        this.connection.emit(Events.NEW_MESSAGE, {
+          message: {
+            ...newMessage,
+            messageState:
+              screen === Screens.CHAT ? MessageStates.READ : MessageStates.SENT,
+          },
+        });
 
-      const unread = [
-        ...this.connection.conversationListMeta[newMessage.conversationId].unread,
-      ];
+        const unread = [
+          ...this.connection.conversationListMeta[newMessage.conversationId]
+            .unread,
+        ];
 
-      if(newMessage.conversationId !== this.connection.activeConversationId){
-        unread.push(newMessage.messageId)
+        if (
+          newMessage.conversationId !== this.connection.activeConversationId
+        ) {
+          unread.push(newMessage.messageId);
+        }
+
+        const updatedConversationListMeta = {
+          conversation: {
+            ...this.connection.conversationListMeta[newMessage.conversationId]
+              .conversation,
+            messages: updatedMessages,
+          },
+          lastMessage: {
+            ...newMessage,
+          },
+          unread: unread,
+        };
+        this.connection.conversationListMeta[newMessage.conversationId] =
+          updatedConversationListMeta;
+        this.connection.emit(Events.CONVERSATION_LIST_META_CHANGED, {
+          conversationListMeta: this.connection.conversationListMeta,
+        });
       }
-      
-      const updatedConversationListMeta = {
-        conversation: { ...this.connection.conversationListMeta[newMessage.conversationId].conversation, messages: updatedMessages },
-        lastMessage: {
-          ...newMessage,
-        },
-        unread: unread,
-      };
-      this.connection.conversationListMeta[newMessage.conversationId] =
-        updatedConversationListMeta;
-      this.connection.emit(Events.CONVERSATION_LIST_META_CHANGED, {
-        conversationListMeta: this.connection.conversationListMeta,
-      });
-    }
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-    
   }
 
   private sendReadNotification(data: ReadMessages) {
@@ -432,28 +484,28 @@ export default class MessageClient {
     }
   }
 
-  private _updateConversationListMetaMessages() {
-    
-  }
+  private _updateConversationListMetaMessages() {}
 
   readMessages(conversationId: string, data: ReadMessages) {
-    if(this.connection.socket){
+    if (this.connection.socket) {
       var socketMessage = {
         action: ServerActions.READ_MESSAGES,
         message: {
           ...data,
           token: this.connection.wsAccessConfig.token,
         },
-      }
-      
+      };
+
       this.connection.socket.send(JSON.stringify(socketMessage));
-      var conversationMeta = this.connection.conversationListMeta[conversationId]
-      const updatedConversationListMeta = { 
+      var conversationMeta =
+        this.connection.conversationListMeta[conversationId];
+      const updatedConversationListMeta = {
         conversation: conversationMeta.conversation,
         lastMessage: conversationMeta.lastMessage,
         unread: [],
       };
-      this.connection.conversationListMeta[conversationId] = updatedConversationListMeta;
+      this.connection.conversationListMeta[conversationId] =
+        updatedConversationListMeta;
       this.connection.emit(Events.CONVERSATION_LIST_META_CHANGED, {
         conversationListMeta: this.connection.conversationListMeta,
       });
@@ -481,7 +533,48 @@ export default class MessageClient {
     });
   }
 
-   reactToMessage({
+  private deleteMessageFromConversationMeta(
+    conversationId: string,
+    messageId: string
+  ) {
+    try {
+      const conversationMeta = this.connection.conversationListMeta[conversationId];
+
+      // check if the message being deleted is the last message
+      var isLastMessage = messageId === conversationMeta.lastMessage?.messageId;
+
+      if (conversationMeta) {
+        const filteredMessages = conversationMeta.conversation.messages.filter(
+          (m) => m.messageId !== messageId
+        );
+
+        var newLastMessage = filteredMessages[filteredMessages.length - 1];
+
+        var updatedConversationListMeta = {
+          ...conversationMeta,
+          conversation: {
+            ...conversationMeta.conversation,
+            messages: filteredMessages,
+          }
+        };
+
+        if(isLastMessage){
+          updatedConversationListMeta.lastMessage = newLastMessage? newLastMessage : null
+        }
+      
+        this.connection.conversationListMeta[conversationId] = updatedConversationListMeta;
+      
+        this.connection.emit(Events.CONVERSATION_LIST_META_CHANGED, {
+          conversationListMeta: this.connection.conversationListMeta,
+        });
+      } else {
+        console.warn(`Conversation with ID ${conversationId} not found.`);
+      }
+      
+    } catch (error) {}
+  }
+
+  reactToMessage({
     conversationId,
     messageId,
     reactions,
@@ -494,12 +587,10 @@ export default class MessageClient {
   }) {
     if (this.connection) {
       // this.connection._reactToMessage({ conversationId, messageId, reactions, to });
-      this._updateMessageReactions(
-        conversationId,
-        messageId,
-        reactions,
-        { ws: true, to }
-      );
+      this._updateMessageReactions(conversationId, messageId, reactions, {
+        ws: true,
+        to,
+      });
     }
   }
 
@@ -531,7 +622,7 @@ export default class MessageClient {
       var messageOwner = {
         ...this.connection.userMeta,
         ...timeStamps,
-      }
+      };
       const messageStruct: Message = {
         ...newMessage,
         quotedMessageId: newMessage?.quotedMessage?.messageId,
@@ -540,23 +631,23 @@ export default class MessageClient {
         messageState: MessageStates.LOADING,
         messageOwner,
         messageId,
-        ...timeStamps
-      }
+        ...timeStamps,
+      };
       this._createMessage(messageStruct);
     }
   }
 
-  editMessage(message: Omit<EditedMessage, 'from'>) {
+  editMessage(message: Omit<EditedMessage, "from">) {
     if (this.connection) {
       this._editMessage({
         ...message,
-        from: this.connection.userMeta.uid
+        from: this.connection.userMeta.uid,
       });
     }
   }
 
   sendTypingNotification(uid: string) {
-    console.log(this.screen, this.connection.activeConversationId)
+    console.log(this.screen, this.connection.activeConversationId);
     if (this.connection) {
       this._sendTypingNotification(uid);
     }
@@ -573,28 +664,32 @@ export default class MessageClient {
       this.connection.socket.send(
         JSON.stringify({
           action: ServerActions.DELETE_MESSAGE,
-          message: { 
-            messageId, 
-            to, 
-            conversationId, 
+          message: {
+            messageId,
+            to,
+            conversationId,
             conversationType: this.getConversationType(),
-            token: this.connection.wsAccessConfig.token
+            token: this.connection.wsAccessConfig.token,
           },
         })
       );
       this.connection.emit(Events.DELETED_MESSAGE, {
         message: {
-          conversationId, 
-          messageId, 
-        }
+          conversationId,
+          messageId,
+        },
       });
+      this.deleteMessageFromConversationMeta(conversationId, messageId)
     }
   }
 
   async getMessages(page?: number) {
     if (this.connection) {
       try {
-        console.log(this.connection.activeConversationId, '--this.connection.activeConversationId messages')
+        console.log(
+          this.connection.activeConversationId,
+          "--this.connection.activeConversationId messages"
+        );
         const response = await GET_MESSAGES<{ messages: Message[] }>(
           this.connection.wsAccessConfig.token,
           this.connection.activeConversationId,
@@ -606,12 +701,12 @@ export default class MessageClient {
             const dateB = moment(b.createdAt).valueOf();
             return dateA - dateB;
           });
-          return sortedMessages
+          return sortedMessages;
         } else {
           return [];
         }
       } catch (err) {
-        console.error(err)
+        console.error(err);
         return [];
       }
     } else {
@@ -645,7 +740,11 @@ export default class MessageClient {
       try {
         const res = await UPLOAD_MEDIA<{ url: string }>(
           this.connection.wsAccessConfig?.token,
-          { base64, conversationId: this.connection.activeConversationId, key: fileKey }
+          {
+            base64,
+            conversationId: this.connection.activeConversationId,
+            key: fileKey,
+          }
         );
         return res;
       } catch (error) {
@@ -684,34 +783,39 @@ export default class MessageClient {
   //   }
   // }
   private isReadableStream(uri: any): uri is Readable {
-    return uri && typeof uri.pipe === 'function';
+    return uri && typeof uri.pipe === "function";
   }
- 
+
   async uploadFile(
     uri: string | NodeJS.ReadableStream | Buffer | File,
     meta: {
-      filename: string,
-      mimeType: string,
+      filename: string;
+      mimeType: string;
     }
   ) {
     try {
       // Get the presigned URL for upload
-      const res = await GET_PRESIGNED_URL<{ uploadUrl: string, s3Link: string }>(
-        this.connection.wsAccessConfig?.token,
-        { base64: "", conversationId: this.connection.activeConversationId, key: generateId(), mediaType: meta.mimeType }
-      );
+      const res = await GET_PRESIGNED_URL<{
+        uploadUrl: string;
+        s3Link: string;
+      }>(this.connection.wsAccessConfig?.token, {
+        base64: "",
+        conversationId: this.connection.activeConversationId,
+        key: generateId(),
+        mediaType: meta.mimeType,
+      });
 
-      console.log(res)
-  
+      console.log(res);
+
       let body;
-  
-      let fileSize = 0;  // Initialize file size
 
-      if (typeof uri === 'string') {
-        const response = await fetch(uri);  // Fetch the file data from URI
-        body = await response.blob();       // Convert it to a Blob
+      let fileSize = 0; // Initialize file size
+
+      if (typeof uri === "string") {
+        const response = await fetch(uri); // Fetch the file data from URI
+        body = await response.blob(); // Convert it to a Blob
         fileSize = body.size;
-      } 
+      }
       // Check if the input is a File object (e.g., browser)
       else if (uri instanceof File) {
         body = uri;
@@ -721,82 +825,85 @@ export default class MessageClient {
       else if (Buffer.isBuffer(uri)) {
         body = new Blob([uri], { type: meta.mimeType });
         fileSize = uri.length;
-      } 
+      }
       // Check if the input is a Node.js Readable stream
       else if (this.isReadableStream(uri)) {
         const chunks: any[] = [];
         let totalSize = 0;
         for await (const chunk of uri) {
           chunks.push(chunk);
-          totalSize += chunk.length;  // Accumulate size
+          totalSize += chunk.length; // Accumulate size
         }
         const buffer = Buffer.concat(chunks);
         body = new Blob([buffer], { type: meta.mimeType });
         fileSize = totalSize;
       }
-  
+
       const data = await fetch(res.data.uploadUrl, {
-        method: 'PUT',
+        method: "PUT",
         body: body,
         headers: {
-          'Content-Type': meta.mimeType,
+          "Content-Type": meta.mimeType,
         },
       });
-  
+
       console.log("up: ", data);
       return {
         link: res.data.s3Link,
         success: res.success,
-        fileSize
-      }
-  
+        fileSize,
+      };
     } catch (error) {
       console.error("Error uploading file: ", error);
       throw error;
     }
   }
-  
 
   async uploadAttachmentV2({
-      base64,
-      fileKey,
-      mediaType,
-      mimeType
-    }: {
-      base64: string;
-      fileKey: string;
-      mediaType: MediaType,
-      mimeType: string
-    }) {
+    base64,
+    fileKey,
+    mediaType,
+    mimeType,
+  }: {
+    base64: string;
+    fileKey: string;
+    mediaType: MediaType;
+    mimeType: string;
+  }) {
     if (this.connection) {
       try {
-  //       const formData = new FormData();
-      
-  //       // Convert the file at the URI to a Blob (or similar) for FormData
-  //       const file = {
-  //         uri: data.uri, // local file URI
-  //         name: data.name, // filename
-  //         type: data.type, // content type
-  //       };
-  // console.log(file)
-  //       // Append the file and other form data
-  //       formData.append('file', file as any);
-        const res = await GET_PRESIGNED_URL<{ uploadUrl: string, s3Link: string }>(
-          this.connection.wsAccessConfig?.token,
-          { base64, conversationId: this.connection.activeConversationId, key: generateId(), mediaType }
-        );
+        //       const formData = new FormData();
+
+        //       // Convert the file at the URI to a Blob (or similar) for FormData
+        //       const file = {
+        //         uri: data.uri, // local file URI
+        //         name: data.name, // filename
+        //         type: data.type, // content type
+        //       };
+        // console.log(file)
+        //       // Append the file and other form data
+        //       formData.append('file', file as any);
+        const res = await GET_PRESIGNED_URL<{
+          uploadUrl: string;
+          s3Link: string;
+        }>(this.connection.wsAccessConfig?.token, {
+          base64,
+          conversationId: this.connection.activeConversationId,
+          key: generateId(),
+          mediaType,
+        });
         const data = await fetch(res.data.uploadUrl, {
-          method: 'PUT',
+          method: "PUT",
           body: {
             base64,
             fileKey,
-            mediaType
+            mediaType,
           } as any,
           headers: {
-            'Content-Type': mimeType,
+            "Content-Type": mimeType,
           },
         });
-        console.log("up: ", data)
+        console.log("up: ", data);
         return res;
       } catch (error) {
         if (error instanceof Error) {
@@ -832,8 +939,8 @@ export default class MessageClient {
     try {
       // this.connection.socket.onmessage = (event: MessageEvent) => {
       // console.log(event, '---event')
-       
-      if(!event) return null
+
+      if (!event) return null;
       var wsData = JSON.parse(event.data);
       // console.log(wsData)
       const action: ClientActions | ServerActions = wsData.action;
@@ -935,10 +1042,13 @@ export default class MessageClient {
           if (existingConversation) {
             this.addMessageToConversation(incomingMessage, this.screen);
           } else {
-            const newConversationId = incomingMessagePayload.conversationType === "private-chat"? generateConversationId(
-              incomingMessage.from, 
-              incomingMessage.to
-            ) : incomingMessagePayload.message.conversationId
+            const newConversationId =
+              incomingMessagePayload.conversationType === "private-chat"
+                ? generateConversationId(
+                    incomingMessage.from,
+                    incomingMessage.to
+                  )
+                : incomingMessagePayload.message.conversationId;
             const newMessage = {
               ...incomingMessage,
               messageId: generateId(),
@@ -998,7 +1108,8 @@ export default class MessageClient {
               lastMessage: newMessage,
               unread: [],
             };
-            this.connection.conversationListMeta[newConversationId] = newConversationMeta;
+            this.connection.conversationListMeta[newConversationId] =
+              newConversationMeta;
             this.connection.emit(Events.CONVERSATION_LIST_META_CHANGED, {
               conversationListMeta: this.connection.conversationListMeta,
             });
@@ -1049,20 +1160,17 @@ export default class MessageClient {
           const {
             message: editedMessage,
           }: WsPayLoad<ClientActions, EditedMessage> = wsData;
-          this._clearActiveTypingIndicator(
-            editedMessage.conversationId,
-            true
-          );
+          this._clearActiveTypingIndicator(editedMessage.conversationId, true);
           this.storeEditedMessage(editedMessage);
           break;
-          case ClientActions.MESSAGE_DELETED:
-            const {
-              message: deletedMessage,
-            }: WsPayLoad<ClientActions, DeletedMessage> = wsData;
-            this.connection.emit(Events.DELETED_MESSAGE, {
-              message: deletedMessage
-            });
-            break;
+        case ClientActions.MESSAGE_DELETED:
+          const {
+            message: deletedMessage,
+          }: WsPayLoad<ClientActions, DeletedMessage> = wsData;
+          this.connection.emit(Events.DELETED_MESSAGE, {
+            message: deletedMessage,
+          });
+          break;
         case ClientActions.ACK_HEALTH_CHECK:
           console.info("HEALTH_CHECK: ok!");
           break;
@@ -1073,11 +1181,9 @@ export default class MessageClient {
       this.connection.socket.onerror = (error: CloseEvent) => {
         this.wsOnError(error);
       };
-// }
-
-} catch (error) {
-    console.error(error)
-}
-};
-
+      // }
+    } catch (error) {
+      console.error(error);
+    }
+  }
 }

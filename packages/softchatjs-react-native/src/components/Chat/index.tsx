@@ -54,7 +54,7 @@ import Haptics from "../../helpers/haptics";
 import { Colors } from "../../constants/Colors";
 import { FlashList } from "@shopify/flash-list";
 import { useConfig } from "../../contexts/ChatProvider";
-import { Events } from "softchatjs-core/src/events";
+import { Events } from "softchatjs-core";
 import Animated, { SlideInDown, SlideInUp } from 'react-native-reanimated';
 import { BottomSheetRef } from "../BottomSheet";
 import { format, isThisWeek } from 'date-fns'

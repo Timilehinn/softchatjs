@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import styles from "./input.module.css";
-import ChatClient, { Media, Message } from "softchatjs-core/src";
+import ChatClient, { Media, Message } from "softchatjs-core";
 import {
   AiOutlineAudio,
   AiOutlineClose,

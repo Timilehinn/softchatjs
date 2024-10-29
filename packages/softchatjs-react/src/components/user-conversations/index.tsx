@@ -7,7 +7,7 @@ import {
   useCallback,
 } from "react";
 import styles from "./index.module.css";
-import { ChatEventGenerics, Conversation, Message } from "softchatjs-core/src";
+import { ChatEventGenerics, Conversation, Message } from "softchatjs-core";
 import { SoftChatContext } from "../../providers/softChatProvider";
 import { ConversationListMeta } from "softchatjs-core/dist/types";
 import Text from "../text/text";
