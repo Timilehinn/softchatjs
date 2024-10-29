@@ -82,8 +82,8 @@ function RootLayoutNav() {
       //     disabled: '#9E9E9E', // Light grey for disabled text
       //   },
       //   action: {
-      //     primary: '#00796B', // Dark teal for primary action buttons
-      //     secondary: '#B2DFDB', // Light teal for secondary action buttons
+      //     primary: '#4F9ED0', // Dark teal for primary action buttons
+      //     secondary: '#4F9ED0', // Light teal for secondary action buttons
       //   },
       //   chatBubble: {
       //     left: {
@@ -93,13 +93,13 @@ function RootLayoutNav() {
       //       replyBorderColor: 'red'
       //     },
       //     right: {
-      //       bgColor: '#E0F7FA', // Light teal for outgoing message background
-      //       messageColor: '#000000', // Black for outgoing message text
-      //       messageTimeColor: '#757575', // Medium grey for message time
+      //       bgColor: '#4F9ED0', // Light teal for outgoing message background
+      //       messageColor: 'white', // Black for outgoing message text
+      //       messageTimeColor: 'lightgrey', // Medium grey for message time
       //       replyBorderColor: 'green'
       //     }
       //   },
-      //   icon: '#212121', // Dark grey for icons
+      //   icon: '#4F9ED0', // Dark grey for icons
       //   divider: '#E0E0E0', // Light grey for dividers
       // }}
     >

@@ -735,10 +735,9 @@ export default class MessageClient {
         fileSize = totalSize;
       }
   
-      // Now upload the file (Blob or File) to the presigned URL
       const data = await fetch(res.data.uploadUrl, {
         method: 'PUT',
-        body: body,  // Upload the blob
+        body: body,
         headers: {
           'Content-Type': meta.mimeType,
         },

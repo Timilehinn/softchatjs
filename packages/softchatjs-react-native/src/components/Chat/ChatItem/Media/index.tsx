@@ -8,6 +8,7 @@ import AudioMessage from './VoiceMessage'
 import VoiceMessage from './VoiceMessage'
 import { useConfig } from 'softchatjs-react-native/src/contexts/ChatProvider'
 import { Image } from 'expo-image'
+import VideoPlayer from './Video'
 
 type Props = {
   message: Message
@@ -45,7 +46,7 @@ export default function MediaMessage(props: Props) {
                   <Image source={{ uri: isPending? media.mediaUrl : media.mediaUrl }} 
                     style={{ 
                       height: 200, width: 250,
-                      borderRadius: 10, 
+                      borderRadius: 5, 
                       marginBottom: 10,
                       resizeMode: "cover"
                     }} 
@@ -54,7 +55,15 @@ export default function MediaMessage(props: Props) {
               </TouchableOpacity>
           )
         }else if(media.type === MediaType.AUDIO){
-          return <VoiceMessage key={i} media={media} textColor={theme?.text.disabled} />
+          return (
+            <View key={i} style={{ marginBottom: 5 }}>
+              <VoiceMessage media={media} textColor={theme?.text.secondary} />
+            </View>
+          )
+        }else if(media.type === MediaType.VIDEO) {
+          return (
+            <VideoPlayer key={i} media={media} />
+          )
         }
       })}
     </View>
