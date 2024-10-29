@@ -1,25 +1,20 @@
-import {
+import React, {
   MutableRefObject,
-  Ref,
   RefObject,
   createRef,
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
 import {
   View,
-  TouchableOpacity,
   StyleSheet,
   TextInput,
   Text,
   KeyboardAvoidingView,
   Platform,
   Dimensions,
-  SectionList,
-  LayoutAnimation, UIManager,
 } from "react-native";
 import {
   AttachmentTypes,
@@ -28,10 +23,8 @@ import {
   ChatInputRenderProps,
   Conversation,
   Message,
-  MessageStates,
   UserMeta,
 } from "../../types";
-import { useConnection } from "../../contexts/ConnectionProvider";
 import { ChatItem } from "./ChatItem";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import ChatInput from "./ChatInput";
@@ -39,35 +32,23 @@ import ChatHeader from "./ChatHeader";
 import SelectedMessage from "./SelectedMessage";
 import EmojiSheet from "./EmojiSheet";
 import MediaOptions from "./MediaOptions";
-import {
-  generateConversationId,
-  generateFillerTimestamps,
-  generateId,
-  getQuotedMessage,
-  getUnreadMessageIds,
-  restructureMessages,
-} from "../../utils";
-import { FlatList } from "react-native-gesture-handler";
-import { Screens, useChatClient } from "../../contexts/ChatClientContext";
+import { restructureMessages } from "../../utils";
 import MessageOptions from "./MessageOptions";
 import Haptics from "../../helpers/haptics";
-import { Colors } from "../../constants/Colors";
 import { FlashList } from "@shopify/flash-list";
 import { useConfig } from "../../contexts/ChatProvider";
 import { Events } from "softchatjs-core";
-import Animated, { SlideInDown, SlideInUp } from 'react-native-reanimated';
 import { BottomSheetRef } from "../BottomSheet";
-import { format, isThisWeek } from 'date-fns'
+import { format, isThisWeek } from "date-fns";
 import { useMessageState } from "../../contexts/MessageStateContext";
-import moment from 'moment';
 import { MessagePlus } from "../../assets/icons";
 
 type ChatProps = {
   conversationId: string;
   unread: string[];
   conversation: Conversation;
-  layout?: 'stacked'
-  chatUser: UserMeta,
+  layout?: "stacked";
+  chatUser: UserMeta;
   renderChatBubble?: (props: ChatBubbleRenderProps) => void;
   renderChatInput?: (props: ChatInputRenderProps) => void;
   renderChatHeader?: (props: ChatHeaderRenderProps) => void;
@@ -84,7 +65,7 @@ export type SelectedMessage = {
   isMessageOwner: boolean;
 };
 
-type GroupedMessages = Array<string | Message>
+type GroupedMessages = Array<string | Message>;
 
 export default function Chat(props: ChatProps) {
   const { client, theme } = useConfig();
@@ -96,9 +77,9 @@ export default function Chat(props: ChatProps) {
     renderChatInput,
     renderChatHeader,
     conversation,
-    chatUser
+    chatUser,
   } = props;
-  const chatUserId = chatUser.uid
+  const chatUserId = chatUser.uid;
   const scrollRef = useRef<FlashList<Message | string> | null>(null);
   const inputRef = useRef<TextInput>(null);
   const emojiListRef = useRef<BottomSheetRef>(null);
@@ -106,18 +87,19 @@ export default function Chat(props: ChatProps) {
   const messageOptionsRef = useRef<BottomSheetRef>(null);
   const [isTyping, showTyping] = useState(false);
   const [loadingMessages, setLoadingMessages] = useState(false);
-  const {
-    globalTextMessage,
-    setGlobalTextMessage,
-    pendingMessages, 
-  } = useMessageState();
-  const [messages, setMessages] = useState<Array<(string | Message)>>([...conversation.messages.reverse()]);
+  const { globalTextMessage, setGlobalTextMessage, pendingMessages } =
+    useMessageState();
+  const [messages, setMessages] = useState<Array<string | Message>>([
+    ...conversation.messages.reverse(),
+  ]);
   const [isEditing, setIsEditing] = useState(false);
-  const [ refMap, setRefMap ] = useState<{ [key: string]: { ref: RefObject<View> | null, index: number } }>({})
+  const [refMap, setRefMap] = useState<{
+    [key: string]: { ref: RefObject<View> | null; index: number };
+  }>({});
   const [viewable, setViewable] = useState<GroupedMessages>([]);
-  const [ isScrolling, setIsScrolling ] = useState(false);
-  const [ currentPage, setCurrentPage ] = useState(2);
-  const [ loadingOlderMessages, setLoadingOlderMessages ] = useState(false);
+  const [isScrolling, setIsScrolling] = useState(false);
+  const [currentPage, setCurrentPage] = useState(2);
+  const [loadingOlderMessages, setLoadingOlderMessages] = useState(false);
   const [recipientId, setRecipientId] = useState("");
 
   const onViewRef = useRef((viewableItems: any) => {
@@ -127,50 +109,32 @@ export default function Chat(props: ChatProps) {
     }
     setViewable(Check);
   });
-  
+
   const viewConfigRef = useRef({ viewAreaCoveragePercentThreshold: 80 });
-
-  // const restructureMessages = (data: Array<string | Message>) => {
-  //   const groupMessagesByDate = data.reduce((acc, item) => {
-  //     if(typeof item !== "string") {
-  //     var date = moment(item.createdAt).format('MMMM DD, YYYY');
-  //       if(acc[date]) {
-  //         acc[date].unshift(item)
-  //       }else{
-  //         acc[date] = [ item ]
-  //       }
-  //     }
-  //     return acc
-  //   },{} as {[key: string]: Array<Message>});
-
-  //   const grouped: Array<string | Message> = Object.entries(groupMessagesByDate).flatMap(
-  //     ([date, messages]) => [...messages.reverse(), date]
-  //   );
-  //   return grouped
-  // }
 
   useEffect(() => {
     setRefMap((prevMap) => {
-      const newMap: { [key: string]: { ref: RefObject<View> | null; index: number } } = { ...prevMap };
+      const newMap: {
+        [key: string]: { ref: RefObject<View> | null; index: number };
+      } = { ...prevMap };
       messages.forEach((message, index) => {
-        if(typeof message === "string") {
+        if (typeof message === "string") {
           if (!newMap[message]) {
             newMap[message] = { ref: createRef<View>(), index };
           } else {
             newMap[message].index = index;
           }
-        }else{
+        } else {
           if (!newMap[message.messageId]) {
             newMap[message.messageId] = { ref: createRef<View>(), index };
           } else {
             newMap[message.messageId].index = index;
           }
         }
-        
       });
       return newMap;
     });
-  },[messages])
+  }, [messages]);
 
   const width = Dimensions.get("window").width;
   const emojiSize = 40;
@@ -204,17 +168,19 @@ export default function Chat(props: ChatProps) {
       const messages = (await client
         ?.messageClient(conversationId)
         .getMessages()) as Array<Message>;
-        if(messages.length > 0){
-          var restructuredMessages: GroupedMessages = restructureMessages(messages.reverse());
-          setMessages(restructuredMessages);
-        }
+      if (messages.length > 0) {
+        var restructuredMessages: GroupedMessages = restructureMessages(
+          messages.reverse()
+        );
+        setMessages(restructuredMessages);
+      }
     } catch (error) {
-      console.log(error)
+      console.log(error);
     } finally {
       setLoadingMessages(false);
     }
   }
-  
+
   async function getOlderMessages() {
     try {
       // if(messages.length < 25) {
@@ -224,14 +190,14 @@ export default function Chat(props: ChatProps) {
       const olderMessages = (await client
         ?.messageClient(conversationId)
         .getMessages(currentPage)) as Array<Message>;
-        setMessages((prev) => {
-          return restructureMessages([ ...prev, ...olderMessages.reverse() ])
-        });
-        if(olderMessages.length > 0){
-          setCurrentPage(prev => prev + 1);
-        }
+      setMessages((prev) => {
+        return restructureMessages([...prev, ...olderMessages.reverse()]);
+      });
+      if (olderMessages.length > 0) {
+        setCurrentPage((prev) => prev + 1);
+      }
     } catch (error) {
-      console.log(error)
+      console.log(error);
     } finally {
       setLoadingOlderMessages(false);
     }
@@ -239,7 +205,7 @@ export default function Chat(props: ChatProps) {
 
   useEffect(() => {
     if (conversation) {
-      getMessages();
+      // getMessages();
       const recipients = conversation?.participants.filter(
         (id) => id !== client?.userMeta.uid
       );
@@ -252,22 +218,22 @@ export default function Chat(props: ChatProps) {
       setMessages((prev) => {
         return restructureMessages([event.message, ...prev]);
       });
-    } catch(error) {
-      console.log(error)
+    } catch (error) {
+      console.log(error);
     }
   };
 
   const handleEditedMessage = (event: any) => {
     setMessages((prev) => {
       return prev.map((message) => {
-        if(typeof message !== "string"){
+        if (typeof message !== "string") {
           if (message.messageId === event.message.messageId) {
             return { ...message, ...event.message };
           } else {
             return message;
           }
-        }else{
-          return message
+        } else {
+          return message;
         }
       });
     });
@@ -286,21 +252,19 @@ export default function Chat(props: ChatProps) {
   };
 
   const handleDeletedMessage = (event: any) => {
-    console.log('new deleted message');
+    console.log("new deleted message");
     setMessages((prev) => {
       return prev.filter((message) => {
-        if(typeof message !== "string"){
-          return message.messageId !== event.message.messageId
+        if (typeof message !== "string") {
+          return message.messageId !== event.message.messageId;
         }
-      })
+      });
     });
   };
 
   useEffect(() => {
     if (client) {
-      client
-      .messageClient(conversationId)
-      .setActiveConversation();
+      client.messageClient(conversationId).setActiveConversation();
       client.subscribe(Events.NEW_MESSAGE, handleNewMessages);
       client.subscribe(Events.EDITED_MESSAGE, handleEditedMessage);
       client.subscribe(Events.HAS_STARTED_TYPING, handleTypingStarted);
@@ -309,9 +273,7 @@ export default function Chat(props: ChatProps) {
     }
     return () => {
       if (client) {
-        client
-          .messageClient(conversationId)
-          .unSetActiveConversation();
+        client.messageClient(conversationId).unSetActiveConversation();
         client.unsubscribe(Events.NEW_MESSAGE, handleNewMessages);
         client.unsubscribe(Events.EDITED_MESSAGE, handleEditedMessage);
         client.unsubscribe(Events.HAS_STARTED_TYPING, handleTypingStarted);
@@ -354,9 +316,7 @@ export default function Chat(props: ChatProps) {
     }
   };
 
-  const sendEditedMessage = async (
-    externalInputRef?: RefObject<TextInput>
-  ) => {
+  const sendEditedMessage = async (externalInputRef?: RefObject<TextInput>) => {
     try {
       if (client && selectedMessage.message) {
         client
@@ -405,7 +365,7 @@ export default function Chat(props: ChatProps) {
       scrollRef.current?.scrollToIndex({
         animated: true,
         index: refMap[messageId].index,
-        viewPosition: 0.5
+        viewPosition: 0.5,
       });
       if (itemRef) {
         itemRef.setNativeProps({
@@ -415,90 +375,146 @@ export default function Chat(props: ChatProps) {
           itemRef.setNativeProps({
             style: { backgroundColor: "transparent" },
           });
-        },1000)
+        }, 1000);
       }
     } catch (error) {
       scrollRef.current?.scrollToEnd({
         animated: true,
       });
     }
-  }
-  
+  };
 
   function formatViewableDate(date: Date | string): string {
-    if (isThisWeek(date, { weekStartsOn: 1 })) { // weekStartsOn: 1 makes the week start on Monday
-      return format(date, 'EEEE'); // 'EEEE' returns the full weekday name (e.g., 'Monday')
+    if (isThisWeek(date, { weekStartsOn: 1 })) {
+      // weekStartsOn: 1 makes the week start on Monday
+      return format(date, "EEEE"); // 'EEEE' returns the full weekday name (e.g., 'Monday')
     } else {
-      return format(date, 'yyyy-MM-dd'); // returns full date (e.g., '2024-09-13')
+      return format(date, "yyyy-MM-dd"); // returns full date (e.g., '2024-09-13')
     }
   }
-
 
   const messageListHeader = useCallback(() => {
     return (
-      <View style={{ width: '100%' }}>
-        {pendingMessages.filter(message => message.conversationId === conversationId) .map((message, index) => (
-          <ChatItem
-            key={index}
-            ref={null}
-            onScrollToIndex={(messageId) => {}}
-            layout={layout}
-            onLongPress={({ message, chatItemRef, isMessageOwner }) => {}}
-            inputRef={inputRef}
-            position={chatUserId === message.from ? "right" : "left"}
-            message={message}
-            onSelectedMessage={({ message, chatItemRef }) => {}}
-            conversation={conversation}
-            chatUserId={chatUserId}
-            recipientId={recipientId}
-            renderChatBubble={renderChatBubble}
-            isPending={true}
-          />
-        ))}
-        <View style={{ display: loadingMessages? 'flex' : 'none', paddingVertical: 5, alignItems: 'center', justifyContent: 'center' }}>
-          <Text style={{ color: theme?.text.disabled, fontStyle: 'italic' }}>Loading new messages...</Text>
+      <View style={{ width: "100%" }}>
+        {pendingMessages
+          .filter((message) => message.conversationId === conversationId)
+          .map((message, index) => (
+            <ChatItem
+              key={index}
+              ref={null}
+              onScrollToIndex={(messageId) => {}}
+              layout={layout}
+              onLongPress={({ message, chatItemRef, isMessageOwner }) => {}}
+              inputRef={inputRef}
+              position={chatUserId === message.from ? "right" : "left"}
+              message={message}
+              onSelectedMessage={({ message, chatItemRef }) => {}}
+              conversation={conversation}
+              chatUserId={chatUserId}
+              recipientId={recipientId}
+              renderChatBubble={renderChatBubble}
+              isPending={true}
+            />
+          ))}
+        <View
+          style={{
+            display: loadingMessages ? "flex" : "none",
+            paddingVertical: 5,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Text style={{ color: theme?.text.disabled, fontStyle: "italic" }}>
+            Loading new messages...
+          </Text>
         </View>
       </View>
-    )
-  },[loadingMessages, pendingMessages, theme]);
+    );
+  }, [loadingMessages, pendingMessages, theme]);
 
   const threaded = (item: string | Message, index: number) => {
-    var nextMessage = messages[index - 1]
-    if(typeof item === "string"){
-      return false
+    var nextMessage = messages[index - 1];
+    if (typeof item === "string") {
+      return false;
     }
-    if(typeof nextMessage === "string" || !nextMessage){
-      return false
+    if (typeof nextMessage === "string" || !nextMessage) {
+      return false;
     }
-    return item.messageOwner.uid === nextMessage.messageOwner.uid
-  }
-
-
+    return item.messageOwner.uid === nextMessage.messageOwner.uid;
+  };
 
   const renderChatItem = useCallback(
-    ({ item, index }: { item: string | Message, index: number }) => {
-      if(typeof item === "string") {
-        if(layout !== 'stacked'){
+    ({ item, index }: { item: string | Message; index: number }) => {
+      if (typeof item === "string") {
+        if (layout !== "stacked") {
           return (
-            <View style={{ alignSelf: 'center', padding: 5, marginTop: 5, backgroundColor: theme?.background.secondary, borderRadius: 10, marginBottom: 20 }}>
-              <Text style={{ textAlign: 'center', paddingHorizontal: 5, color: theme?.text.secondary, fontSize: 11 }}>{item}</Text>
+            <View
+              style={{
+                alignSelf: "center",
+                padding: 5,
+                marginTop: 5,
+                backgroundColor: theme?.background.secondary,
+                borderRadius: 10,
+                marginBottom: 20,
+              }}
+            >
+              <Text
+                style={{
+                  textAlign: "center",
+                  paddingHorizontal: 5,
+                  color: theme?.text.secondary,
+                  fontSize: 11,
+                }}
+              >
+                {item}
+              </Text>
             </View>
-          )
+          );
         }
         return (
-          <View style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 20, backgroundColor: theme?.background.primary }}>
-            <View style={{ height: 1, width: '100%', flex: 1, backgroundColor: theme?.divider }} />
-            <Text style={{ textAlign: 'center', paddingHorizontal: 15, color: theme?.text.secondary, fontSize: 11 }}>{item}</Text>
-            <View style={{ height: 1, width: '100%', flex: 1, backgroundColor: theme?.divider }} />
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              paddingVertical: 20,
+              backgroundColor: theme?.background.primary,
+            }}
+          >
+            <View
+              style={{
+                height: 1,
+                width: "100%",
+                flex: 1,
+                backgroundColor: theme?.divider,
+              }}
+            />
+            <Text
+              style={{
+                textAlign: "center",
+                paddingHorizontal: 15,
+                color: theme?.text.secondary,
+                fontSize: 11,
+              }}
+            >
+              {item}
+            </Text>
+            <View
+              style={{
+                height: 1,
+                width: "100%",
+                flex: 1,
+                backgroundColor: theme?.divider,
+              }}
+            />
           </View>
-        )
+        );
       }
 
       return (
-          <ChatItem
+        <ChatItem
           ref={refMap[item.messageId]?.ref}
           onScrollToIndex={(messageId) => {
-            onScrollToMessage(messageId)
+            onScrollToMessage(messageId);
           }}
           layout={layout}
           onLongPress={({ message, chatItemRef, isMessageOwner }) =>
@@ -508,7 +524,7 @@ export default function Chat(props: ChatProps) {
           position={chatUserId === item.from ? "right" : "left"}
           message={item}
           onSelectedMessage={({ message, chatItemRef }) => {
-            setActiveQuote({ message, ref: chatItemRef, itemIndex: index })
+            setActiveQuote({ message, ref: chatItemRef, itemIndex: index });
           }}
           threaded={threaded(item, index)}
           conversation={conversation}
@@ -549,7 +565,7 @@ export default function Chat(props: ChatProps) {
     inputRef,
     messageOptionsRef,
     setIsEditing,
-    theme
+    theme,
   ]);
 
   useEffect(() => {
@@ -580,16 +596,15 @@ export default function Chat(props: ChatProps) {
     return () => clearTimeout(debounceTimer);
   }, [client, globalTextMessage, conversation]);
 
-
   useEffect(() => {
-    if(client && conversation.conversationId) {
+    if (client && conversation.conversationId) {
       const msClient = client.messageClient(conversation.conversationId);
       msClient.readMessages(conversation.conversationId, {
         uid: client.userMeta.uid,
-        messageIds: unread
+        messageIds: unread,
       });
-      
-      console.log('sent messageIds for read')
+
+      console.log("sent messageIds for read");
     }
   }, [client, conversation, unread]);
 
@@ -600,15 +615,16 @@ export default function Chat(props: ChatProps) {
     clearTimeout(scrollStateRef);
     scrollStateRef = setTimeout(() => {
       setIsScrolling(false);
-    },3000)
-  }
+    }, 3000);
+  };
 
   return (
-    <GestureHandlerRootView style={{ 
-      ...styles.main,
-      backgroundColor: theme?.background.primary,
-      
-      }}>
+    <GestureHandlerRootView
+      style={{
+        ...styles.main,
+        backgroundColor: theme?.background.primary,
+      }}
+    >
       <ChatHeader
         conversation={conversation}
         chatUserId={chatUserId}
@@ -616,41 +632,63 @@ export default function Chat(props: ChatProps) {
         isTyping={isTyping}
       />
       <KeyboardAvoidingView
-        style={{ flex: 1, }}
+        style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={Platform.OS === "ios" ? 10 : 0}
       >
         {messages.length === 0 && (
-           <View style={{ flex: 1, height: Dimensions.get("window").height, alignItems: 'center', justifyContent: 'center' }}>
-           <MessagePlus size={100} color={theme?.icon} />
-           <Text style={{ color: theme?.text.disabled, marginTop: 20 }}>Start by sending a message.</Text>
-         </View>
+          <View
+            style={{
+              flex: 1,
+              height: Dimensions.get("window").height,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <MessagePlus size={100} color={theme?.icon} />
+            <Text style={{ color: theme?.text.disabled, marginTop: 20 }}>
+              Start by sending a message.
+            </Text>
+          </View>
         )}
-        <View style={{
-          flex: 1,
-          height: '100%',
-        }}>
+        <View
+          style={{
+            flex: 1,
+            height: "100%",
+          }}
+        >
           <FlashList
             ref={scrollRef}
             inverted
-            onScroll={() => isScrolling? null : onStartedScrolling()}
+            onScroll={() => (isScrolling ? null : onStartedScrolling())}
             data={messages}
             keyExtractor={(_, index) => index.toString()}
             renderItem={renderChatItem}
             ListHeaderComponent={messageListHeader}
             ListFooterComponent={() => (
-              <View style={{ display: loadingOlderMessages? 'flex' : 'none', paddingVertical: 10, alignItems: 'center', justifyContent: 'center' }}>
-                <Text style={{ color: theme?.text.disabled, fontStyle: 'italic' }}>Loading older messages...</Text>
+              <View
+                style={{
+                  display: loadingOlderMessages ? "flex" : "none",
+                  paddingVertical: 10,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Text
+                  style={{ color: theme?.text.disabled, fontStyle: "italic" }}
+                >
+                  Loading older messages...
+                </Text>
               </View>
             )}
             contentContainerStyle={{
               paddingTop: 0,
             }}
             estimatedItemSize={100}
-            onViewableItemsChanged={onViewRef.current}
+            // onViewableItemsChanged={onViewRef.current}
             viewabilityConfig={viewConfigRef.current}
             onEndReached={() => {
-              console.log('end reached')
+              console.log("end reached");
               getOlderMessages();
             }}
           />

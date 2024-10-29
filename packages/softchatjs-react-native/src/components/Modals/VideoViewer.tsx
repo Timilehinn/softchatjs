@@ -2,12 +2,19 @@ import {
   View,
   Text,
   StyleSheet,
-  Button,
   TouchableOpacity,
   TouchableWithoutFeedback,
   ActivityIndicator,
+  Dimensions,
 } from "react-native";
-import React, { useRef, useState, useCallback, useEffect } from "react";
+import React, {
+  useRef,
+  forwardRef,
+  useImperativeHandle,
+  useState,
+  useCallback,
+  useEffect,
+} from "react";
 import {
   Video,
   ResizeMode,
@@ -27,6 +34,21 @@ import { useMessageState } from "../../contexts/MessageStateContext";
 import { convertToMinutes, generateId } from "../../utils";
 import { AttachmentTypes, MediaType } from "../../types";
 import { useModalProvider } from "../../contexts/ModalProvider";
+import {
+  GestureHandlerRootView,
+  GestureDetector,
+  Gesture,
+} from "react-native-gesture-handler";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  useAnimatedProps,
+  useAnimatedReaction,
+  interpolate,
+  Easing,
+  withTiming,
+  runOnJS,
+} from "react-native-reanimated";
 
 type VideoViewProps = {
   conversationId?: string;
@@ -60,6 +82,86 @@ type AVPlaybackStatusMeta = {
   volume?: number;
 };
 
+type SliderProps = {
+  setTimeStamp: (timeStampMillis: number) => void;
+  status: AVPlaybackStatusSuccess;
+};
+
+const INITIAL_BOX_SIZE = 50;
+var deviceWidth = Dimensions.get("window").width;
+const SLIDER_WIDTH = deviceWidth - 50;
+
+Animated.addWhitelistedNativeProps({ text: true });
+
+const Slider = forwardRef(({ setTimeStamp, status }: SliderProps, ref: any) => {
+  const offset = useSharedValue(0);
+  const MAX_VALUE = SLIDER_WIDTH + 10;
+  var duration = status?.durationMillis ?? 0;
+
+  useEffect(() => {
+    if (status.shouldPlay && status.isPlaying) {
+      var position = status?.positionMillis ?? 0;
+      var duration = status?.durationMillis ?? 0;
+      offset.value = withTiming(
+        interpolate(position, [0, duration], [0, SLIDER_WIDTH]),
+        { duration: 500, easing: Easing.linear }
+      );
+    }
+  }, [status]);
+
+  const pan = Gesture.Pan()
+    .onChange((event) => {
+      var value =
+        Math.abs(offset.value) <= MAX_VALUE
+          ? offset.value + event.changeX <= 0
+            ? 0
+            : offset.value + event.changeX >= MAX_VALUE
+              ? MAX_VALUE
+              : offset.value + event.changeX
+          : offset.value;
+
+      offset.value = value;
+    })
+    .onEnd((event) => {
+      console.log(event.absoluteX);
+      var timeStamp = interpolate(
+        event.absoluteX,
+        [0, SLIDER_WIDTH],
+        [0, duration]
+      );
+      runOnJS(setTimeStamp)(timeStamp);
+    });
+
+  const sliderStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateX: offset.value }],
+    };
+  });
+
+  useImperativeHandle(ref, () => ({
+    reset: () => (offset.value = 0),
+  }));
+
+  return (
+    <GestureHandlerRootView style={{}}>
+      <View ref={ref} style={styles.sliderTrack}>
+        <GestureDetector gesture={pan}>
+          <Animated.View style={[styles.sliderHandle, sliderStyle]}>
+            <View
+              style={{
+                height: 18,
+                width: 18,
+                borderRadius: 18,
+                backgroundColor: "white",
+              }}
+            />
+          </Animated.View>
+        </GestureDetector>
+      </View>
+    </GestureHandlerRootView>
+  );
+});
+
 export default function VideoViewer(props: VideoViewProps) {
   const {
     conversationId,
@@ -72,13 +174,12 @@ export default function VideoViewer(props: VideoViewProps) {
     view,
   } = props;
 
+  const sliderRef = useRef<{ reset: () => void }>(null);
   const { client } = useConfig();
   const { resetModal } = useModalProvider();
   const { addNewPendingMessages } = useMessageState();
   const video = useRef<Video>(null);
-  const [status, setStatus] = useState<
-    AVPlaybackStatus
-  >({ isLoaded: false });
+  const [status, setStatus] = useState<AVPlaybackStatus>({ isLoaded: false });
   const [loading, setLoading] = useState(false);
   const [timePlayedSecs, setTimePlayedSecs] = useState(0);
 
@@ -100,7 +201,7 @@ export default function VideoViewer(props: VideoViewProps) {
               mimeType: media.mimeType,
               ext: ".mp4",
               mediaId: generateId(),
-              mediaUrl: media.base64,
+              mediaUrl: media.mediaUrl,
               meta: {
                 aspectRatio: media?.meta?.aspectRatio,
                 height: media?.meta?.height,
@@ -133,41 +234,62 @@ export default function VideoViewer(props: VideoViewProps) {
   };
 
   useEffect(() => {
+    if (video.current) {
+      video.current?.setProgressUpdateIntervalAsync(500);
+    }
+  }, [video]);
+
+  useEffect(() => {
+    if (status.didJustFinish) {
+      video.current?.setPositionAsync(0);
+      sliderRef.current?.reset();
+    }
     if (status?.isBuffering || status.isLoaded === false) {
       setLoading(true);
-    }else{
-      setLoading(false)
+    } else {
+      setLoading(false);
     }
 
     return () => {};
   }, [status]);
 
   const renderVideoDuration = useCallback(() => {
-
     var duration = status?.durationMillis ?? 0;
     var position = status?.positionMillis ?? 0;
-    
+
     return (
       <View>
-        <View style={{ height: 4, width: '100%', backgroundColor: 'grey', borderRadius: 5, marginBottom: 10 }}>
+        {/* <View style={{ height: 4, width: '100%', backgroundColor: 'grey', borderRadius: 5, marginBottom: 10 }}>
           <View style={{ height: '100%', backgroundColor: 'white', width: `${position/duration * 100}%`, borderRadius: 5 }} />
+        </View> */}
+        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+          <Text style={{ color: "white" }}>
+            {convertToMinutes(position / 1000)}
+          </Text>
+          <Text style={{ color: "white" }}>
+            {convertToMinutes(duration / 1000)}
+          </Text>
         </View>
-      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-        <Text style={{ color: "white" }}>
-          {convertToMinutes(position / 1000)}
-        </Text>
-        <Text style={{ color: "white" }}>
-          {convertToMinutes(duration / 1000)}
-        </Text>
-      </View>
       </View>
     );
   }, [status]);
 
   const deleteMessage = () => {
     resetModal();
-    if(view) {
-      onDelete?.()
+    if (view) {
+      onDelete?.();
+    }
+  };
+
+  const setTimeStamp = async (position: number) => {
+    try {
+      if (video.current) {
+        await video.current.pauseAsync();
+        await video.current.setPositionAsync(position);
+        await video.current.playAsync();
+      }
+    } catch (error) {
+      console.error("Error seeking:", error);
     }
   };
 
@@ -181,7 +303,8 @@ export default function VideoViewer(props: VideoViewProps) {
         }}
         useNativeControls
         resizeMode={ResizeMode.COVER}
-        isLooping
+        // isLooping
+        progressUpdateIntervalMillis={500}
         onLoadStart={() => {
           setLoading(true);
           video?.current?.pauseAsync();
@@ -191,7 +314,6 @@ export default function VideoViewer(props: VideoViewProps) {
           setLoading(false);
         }}
         onPlaybackStatusUpdate={(status) => {
-
           setStatus(() => status);
           setTimePlayedSecs((prev) => prev + 1);
         }}
@@ -205,11 +327,24 @@ export default function VideoViewer(props: VideoViewProps) {
             </TouchableOpacity> */}
           {/* </View> */}
           {loading && (
-            <View style={{ padding: 10, alignSelf: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,.5)', borderRadius: 10 }}>
-              <ActivityIndicator size="large" color={'white'} />
+            <View
+              style={{
+                padding: 10,
+                alignSelf: "center",
+                alignItems: "center",
+                backgroundColor: "rgba(0,0,0,.5)",
+                borderRadius: 10,
+              }}
+            >
+              <ActivityIndicator size="large" color={"white"} />
             </View>
           )}
           <View style={styles.footer}>
+            <Slider
+              setTimeStamp={setTimeStamp}
+              status={status as AVPlaybackStatusSuccess}
+              ref={sliderRef}
+            />
             {renderVideoDuration()}
             <View style={styles.controls}>
               <TouchableOpacity onPress={deleteMessage}>
@@ -285,11 +420,29 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,.6)",
     justifyContent: "space-between",
     paddingHorizontal: 20,
-    paddingTop: 10
+    paddingTop: 10,
   },
   controls: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
+  sliderTrack: {
+    width: SLIDER_WIDTH,
+    height: 3,
+    backgroundColor: "white",
+    borderRadius: 25,
+    justifyContent: "center",
+    // padding: 5,
+  },
+  sliderHandle: {
+    width: 40,
+    height: 40,
+    backgroundColor: "transparent",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 40,
+    position: "absolute",
+    left: -20,
+  }
 });

@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react"
+import React, { createContext, useContext, useState } from "react"
 import { KeyboardAvoidingView, Modal, ScrollView, StyleSheet, TouchableWithoutFeedback, View, ViewStyle, Text } from "react-native"
 import Animated, { SharedValue, interpolate, useAnimatedStyle, useSharedValue, withDecay, withTiming } from "react-native-reanimated"
 import { Children } from "../types"
