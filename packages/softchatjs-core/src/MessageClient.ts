@@ -1170,6 +1170,7 @@ export default class MessageClient {
           this.connection.emit(Events.DELETED_MESSAGE, {
             message: deletedMessage,
           });
+          this.deleteMessageFromConversationMeta(deletedMessage.conversationId, deletedMessage.messageId)
           break;
         case ClientActions.ACK_HEALTH_CHECK:
           console.info("HEALTH_CHECK: ok!");
