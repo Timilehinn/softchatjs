@@ -36,42 +36,6 @@ const chatApi = async <R>(payload: Payload): Promise<APIResponse<R>> => {
       responseType: "json",
       timeout: 30000,
     });
-
-    const response = res.data;
-    if (typeof response === "object" && response && "success" in response) {
-      return response as unknown as APIResponse<R>;
-    }
-    return { ...response, success: false } as unknown as APIResponse<R>;
-  } catch (error) {
-    console.log(error, "fetch error");
-    if (axios.isAxiosError(error) && error.response) {
-      throw new Error(`HTTP error! Status: ${error.response.status}`);
-    }
-    throw new Error("An unknown error occurred.");
-  }
-};
-
-const chatApi2 = async <R>(
-  endpoint: string,
-  body: Object,
-  method: "GET" | "POST" | "PUT",
-  token?: string
-): Promise<APIResponse<R>> => {
-  try {
-    const res: AxiosResponse<R> = await axios({
-      url: endpoint,
-      method,
-      headers: {
-        "Cache-Control": "no-cache",
-        accessToken: token || "",
-        "Content-Type": "multipart/form-data",
-      },
-      data: method === "POST" ? body : undefined,
-      responseType: "json",
-      // withCredentials: true,
-      timeout: 30000,
-    });
-
     const response = res.data;
     if (typeof response === "object" && response && "success" in response) {
       return response as unknown as APIResponse<R>;
@@ -94,18 +58,18 @@ type APIResponse<R> = {
 
 export async function CREATE_SESSION<Response>({
   userId,
-  apiKey,
+  subId,
   projectId,
 }: {
   userId: string;
-  apiKey: string;
+  subId: string;
   projectId: string;
 }): Promise<APIResponse<Response>> {
   return await chatApi<Response>({
     endpoint: `${API}${ENDPOINTS.CREATE_SESSION}`,
-    body: { userId, projectId },
+    body: { userId, projectId, subId },
     method: "POST",
-    headers: { "x-api-key": apiKey },
+    // headers: { "x-api-key": apiKey },
   });
 }
 
@@ -173,10 +137,11 @@ export async function UPLOAD_ATTACHMENT<Response>(
   token: string,
   data: any
 ): Promise<APIResponse<Response>> {
-  return await chatApi2<Response>(
-    `${API}${ENDPOINTS.UPLOAD_ATTACHMENT}`,
-    data,
-    "POST",
-    token
-  );
+  return await chatApi<Response>({
+    endpoint: `${API}${ENDPOINTS.UPLOAD_ATTACHMENT}`,
+    body: data,
+    method: "POST",
+    token,
+    headers: { "Content-Type": "multipart/form-data" },
+  });
 }

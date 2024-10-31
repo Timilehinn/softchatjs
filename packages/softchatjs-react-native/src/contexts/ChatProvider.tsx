@@ -8,13 +8,13 @@ import { MessageStateProvider } from "./MessageStateContext";
 
 type ChatProvider = {
   children: JSX.Element,
-  apiKey: string,
+  subId: string,
   projectId: string,
   theme?: ChatTheme
 }
 
 const ConfigContext = createContext<Omit<ChatProvider, 'children'> & { client: ChatClient | null }>({
-  apiKey: '',
+  subId: '',
   projectId: '',
   theme: defaultTheme,
   client: null
@@ -24,18 +24,15 @@ export function useConfig() {
   return useContext(ConfigContext);
 }
 
-
 export default function ChatProvider(props: ChatProvider) {
 
 
-  const { children, apiKey, projectId, theme = defaultTheme } = props;
+  const { children, subId, projectId, theme = defaultTheme } = props;
 
-  const client = ChatClient.getInstance({ apiKey: apiKey, projectId: projectId });
+  const client = ChatClient.getInstance({ subId, projectId: projectId });
   
-  
-
   return (
-    <ConfigContext.Provider value={{ apiKey, projectId, theme, client }}>
+    <ConfigContext.Provider value={{ subId, projectId, theme, client }}>
       {/* <ConnectionProvider projectId={config.projectId}>
         <ChatClientProvider> */}
         <MessageStateProvider>

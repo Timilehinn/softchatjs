@@ -33,7 +33,7 @@ export default function RootLayout({
         config={{
           userId: "20",
           username: "Tolu",
-          apiKey: "1234",
+          subId: "ef066542-6e13-4f25-a6c3-d3e3671e4662",
           projectId: "5909b61d-e6be-47b5-bb54-a60e56344580",
           // theme: {
           //   background: {

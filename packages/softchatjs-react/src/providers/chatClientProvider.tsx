@@ -2,7 +2,7 @@ import { createContext, useContext } from "react";
 import ChatClient from "softchatjs-core";
 
 type ChatClientConfigType = {
-  apiKey: string;
+  subId: string;
   projectId: string;
   userId: string;
   username: string;
@@ -52,7 +52,7 @@ type ContexType = {
 };
 
 export const ChatClientContext = createContext<ContexType>({
-  config: { apiKey: "", projectId: "", userId: "", username: "", theme: null },
+  config: { subId: "", projectId: "", userId: "", username: "", theme: null },
   client: null as any,
 });
 
@@ -66,7 +66,7 @@ export const ChatClientProvider = ({
   config: ChatClientConfigType;
 }) => {
   const client = ChatClient.getInstance({
-    apiKey: config.apiKey,
+    subId: config.subId,
     projectId: config.projectId,
   });
 

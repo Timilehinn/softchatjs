@@ -68,7 +68,7 @@ function RootLayoutNav() {
 
   return (
     <ChatProvider
-      apiKey='wBfANeWrOdtcNOkMwQ0Q5abzuaSX8Mn34IJ1MsA9'
+      subId='ef066542-6e13-4f25-a6c3-d3e3671e4662'
       projectId='5909b61d-e6be-47b5-bb54-a60e56344580'
       // theme={{
       //   background: {

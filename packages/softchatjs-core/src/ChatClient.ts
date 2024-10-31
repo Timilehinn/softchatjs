@@ -24,23 +24,21 @@ let defaultUser = {
 export default class ChatClient {
   private static client_instance: ChatClient;
   private connection: Connection | null;
-  apiKey: string;
+  subId: string;
   projectId: string;
   userMeta: UserMeta
 
-  constructor(apiKey: string, projectId: string) {
-    this.apiKey = apiKey;
+  constructor(subId: string, projectId: string) {
+    this.subId = subId;
     this.projectId = projectId;
     this.userMeta = defaultUser,
     this.connection = null
   }
 
-  static getInstance({ projectId, apiKey }: Config) {
+  static getInstance({ projectId, subId }: Config) {
     if (!ChatClient.client_instance) {
-      if (projectId && apiKey) {
-        ChatClient.client_instance = new ChatClient(apiKey, projectId);
-        return ChatClient.client_instance
-      }
+      ChatClient.client_instance = new ChatClient(subId, projectId);
+      return ChatClient.client_instance
     }
     return ChatClient.client_instance
   }

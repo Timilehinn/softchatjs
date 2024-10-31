@@ -7,6 +7,7 @@ export enum ClientActions {
   ACK_HEALTH_CHECK = 'acknowledgeHealthCheck',
   EDITED_MESSAGE = 'editedMessage',
   MESSAGE_DELETED = 'deletedMessage',
+  MESSAGE_SENT = 'messageSent'
 }
 
 // sent to the server
@@ -188,10 +189,9 @@ export type InitiateConnection = {
 
 export type StringOrNumber = string | number
 
-
 export type Config = {
   projectId: string,
-  apiKey: string,
+  subId: string
 }
 
 export type StartConversation = {

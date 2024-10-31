@@ -65,7 +65,7 @@ export default class Connection extends EventEmitter {
     this.userMeta = client_instance.userMeta;
     this.projectConfig = {
       projectId: client_instance.projectId,
-      apiKey: client_instance.apiKey,
+      subId: client_instance.subId,
     },
     this.activeConversationId = "";
     this.screen = Screens.CONVERSATIONS;
@@ -93,7 +93,7 @@ export default class Connection extends EventEmitter {
       const res = await CREATE_SESSION<{ token: string; wsURI: string }>({
         userId: this.userMeta.uid,
         projectId: this.projectConfig.projectId,
-        apiKey: this.projectConfig.apiKey,
+        subId: this.projectConfig.subId,
       });
 
       console.log(res)

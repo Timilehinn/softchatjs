@@ -4,7 +4,7 @@ import { ChatClientProvider } from "./chatClientProvider";
 import { ChatStateProvider } from "./clientStateProvider";
 
 type SoftChatConfigType = {
-  apiKey: string;
+  subId: string;
   projectId: string;
   userId: string;
   username: string;
@@ -54,7 +54,7 @@ type ContexType = {
 };
 
 export const SoftChatContext = createContext<ContexType>({
-  config: { apiKey: "", projectId: "", userId: "", username: "", theme: null },
+  config: { subId: "", projectId: "", userId: "", username: "", theme: null },
   client: null as any,
 });
 
