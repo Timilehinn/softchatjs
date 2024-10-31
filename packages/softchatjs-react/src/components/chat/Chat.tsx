@@ -225,7 +225,7 @@ const Chat = (props: ChatProps) => {
   }, [forceScrollCount]);
 
   useEffect(() => {
-    if (presentPage > 2) {
+    if (presentPage < 2) {
       return;
     }
     try {

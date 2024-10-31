@@ -57,6 +57,7 @@ type ConversationProps = {
   textInputRef: any;
   recipientId: string;
   hideAvartar: boolean;
+  setShowEmojiPanel: Dispatch<SetStateAction<boolean>>;
 };
 
 export const Conversation = (props: ConversationProps) => {
@@ -101,7 +102,7 @@ export const Conversation = (props: ConversationProps) => {
   const messageDateColor =
     message.messageOwner.uid === config.userId
       ? config.theme?.chatBubble?.right?.messageTimeColor
-      : config.theme?.chatBubble?.left?.messageTimeColor|| "grey";
+      : config.theme?.chatBubble?.left?.messageTimeColor || "grey";
 
   const messageState = () => {
     if (message.messageState === MessageStates.SENT) {
@@ -157,6 +158,7 @@ export const Conversation = (props: ConversationProps) => {
               emojiPickerRef={emojiPickerRef}
               message={message}
               recipientId={recipientId}
+              setShowEmojiPanel={props.setShowEmojiPanel}
             />
           ) : null}
           <div className={styles.conversation__text__container}>
@@ -339,7 +341,6 @@ const AttachmentList = ({ attachments }: { attachments: Media[] }) => {
   return (
     <div className={styles.attachments}>
       {attachments.map((i, index) => {
-      
         if (i.type === "image") {
           return (
             <img
@@ -359,7 +360,6 @@ const AttachmentList = ({ attachments }: { attachments: Media[] }) => {
               src={i.mediaUrl}
               className={styles.image}
               controls
-              
             />
           );
         }
@@ -388,16 +388,23 @@ export const QuotedMessage = ({
   const msg = message?.messageOwner?.username;
   return (
     <div
-      onClick={() => scrollToQuote(message.messageId)}
       className={styles.quote}
+      onClick={() => scrollToQuote(message.messageId)}
     >
-      <Text
-        styles={{ color: "greenyellow", textAlign: "left" }}
-        size="sm"
-        weight="bold"
-        text={msg?.length > 30 ? `${msg?.slice(0, 5)}...` : msg}
-      />
-      <Text size="xs" text={message?.message} styles={{ textAlign: "left" }} />
+      <div>
+        <Text
+          styles={{ color: "greenyellow", textAlign: "left" }}
+          size="sm"
+          weight="bold"
+          text={msg?.length > 30 ? `${msg?.slice(0, 5)}...` : msg}
+        />
+        <Text
+          size="xs"
+          text={message?.message}
+          styles={{ textAlign: "left" }}
+        />
+      </div>
+      <img src={message?.attachedMedia[0]?.mediaUrl} alt="" />
     </div>
   );
 };

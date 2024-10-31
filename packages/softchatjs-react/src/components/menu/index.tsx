@@ -48,7 +48,7 @@ export const AttachmentMenu = ({
             <div style={{ marginRight: "10px" }}> {item.icon}</div>
             <input
               onChange={handleChange}
-              multiple
+              
               ref={fileInputRef}
               type="file"
               hidden
