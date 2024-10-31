@@ -15,6 +15,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Dimensions,
+  RefreshControl,
 } from "react-native";
 import {
   AttachmentTypes,
@@ -205,7 +206,7 @@ export default function Chat(props: ChatProps) {
 
   useEffect(() => {
     if (conversation) {
-      // getMessages();
+      getMessages();
       const recipients = conversation?.participants.filter(
         (id) => id !== client?.userMeta.uid
       );
@@ -416,7 +417,7 @@ export default function Chat(props: ChatProps) {
               isPending={true}
             />
           ))}
-        <View
+        {/* <View
           style={{
             display: loadingMessages ? "flex" : "none",
             paddingVertical: 5,
@@ -427,7 +428,7 @@ export default function Chat(props: ChatProps) {
           <Text style={{ color: theme?.text.disabled, fontStyle: "italic" }}>
             Loading new messages...
           </Text>
-        </View>
+        </View> */}
       </View>
     );
   }, [loadingMessages, pendingMessages, theme]);
@@ -664,6 +665,7 @@ export default function Chat(props: ChatProps) {
             data={messages}
             keyExtractor={(_, index) => index.toString()}
             renderItem={renderChatItem}
+            refreshControl={<RefreshControl refreshing={loadingMessages} onRefresh={getMessages} />}
             ListHeaderComponent={messageListHeader}
             ListFooterComponent={() => (
               <View

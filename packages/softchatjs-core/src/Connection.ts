@@ -46,6 +46,7 @@ export default class Connection extends EventEmitter {
   screen: Screens;
   conversationListMeta: ConversationListMeta; // lastMessage field should be changed to use the last message in the conversation
   private healthCheckRef: NodeJS.Timeout | undefined;
+  private retryRef: NodeJS.Timeout | undefined;
 
   constructor(client_instance: ChatClient) {
     super();
@@ -85,9 +86,10 @@ export default class Connection extends EventEmitter {
       if (!this.userMeta?.uid) return null;
   
       // Clear previous health check interval
-      clearInterval(this.healthCheckRef);
-  
-      // Create a session to retrieve token and wsURI
+      clearTimeout(this.retryRef);
+      console.log('clear ref: ', this.retryRef)        
+      clearTimeout(this.retryRef);
+          // Create a session to retrieve token and wsURI
       const res = await CREATE_SESSION<{ token: string; wsURI: string }>({
         userId: this.userMeta.uid,
         projectId: this.projectConfig.projectId,
@@ -105,6 +107,9 @@ export default class Connection extends EventEmitter {
   
       // If session creation was successful
       if (res.success) {
+        // if(this.retryRef){
+        //   clearInterval(this.retryRef)
+        // }
         this.wsAccessConfig = {
           url: res.data.wsURI,
           token: res.data.token,
@@ -214,7 +219,6 @@ export default class Connection extends EventEmitter {
       console.warn("Connection error. Attempting to reconnect...");
       this.retryConnection()
     } finally {
-      // Any additional cleanup logic if necessary
     }
   }
 
@@ -351,6 +355,7 @@ export default class Connection extends EventEmitter {
 
   private retryConnection() {
     // Retry logic or call _initiateConnection() after delay
+   
     if(this.retry_count >= this.max_retry_count){
       return console.warn(`Connection attempt failed after multiple retries. Please check your network settings or try again.`)
     }
@@ -359,10 +364,12 @@ export default class Connection extends EventEmitter {
       isConnected: false,
       fetchingConversations: false,
     });
-    setTimeout(() => {
-      this._initiateConnection();
-      this.retry_count += 1;
-    }, 5000);
+    if(!this.wsConnected){
+      this.retryRef = setTimeout(() => {
+        this._initiateConnection();
+        this.retry_count += 1;
+      }, 5000);
+    }
   }
 
   private setupEventHandlers() {
@@ -375,12 +382,14 @@ export default class Connection extends EventEmitter {
       // Handle errors
       this.socket.onerror = (event: ErrorEvent) => {
         console.error("Socket error: ", event);
+        this.wsConnected = false;
         this.retryConnection();
       };
 
       // Handle disconnection (socket closes)
       this.socket.onclose = () => {
         console.warn("Socket closed. Attempting to reconnect...");
+        this.wsConnected = false;
         this.retryConnection();
       };
 

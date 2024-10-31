@@ -6,6 +6,7 @@ import {
   TouchableWithoutFeedback,
   ActivityIndicator,
   Dimensions,
+  Alert,
 } from "react-native";
 import React, {
   useRef,
@@ -87,7 +88,6 @@ type SliderProps = {
   status: AVPlaybackStatusSuccess;
 };
 
-const INITIAL_BOX_SIZE = 50;
 var deviceWidth = Dimensions.get("window").width;
 const SLIDER_WIDTH = deviceWidth - 50;
 
@@ -103,7 +103,7 @@ const Slider = forwardRef(({ setTimeStamp, status }: SliderProps, ref: any) => {
       var position = status?.positionMillis ?? 0;
       var duration = status?.durationMillis ?? 0;
       offset.value = withTiming(
-        interpolate(position, [0, duration], [0, SLIDER_WIDTH]),
+        Math.ceil(interpolate(position, [0, duration], [0, SLIDER_WIDTH])),
         { duration: 500, easing: Easing.linear }
       );
     }
@@ -122,7 +122,7 @@ const Slider = forwardRef(({ setTimeStamp, status }: SliderProps, ref: any) => {
 
       offset.value = value;
     })
-    .onEnd((event) => {
+    .onFinalize((event) => {
       console.log(event.absoluteX);
       var timeStamp = interpolate(
         event.absoluteX,
@@ -161,6 +161,8 @@ const Slider = forwardRef(({ setTimeStamp, status }: SliderProps, ref: any) => {
     </GestureHandlerRootView>
   );
 });
+
+
 
 export default function VideoViewer(props: VideoViewProps) {
   const {
@@ -274,10 +276,32 @@ export default function VideoViewer(props: VideoViewProps) {
     );
   }, [status]);
 
+  
+  const showAlert = () => {
+    Alert.alert(
+      "Delete video",
+      "This action is irreversible. Proceed?",
+      [
+        {
+          text: "Cancel",
+          onPress: () => console.log("Cancelled"),
+          style: "cancel"
+        },
+        {
+          text: "Proceed",
+          onPress: () => { resetModal(); onDelete?.(); },
+          style: "destructive"
+        }
+      ],
+      { cancelable: false }
+    );
+  };
+
   const deleteMessage = () => {
-    resetModal();
-    if (view) {
-      onDelete?.();
+    if(view){
+      showAlert();
+    }else{
+      resetModal();
     }
   };
 
@@ -292,6 +316,8 @@ export default function VideoViewer(props: VideoViewProps) {
       console.error("Error seeking:", error);
     }
   };
+
+  
 
   return (
     <View style={styles.container}>

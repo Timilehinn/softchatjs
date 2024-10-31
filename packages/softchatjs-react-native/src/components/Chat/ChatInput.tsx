@@ -1,3 +1,4 @@
+import React from "react";
 import {
   TextInput,
   View,
@@ -141,7 +142,7 @@ export default function ChatInput(props: ChatInputProps) {
     // console.log(data);
     var durationSecond = data.durationMillis / 1000;
     var metering = data.metering?? -160
-    if (durationSecond > 300) {
+    if (durationSecond >= 300) {
       
     }
     var interp = interpolate(
@@ -149,24 +150,11 @@ export default function ChatInput(props: ChatInputProps) {
       [METERING_MIN_POWER, 0],
       [1, 100]
     )
-    console.log(interp, '--interp')
     setAudioWaves((prev) => {
       return { ...prev, [durationSecond]: { metering, height: interp } };
     });
     setAudioTime(durationSecond);
   };
-
-  // async function playSound() {
-  //   console.log("Loading Sound");
-  //   if(audioFileUri) {
-  //     console.log(audioFileUri)
-  //     const { sound } = await Audio.Sound.createAsync({ uri: audioFileUri });
-  //     setSound(sound);
-  //     console.log("Playing Sound");
-  //     await sound.playAsync();
-  //   }
-  
-  // }
 
   async function startRecording() {
     try {
@@ -260,44 +248,6 @@ export default function ChatInput(props: ChatInputProps) {
                   createdAt: new Date()
                 }
             )
-            // client.messageClient(conversationId).sendMessage({
-            //   conversationId,
-            //   to: recipientId,
-            //   message: globalTextMessage,
-            //   reactions: [],
-            //   attachedMedia: [
-            //     {
-            //       type: MediaType.AUDIO,
-            //       ext: 'audio/mp4',
-            //       mediaId: generateId(),
-            //       mediaUrl: base64,
-            //       audioDurationSec: audioTime,
-            //       audioMetering: audioWaves
-            //     }
-            //   ],
-            //   attachmentType: AttachmentTypes.MEDIA,
-            //   quotedMessage: null,
-            // });
-            // if (client) {
-            //   client.messageClient(conversationId).sendMessage({
-            //     conversationId,
-            //     to: recipientId,
-            //     message: globalTextMessage,
-            //     reactions: [],
-            //       attachedMedia: [
-            //       {
-            //         type: MediaType.AUDIO,
-            //         ext: 'audio/mp4',
-            //         mediaId: generateId(),
-            //         mediaUrl: base64,
-            //         audioDurationSec: audioTime,
-            //         audioMetering: audioWaves
-            //       }
-            //   ],
-            //   attachmentType: AttachmentTypes.MEDIA,
-            //     quotedMessage: null,
-            //   });
-            // }
             setAudioFileUri("");
           setAudioWaves({})
           }
@@ -321,18 +271,6 @@ export default function ChatInput(props: ChatInputProps) {
           },
         ]}
       >
-        {/* {!isRecordingPaused? (
-          <View style={{ flexDirection: 'row', alignItems: 'center',  width: "100%", paddingHorizontal: 10 }}>
-            <Text style={{ color: "white", fontSize: 20, marginEnd: 10 }}>
-              {convertToMinutes(Number(audioTime.toFixed(0)))}
-            </Text>
-            <View style={{ height: 60, overflow: 'hidden', flexDirection: 'row', flex: 1, alignItems: 'center', justifyContent: 'flex-end' }}>
-              {waves.map((wave, i) => (
-                <View key={i} style={{ width: 2, backgroundColor: theme?.icon, height: `${wave.height}%`, marginEnd: 2, borderRadius: 1 }} />
-              ))} 
-            </View>
-          </View>
-        ):( */}
           <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10 }}> 
             <TouchableOpacity
               style={{
@@ -344,16 +282,6 @@ export default function ChatInput(props: ChatInputProps) {
             >
               <TrashIcon color={theme?.icon} />
             </TouchableOpacity>
-            {/* <View style={{ flex: 1, marginHorizontal: 5, borderWidth: 1, overflow: 'hidden', borderColor: theme?.divider, borderRadius: 100, paddingHorizontal: 10, height: 35, flexDirection: 'row', alignItems: 'center' }}>
-              <Text style={{ color: "white", fontSize: 12, marginEnd: 5 }}>
-                {convertToMinutes(Number(audioTime.toFixed(0)))}
-              </Text>
-              <View style={{ flexDirection: 'row', alignItems: 'center', height: '100%', justifyContent: 'flex-end', overflow: 'hidden', flex: 1, paddingHorizontal: 0 }}>
-                {waves.map((wave, i) => (
-                  <View key={i} style={{ width: 2, backgroundColor: theme?.icon, height: `${wave.height}%`, marginEnd: 2, borderRadius: 1 }} />
-                ))}
-              </View>
-            </View> */}
             <AudioWaves type="record" audioTime={audioTime} audioWaves={audioWaves} />
             <TouchableOpacity
               style={{
@@ -366,68 +294,6 @@ export default function ChatInput(props: ChatInputProps) {
               <SendIcon size={30} color={theme?.icon} />
             </TouchableOpacity>
           </View>
-        {/* )} */}
-        
-        {/* <View
-          style={{
-            width: "100%",
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-            paddingVertical: 10,
-            paddingHorizontal: 15,
-          }}
-        >
-          <TouchableOpacity
-            style={{
-              marginStart: 5,
-              padding: Platform.OS === "ios" ? 3 : 1.5,
-              borderRadius: 100,
-              backgroundColor: theme?.icon,
-            }}
-            onPress={() => deleteRecording()}
-          >
-            <TrashIcon />
-          </TouchableOpacity>
-          
-          {isRecordingPaused? (
-            <TouchableOpacity
-              style={{
-                marginStart: 5,
-                padding: Platform.OS === "ios" ? 3 : 1.5,
-                borderRadius: 100,
-                backgroundColor: theme?.icon,
-              }}
-              onPress={() => continueRecording()}
-            >
-              <MicIcon />
-            </TouchableOpacity>
-          ):(
-          <TouchableOpacity
-            style={{
-              marginStart: 5,
-              padding: Platform.OS === "ios" ? 3 : 1.5,
-              borderRadius: 100,
-              backgroundColor: theme?.icon,
-            }}
-            onPress={() => pauseRecording()}
-          >
-            <PauseIcon />
-          </TouchableOpacity>
-          )}
-          
-          <TouchableOpacity
-            style={{
-              marginStart: 5,
-              padding: Platform.OS === "ios" ? 3 : 1.5,
-              borderRadius: 100,
-              backgroundColor: theme?.icon,
-            }}
-            onPress={() => stopRecording()}
-          >
-            <SendIcon />
-          </TouchableOpacity>
-        </View> */}
       </View>
     );
   }

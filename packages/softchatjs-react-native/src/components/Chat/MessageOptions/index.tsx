@@ -1,9 +1,11 @@
+import React from 'react'
 import {
   View,
   Text,
   Dimensions,
   TouchableOpacity,
   Platform,
+  Alert,
 } from "react-native";
 import BottomSheet, { BottomSheetRef } from "../../BottomSheet";
 import {
@@ -12,7 +14,7 @@ import {
   useRef,
   useState,
   useImperativeHandle,
-  forwardRef,
+  forwardRef
 } from "react";
 import TrashIcon, {
   CopyIcon,
@@ -20,11 +22,12 @@ import TrashIcon, {
   EmojiIcon,
   ReplyIcon,
 } from "../../../assets/icons";
-import { ChatTheme, Message } from "../../../types";
+import { ChatTheme, Emoji, Message } from "../../../types";
 import Search from "../../Search";
 import { FlashList } from "@shopify/flash-list";
 import { emojis } from "../../../assets/emoji";
 import { useConfig } from "../../../contexts/ChatProvider";
+import { Emo } from 'softchatjs-core'
 
 type MessageOptionsProps = {
   recipientId: string;
@@ -73,6 +76,40 @@ export const MessageOptions = forwardRef(
       close: () => close(),
     }));
 
+    const deleteMessage = () => {
+      if (client && message) {
+        client
+          .messageClient(message.conversationId)
+          .deleteMessage(
+            message.messageId,
+            recipientId,
+            message.conversationId
+          );
+        // optionsRef?.current?.close();
+      }
+    };
+
+    const showAlert = () => {
+      optionsRef?.current?.close();
+      Alert.alert(
+        "Delete video",
+        "This action is irreversible. Proceed?",
+        [
+          {
+            text: "Cancel",
+            onPress: () => console.log("Cancelled"),
+            style: "cancel"
+          },
+          {
+            text: "Proceed",
+            onPress: () => deleteMessage(),
+            style: "destructive"
+          }
+        ],
+        { cancelable: false }
+      );
+    };
+
     const options = useMemo(() => {
       return [
         {
@@ -97,7 +134,7 @@ export const MessageOptions = forwardRef(
           label: "Delete",
           icon: <TrashIcon size={20} color={"red"} />,
           isVisible: isMessageOwner,
-          onPress: () => deleteMessage(),
+          onPress: () => showAlert(),
         },
       ];
     }, [isMessageOwner, view, onReply, onStartEditing]);
@@ -107,18 +144,6 @@ export const MessageOptions = forwardRef(
       changeView("emojis");
     };
 
-    const deleteMessage = () => {
-      if (client && message) {
-        client
-          .messageClient(message.conversationId)
-          .deleteMessage(
-            message.messageId,
-            recipientId,
-            message.conversationId
-          );
-        optionsRef?.current?.close();
-      }
-    };
 
     const addReaction = useCallback(
       (emoji: string) => {

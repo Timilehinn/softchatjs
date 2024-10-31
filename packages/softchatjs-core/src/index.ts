@@ -12,7 +12,7 @@ export type {
   ConnectionEvent,
   ChatEventGenerics,
   ConversationListMeta,
-  SendMessageGenerics
+  SendMessageGenerics,
 } from "./types";
 export { Emoticon } from './emoticon.type'
 export { generateFillerTimestamps, generateConversationId, generateId } from './utils'

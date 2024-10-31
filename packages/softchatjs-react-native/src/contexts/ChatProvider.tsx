@@ -1,5 +1,5 @@
+import React, { createContext, useContext, useEffect } from "react";
 import { ConnectionProvider } from "./ConnectionProvider";
-import { createContext, useContext, useEffect } from "react";
 import { ChatTheme, Config } from "../types";
 import ModalProvider from "./ModalProvider";
 import ChatClient from "softchatjs-core";
