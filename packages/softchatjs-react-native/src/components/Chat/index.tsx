@@ -23,12 +23,14 @@ import {
   ChatHeaderRenderProps,
   ChatInputRenderProps,
   Conversation,
+  MediaType,
   Message,
+  Prettify,
   UserMeta,
 } from "../../types";
 import { ChatItem } from "./ChatItem";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import ChatInput from "./ChatInput";
+import ChatInput, { METERING_MIN_POWER } from "./ChatInput";
 import ChatHeader from "./ChatHeader";
 import SelectedMessage from "./SelectedMessage";
 import EmojiSheet from "./EmojiSheet";
@@ -38,11 +40,18 @@ import MessageOptions from "./MessageOptions";
 import Haptics from "../../helpers/haptics";
 import { FlashList } from "@shopify/flash-list";
 import { useConfig } from "../../contexts/ChatProvider";
-import { Events } from "softchatjs-core";
+import {
+  ChatEventGenerics,
+  ConnectionEvent,
+  Events,
+  generateId,
+} from "softchatjs-core";
 import { BottomSheetRef } from "../BottomSheet";
 import { format, isThisWeek } from "date-fns";
 import { useMessageState } from "../../contexts/MessageStateContext";
 import { MessagePlus } from "../../assets/icons";
+import { Audio } from "expo-av";
+import { interpolate } from "react-native-reanimated";
 
 type ChatProps = {
   conversationId: string;
@@ -50,9 +59,9 @@ type ChatProps = {
   conversation: Conversation;
   layout?: "stacked";
   chatUser: UserMeta;
-  renderChatBubble?: (props: ChatBubbleRenderProps) => void;
-  renderChatInput?: (props: ChatInputRenderProps) => void;
-  renderChatHeader?: (props: ChatHeaderRenderProps) => void;
+  renderChatBubble?: (props: Prettify<ChatBubbleRenderProps>) => void;
+  renderChatInput?: (props: Prettify<ChatInputRenderProps>) => void;
+  renderChatHeader?: (props: Prettify<ChatHeaderRenderProps>) => void;
 };
 
 export type SendMessage = {
@@ -81,6 +90,8 @@ export default function Chat(props: ChatProps) {
     chatUser,
   } = props;
   const chatUserId = chatUser.uid;
+  const [permissionResponse, requestPermission] = Audio.usePermissions();
+
   const scrollRef = useRef<FlashList<Message | string> | null>(null);
   const inputRef = useRef<TextInput>(null);
   const emojiListRef = useRef<BottomSheetRef>(null);
@@ -88,8 +99,15 @@ export default function Chat(props: ChatProps) {
   const messageOptionsRef = useRef<BottomSheetRef>(null);
   const [isTyping, showTyping] = useState(false);
   const [loadingMessages, setLoadingMessages] = useState(false);
-  const { globalTextMessage, setGlobalTextMessage, pendingMessages } =
-    useMessageState();
+  const {
+    globalTextMessage,
+    setGlobalTextMessage,
+    pendingMessages,
+    pauseVoiceMessage,
+    addNewPendingMessages,
+    activeVoiceMessage,
+    unload
+  } = useMessageState();
   const [messages, setMessages] = useState<Array<string | Message>>([
     ...conversation.messages.reverse(),
   ]);
@@ -102,14 +120,41 @@ export default function Chat(props: ChatProps) {
   const [currentPage, setCurrentPage] = useState(2);
   const [loadingOlderMessages, setLoadingOlderMessages] = useState(false);
   const [recipientId, setRecipientId] = useState("");
-
-  const onViewRef = useRef((viewableItems: any) => {
-    let Check = [];
-    for (var i = 0; i < viewableItems.viewableItems.length; i++) {
-      Check.push(viewableItems.viewableItems[i].item);
-    }
-    setViewable(Check);
+  const [connectionStatus, setConnectionStatus] = useState<ConnectionEvent>({
+    isConnected: false,
+    fetchingConversations: false,
+    connecting: false,
   });
+  const width = Dimensions.get("window").width;
+  const emojiSize = 40;
+
+  const [selectedMessage, setSelectedMessage] = useState<SelectedMessage>({
+    message: null,
+    ref: null,
+    itemIndex: 0,
+    isMessageOwner: false,
+  });
+  // quoted message and ref
+  const [activeQuote, setActiveQuote] = useState<
+    Omit<SelectedMessage, "isMessageOwner">
+  >({
+    message: null,
+    ref: null,
+    itemIndex: 0,
+  });
+  const [audioTime, setAudioTime] = useState(0);
+  const [audioWaves, setAudioWaves] = useState<{
+    [key: number]: { metering: number; height: number };
+  }>({});
+  const [recording, setRecording] = useState<Audio.Recording>();
+
+  // const onViewRef = useRef((viewableItems: any) => {
+  //   let Check = [];
+  //   for (var i = 0; i < viewableItems.viewableItems.length; i++) {
+  //     Check.push(viewableItems.viewableItems[i].item);
+  //   }
+  //   setViewable(Check);
+  // });
 
   const viewConfigRef = useRef({ viewAreaCoveragePercentThreshold: 80 });
 
@@ -136,29 +181,6 @@ export default function Chat(props: ChatProps) {
       return newMap;
     });
   }, [messages]);
-
-  const width = Dimensions.get("window").width;
-  const emojiSize = 40;
-  var noOfColumns = Math.floor(width / emojiSize);
-
-  const [selectedMessage, setSelectedMessage] = useState<SelectedMessage>({
-    message: null,
-    ref: null,
-    itemIndex: 0,
-    isMessageOwner: false,
-  });
-  // quoted message and ref
-  const [activeQuote, setActiveQuote] = useState<
-    Omit<SelectedMessage, "isMessageOwner">
-  >({
-    message: null,
-    ref: null,
-    itemIndex: 0,
-  });
-
-  useEffect(() => {
-    console.log("re-rendering");
-  }, []);
 
   const clearSelectedMessage = () =>
     setActiveQuote({ message: null, ref: null, itemIndex: 0 });
@@ -263,6 +285,12 @@ export default function Chat(props: ChatProps) {
     });
   };
 
+  const handleConnectionChanged = (
+    event: ChatEventGenerics<ConnectionEvent>
+  ) => {
+    setConnectionStatus(event);
+  };
+
   useEffect(() => {
     if (client) {
       client.messageClient(conversationId).setActiveConversation();
@@ -271,6 +299,7 @@ export default function Chat(props: ChatProps) {
       client.subscribe(Events.HAS_STARTED_TYPING, handleTypingStarted);
       client.subscribe(Events.HAS_STOPPED_TYPING, handleStoppedStarted);
       client.subscribe(Events.DELETED_MESSAGE, handleDeletedMessage);
+      client.subscribe(Events.CONNECTION_CHANGED, handleConnectionChanged);
     }
     return () => {
       if (client) {
@@ -280,6 +309,7 @@ export default function Chat(props: ChatProps) {
         client.unsubscribe(Events.HAS_STARTED_TYPING, handleTypingStarted);
         client.unsubscribe(Events.HAS_STOPPED_TYPING, handleStoppedStarted);
         client.unsubscribe(Events.DELETED_MESSAGE, handleDeletedMessage);
+        client.unsubscribe(Events.CONNECTION_CHANGED, handleConnectionChanged);
       }
     };
   }, [client]);
@@ -344,6 +374,52 @@ export default function Chat(props: ChatProps) {
     }
   };
 
+  const sendVoiceMessage = async () => {
+    try {
+      console.log("Stopping recording..");
+      setRecording(undefined);
+      await recording?.stopAndUnloadAsync();
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+      });
+      const uri = recording?.getURI();
+      if (client) {
+        // remove any audio being played
+        pauseVoiceMessage();
+        addNewPendingMessages({
+          from: client.userMeta.uid,
+          messageId: generateId(),
+          conversationId,
+          to: recipientId,
+          message: "",
+          reactions: [],
+          attachedMedia: [
+            {
+              type: MediaType.AUDIO,
+              ext: "audio/mp3",
+              mediaId: generateId(),
+              mediaUrl: uri as string,
+              mimeType: "audio/mp3",
+              meta: {
+                audioDurationSec: audioTime,
+              },
+            },
+          ],
+          attachmentType: AttachmentTypes.MEDIA,
+          quotedMessage: null,
+          createdAt: new Date(),
+        });
+        setAudioWaves({});
+        setAudioTime(0);
+      }
+    } catch (err) {
+      setAudioWaves({});
+      setAudioTime(0);
+      setRecording(undefined);
+      console.log(err, "--this error");
+    }
+  };
+
   const onChatItemLongPress = (
     selectedMessage: Message,
     ref: MutableRefObject<View | undefined>,
@@ -394,6 +470,141 @@ export default function Chat(props: ChatProps) {
     }
   }
 
+  const threaded = (item: string | Message, index: number) => {
+    var nextMessage = messages[index - 1];
+    if (typeof item === "string") {
+      return false;
+    }
+    if (typeof nextMessage === "string" || !nextMessage) {
+      return false;
+    }
+    return item.messageOwner.uid === nextMessage.messageOwner.uid;
+  };
+
+  useEffect(() => {
+    let debounceTimer: NodeJS.Timeout | undefined;
+    let idleTimer: NodeJS.Timeout | undefined;
+    if (globalTextMessage.length > 0) {
+      clearTimeout(debounceTimer);
+      // set a new debounce timer to send a typing notification after 350ms
+      debounceTimer = setTimeout(() => {
+        if (client) {
+          client
+            .messageClient(conversation.conversationId)
+            .sendTypingNotification(recipientId);
+          debounceTimer = undefined; // clear debounce timer reference after sending the typing notification
+        }
+      }, 300);
+      // clear the previous idle timer (stopped typing)
+      clearTimeout(idleTimer);
+      // set a new idle timer to send a stopped typing notification after 1300ms of inactivity
+      idleTimer = setTimeout(() => {
+        if (client) {
+          client
+            .messageClient(conversation.conversationId)
+            .sendStoppedTypingNotification(recipientId);
+        }
+      }, 1300);
+    }
+    return () => clearTimeout(debounceTimer);
+  }, [client, globalTextMessage, conversation]);
+
+  useEffect(() => {
+    if (client && conversation.conversationId) {
+      const msClient = client.messageClient(conversation.conversationId);
+      msClient.readMessages(conversation.conversationId, {
+        uid: client.userMeta.uid,
+        messageIds: unread,
+      });
+
+      console.log("sent messageIds for read");
+    }
+  }, [client, conversation, unread]);
+
+  const onStartedScrolling = () => {
+    let scrollStateRef: NodeJS.Timeout | undefined = undefined;
+    setIsScrolling(true);
+    clearTimeout(scrollStateRef);
+    scrollStateRef = setTimeout(() => {
+      setIsScrolling(false);
+    }, 3000);
+  };
+
+  const onRecordingStatusUpdate = (data: Audio.RecordingStatus) => {
+    var durationSecond = data.durationMillis / 1000;
+    var metering = data.metering ?? -160;
+    if (durationSecond >= 300) {
+    }
+    var interp = interpolate(metering, [METERING_MIN_POWER, 0], [1, 100]);
+    setAudioWaves((prev) => {
+      return { ...prev, [durationSecond]: { metering, height: interp } };
+    });
+    setAudioTime(durationSecond);
+  };
+
+  async function startRecording() {
+    try {
+      if (permissionResponse?.status !== "granted") {
+        console.log("Requesting permission..");
+        await requestPermission();
+      }
+      // pause any audio being played
+      pauseVoiceMessage();
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+      });
+
+      console.log("Starting recording..");
+      const { recording } = await Audio.Recording.createAsync(
+        Audio.RecordingOptionsPresets.LOW_QUALITY,
+        onRecordingStatusUpdate
+      );
+      setRecording(recording);
+      console.log("Recording started");
+    } catch (err) {
+      console.error("Failed to start recording", err);
+    }
+  }
+
+  async function deleteRecording() {
+    setRecording(undefined);
+    setAudioWaves({});
+    // setIsRecordingPaused(false)
+    await recording?.stopAndUnloadAsync();
+  }
+
+  const renderMessageOptions = useCallback(() => {
+    return (
+      <MessageOptions
+        ref={messageOptionsRef}
+        recipientId={recipientId}
+        message={selectedMessage.message}
+        isMessageOwner={selectedMessage.isMessageOwner}
+        onReply={() => {
+          messageOptionsRef?.current?.close();
+          setActiveQuote(selectedMessage);
+          inputRef.current?.focus();
+        }}
+        onStartEditing={() => {
+          messageOptionsRef?.current?.close();
+          inputRef?.current?.focus();
+          setIsEditing(true);
+          setGlobalTextMessage(selectedMessage.message?.message || "");
+        }}
+        theme={theme}
+      />
+    );
+  }, [
+    selectedMessage,
+    recipientId,
+    messageOptionsRef,
+    inputRef,
+    messageOptionsRef,
+    setIsEditing,
+    theme,
+  ]);
+
   const messageListHeader = useCallback(() => {
     return (
       <View style={{ width: "100%" }}>
@@ -432,17 +643,6 @@ export default function Chat(props: ChatProps) {
       </View>
     );
   }, [loadingMessages, pendingMessages, theme]);
-
-  const threaded = (item: string | Message, index: number) => {
-    var nextMessage = messages[index - 1];
-    if (typeof item === "string") {
-      return false;
-    }
-    if (typeof nextMessage === "string" || !nextMessage) {
-      return false;
-    }
-    return item.messageOwner.uid === nextMessage.messageOwner.uid;
-  };
 
   const renderChatItem = useCallback(
     ({ item, index }: { item: string | Message; index: number }) => {
@@ -538,85 +738,28 @@ export default function Chat(props: ChatProps) {
     [conversation, renderChatBubble, refMap, theme, layout]
   );
 
-  const renderMessageOptions = useCallback(() => {
-    return (
-      <MessageOptions
-        ref={messageOptionsRef}
-        recipientId={recipientId}
-        message={selectedMessage.message}
-        isMessageOwner={selectedMessage.isMessageOwner}
-        onReply={() => {
-          messageOptionsRef?.current?.close();
-          setActiveQuote(selectedMessage);
-          inputRef.current?.focus();
-        }}
-        onStartEditing={() => {
-          messageOptionsRef?.current?.close();
-          inputRef?.current?.focus();
-          setIsEditing(true);
-          setGlobalTextMessage(selectedMessage.message?.message || "");
-        }}
-        theme={theme}
-      />
-    );
-  }, [
-    selectedMessage,
-    recipientId,
-    messageOptionsRef,
-    inputRef,
-    messageOptionsRef,
-    setIsEditing,
-    theme,
-  ]);
+ 
 
-  useEffect(() => {
-    let debounceTimer: NodeJS.Timeout | undefined;
-    let idleTimer: NodeJS.Timeout | undefined;
-    if (globalTextMessage.length > 0) {
-      clearTimeout(debounceTimer);
-      // set a new debounce timer to send a typing notification after 350ms
-      debounceTimer = setTimeout(() => {
-        if (client) {
-          client
-            .messageClient(conversation.conversationId)
-            .sendTypingNotification(recipientId);
-          debounceTimer = undefined; // clear debounce timer reference after sending the typing notification
-        }
-      }, 300);
-      // clear the previous idle timer (stopped typing)
-      clearTimeout(idleTimer);
-      // set a new idle timer to send a stopped typing notification after 1300ms of inactivity
-      idleTimer = setTimeout(() => {
-        if (client) {
-          client
-            .messageClient(conversation.conversationId)
-            .sendStoppedTypingNotification(recipientId);
-        }
-      }, 1300);
-    }
-    return () => clearTimeout(debounceTimer);
-  }, [client, globalTextMessage, conversation]);
-
-  useEffect(() => {
-    if (client && conversation.conversationId) {
-      const msClient = client.messageClient(conversation.conversationId);
-      msClient.readMessages(conversation.conversationId, {
-        uid: client.userMeta.uid,
-        messageIds: unread,
-      });
-
-      console.log("sent messageIds for read");
-    }
-  }, [client, conversation, unread]);
-
-  const onStartedScrolling = () => {
-    let scrollStateRef: NodeJS.Timeout | undefined = undefined;
-
-    setIsScrolling(true);
-    clearTimeout(scrollStateRef);
-    scrollStateRef = setTimeout(() => {
-      setIsScrolling(false);
-    }, 3000);
+  const chatInputProps = {
+    sendMessage: (externalInputRef: RefObject<TextInput>) =>
+      isEditing ? sendEditedMessage(externalInputRef) : sendMessage(),
+    value: globalTextMessage,
+    onValueChange: setGlobalTextMessage,
+    openMediaOptions: (externalInputRef: RefObject<TextInput>) => {
+      mediaOptionsRef?.current?.open();
+      externalInputRef?.current?.blur();
+    },
+    openEmojis,
+    onStopEditing: () => {
+      setIsEditing(false);
+      clearSelectedMessage();
+    },
+    isRecording: recording !== undefined,
+    audioDuration: audioTime,
+    onDeleteRecording: deleteRecording,
+    onStartRecording: startRecording,
+    meteringProgress: audioWaves,
+    isEditing,
   };
 
   return (
@@ -665,7 +808,12 @@ export default function Chat(props: ChatProps) {
             data={messages}
             keyExtractor={(_, index) => index.toString()}
             renderItem={renderChatItem}
-            refreshControl={<RefreshControl refreshing={loadingMessages} onRefresh={getMessages} />}
+            refreshControl={
+              <RefreshControl
+                refreshing={loadingMessages}
+                onRefresh={getMessages}
+              />
+            }
             ListHeaderComponent={messageListHeader}
             ListFooterComponent={() => (
               <View
@@ -707,29 +855,9 @@ export default function Chat(props: ChatProps) {
             />
           )}
           <View>
+            <>
             {renderChatInput ? (
-              <>
-                {renderChatInput({
-                  sendMessage: (externalInputRef: RefObject<TextInput>) =>
-                    isEditing
-                      ? sendEditedMessage(externalInputRef)
-                      : sendMessage(),
-                  value: globalTextMessage,
-                  onValueChange: (text) => setGlobalTextMessage(text),
-                  openMediaOptions: (
-                    externalInputRef: RefObject<TextInput>
-                  ) => {
-                    mediaOptionsRef?.current?.open();
-                    externalInputRef?.current?.blur();
-                  },
-                  openEmojis: () => openEmojis(),
-                  onStopEditing: () => {
-                    setIsEditing(false);
-                    clearSelectedMessage();
-                  },
-                  isEditing,
-                })}
-              </>
+                renderChatInput(chatInputProps)
             ) : (
               <ChatInput
                 openEmojis={openEmojis}
@@ -738,19 +866,27 @@ export default function Chat(props: ChatProps) {
                 sendMessage={() =>
                   isEditing ? sendEditedMessage() : sendMessage()
                 }
+                isLoading={connectionStatus.connecting || loadingMessages}
                 conversationId={conversationId}
                 // chatUserId={chatUserId}
                 recipientId={recipientId}
                 // selectedMessage={activeQuote}
                 value={globalTextMessage}
+                audioWaves={audioWaves}
+                audioTime={audioTime}
                 setValue={setGlobalTextMessage}
                 onStopEditing={() => {
                   setIsEditing(false);
                   clearSelectedMessage();
                 }}
                 isEditing={isEditing}
+                sendVoiceMessage={() => sendVoiceMessage()}
+                onStartRecording={() => startRecording()}
+                onDeleteRecording={() => deleteRecording()}
+                isRecording={recording !== undefined}
               />
             )}
+            </>
           </View>
         </View>
       </KeyboardAvoidingView>

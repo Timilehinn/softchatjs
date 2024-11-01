@@ -32,11 +32,11 @@ import {
   restructureMessages,
 } from "../../utils";
 import { useConfig } from "../../contexts/ChatProvider";
-import { Events } from "softchatjs-core";
 import {
   ChatEventGenerics,
   ConnectionEvent,
   ConversationListMeta,
+  Events
 } from "softchatjs-core";
 import { ChatIcon, XIcon } from "../../assets/icons";
 import Search from "../Search";

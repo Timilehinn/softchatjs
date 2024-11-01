@@ -249,7 +249,17 @@ export type ChatInputRenderProps = {
   openMediaOptions: (externalInputRef: React.RefObject<TextInput>) => void;
   openEmojis: () => void;
   onStopEditing: () => void;
-  isEditing: boolean
+  isEditing: boolean,
+  onStartRecording: () => void;
+  onDeleteRecording: () => void;
+  sendVoiceMessage: () => void;
+  // Metering progress where key is the timestamp, metering represents loudness and height is metering height in percentage
+  meteringProgress: {[key: number]: { metering: number; height: number }};
+  isRecording: boolean,
+  // Audio duration in seconds
+  audioDuration: number,
+  // Is true when connection state changes or loading new messages
+  isLoading: boolean
 }
 
 export type ConversationHeaderRenderProps = {

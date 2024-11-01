@@ -27,7 +27,6 @@ import Search from "../../Search";
 import { FlashList } from "@shopify/flash-list";
 import { emojis } from "../../../assets/emoji";
 import { useConfig } from "../../../contexts/ChatProvider";
-import { Emo } from 'softchatjs-core'
 
 type MessageOptionsProps = {
   recipientId: string;

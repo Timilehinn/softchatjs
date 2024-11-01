@@ -157,7 +157,7 @@ export default function Default(props: DefaultProps) {
       style={[
         isPending ? { opacity: 0.7 } : animatedStyles,
         {
-          maxWidth: "80%",
+          maxWidth: "90%",
           // marginBottom: 8,
           alignItems: position === "right" ? "flex-end" : "flex-start",
           alignSelf: position === "left" ? "flex-start" : "flex-end",

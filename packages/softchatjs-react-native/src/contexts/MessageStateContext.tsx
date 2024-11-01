@@ -127,6 +127,7 @@ export const MessageStateProvider = ({ children }: { children: JSX.Element }) =>
 
   const unload = () => {
     console.log('Unloading Sound');
+    sound?.stopAsync();
     sound?.unloadAsync();
     setSound(null);
     setActiveVoiceMessage(null);

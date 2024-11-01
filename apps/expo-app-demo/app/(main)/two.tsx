@@ -8,6 +8,7 @@ import { Conversation, Message, UserMeta } from 'softchatjs-react-native/src/typ
 
 export default function TabTwoScreen() {
 
+  var inputRef = useRef(null)
   const item = useLocalSearchParams();
   var chatUser = JSON.parse(item.chatUser as string) as UserMeta;
   var conversationId = item.conversationId as string;
