@@ -23,6 +23,7 @@ type EmojiPanelProps = {
   client: ChatClient;
   message: Message;
   recipientId: string;
+  setShowEmojiPanel: Dispatch<SetStateAction<boolean>>;
 };
 
 type ReactionPanelProps = {
@@ -48,7 +49,8 @@ type ReactionPanelProps = {
 };
 
 export const EmojiPanel = (props: EmojiPanelProps) => {
-  const { client, message, conversationId, recipientId } = props;
+  const { client, message, conversationId, recipientId, setShowEmojiPanel } =
+    props;
   const { config } = useChatClient();
   const bgColor = config?.theme?.background?.secondary || "#222529";
 
@@ -66,6 +68,7 @@ export const EmojiPanel = (props: EmojiPanelProps) => {
       ],
       to: recipientId,
     });
+    setShowEmojiPanel(false);
   };
   return (
     <div

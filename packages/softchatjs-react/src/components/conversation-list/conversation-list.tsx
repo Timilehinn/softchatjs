@@ -278,6 +278,7 @@ const MessageList = (props: MessageListProps) => {
                       closeOptionsMenu={() => setShowOPtions(false)}
                       scrollToQuote={scrollToQuote}
                       recipientId={recipientId}
+                      setShowEmojiPanel={setShowEmojiPanel}
                     />
                   )}
                 </div>

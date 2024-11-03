@@ -79,7 +79,7 @@ display: none;
 
 .conversation__text__wrap{
   background-color: #343434;
-  max-width: 500px;
+  max-width: 300px;
 
 }
 
@@ -144,7 +144,7 @@ display: none;
 
 .attachments img{
   height: 220px;
-  width: 200px;
+  width: 290px;
   border-radius: 12px;
   
   object-fit: cover;
@@ -153,7 +153,7 @@ display: none;
 
 .attachments video{
   height: 220px;
-  width: 200px;
+  width: 300px;
   border-radius: 12px;
   
   object-fit: cover;
@@ -169,9 +169,15 @@ display: none;
   border-radius: 8px;
   border-left: 2px solid greenyellow;
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
   align-items: flex-start;
+  align-items: center;
   padding: 5px;
+}
+
+.quote img{
+  width:30px;
+  border-radius: 5px;
 }
 
 
