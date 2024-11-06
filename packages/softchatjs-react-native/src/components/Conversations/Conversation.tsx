@@ -1,6 +1,6 @@
 import { TouchableOpacity, View, StyleSheet, Text, Image } from "react-native";
 import { Conversation, Message } from "../../types";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import {
   formatConversationTime,
   getConversationTitle,
@@ -11,7 +11,6 @@ import {
 import { Colors } from "../../constants/Colors";
 import { ConversationAvatar } from "./ConversationAvatar";
 import { UnreadMessagesBadge } from "../Badge";
-import { useChatClient } from "../../contexts/ChatClientContext";
 import { stone } from "../../theme/colors";
 import { useConfig } from "../../contexts/ChatProvider";
 import Draggeble from "../Draggable";
@@ -30,12 +29,11 @@ export type ConversationItemProps = {
   lastMessage: Message;
   unread: string[];
 };
+
 export const ConversationItem = (props: ConversationItemProps) => {
   const { theme } = useConfig();
   const { conversation, chatUserId, isLastItem, onPress, lastMessage, unread } =
     props;
-
-  // const lastMessage = conversation.messages[0];
 
   let conversationTitle = useMemo(() => {
     return getConversationTitle(chatUserId, conversation);

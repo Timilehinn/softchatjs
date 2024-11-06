@@ -33,7 +33,7 @@ type MessageListProps = {
     x: number;
     y: number;
   };
-  client: ChatClient;
+  client: ChatClient | null;
   conversationId: string;
   textInputRef: any;
   setPresentPage: Dispatch<SetStateAction<number>>;
@@ -139,7 +139,7 @@ const MessageList = (props: MessageListProps) => {
         selectedRef.current.style.backgroundColor = "#282c34";
         selectedRef.current.style.transition = "0.5s";
         setTimeout(() => {
-          selectedRef.current.style.backgroundColor = "#1b1d21";
+          selectedRef.current.style.backgroundColor = "transparent";
         }, 1500);
         selectedRef?.current.scrollIntoView({
           behavior: "smooth",
@@ -251,7 +251,7 @@ const MessageList = (props: MessageListProps) => {
               >
                 <div ref={refMap[item?.messageId]}>
                   {props.renderChatBubble ? (
-                    renderChatBubble(item)
+                    props.renderChatBubble(item)
                   ) : (
                     <Conversation
                       hideAvartar={
@@ -268,7 +268,7 @@ const MessageList = (props: MessageListProps) => {
                       message={item}
                       onPress={(e) => handlePress(e, item.messageId)}
                       setEditDetails={setEditDetails}
-                      canEdit={item.from === config.userId}
+                      canEdit={item.from === client?.userMeta.uid}
                       openEmojiPanel={() => openEmojiPanel(item.messageId)}
                       optionsMenuRef={optionsMenuRef}
                       emojiPickerRef={emojiPickerRef}

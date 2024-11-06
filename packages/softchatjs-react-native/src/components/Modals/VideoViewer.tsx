@@ -22,7 +22,7 @@ import {
   AVPlaybackStatus,
   AVPlaybackStatusSuccess,
 } from "expo-av";
-import { Media, Message } from "softchatjs-core";
+import { Media, Message, generateFillerTimestamps } from "softchatjs-core";
 import TrashIcon, {
   PauseIcon,
   PlayIcon,
@@ -30,7 +30,6 @@ import TrashIcon, {
   XIcon,
 } from "../../assets/icons";
 import { useConfig } from "../../contexts/ChatProvider";
-import { generateFillerTimestamps } from "softchatjs-core";
 import { useMessageState } from "../../contexts/MessageStateContext";
 import { convertToMinutes, generateId } from "../../utils";
 import { AttachmentTypes, MediaType } from "../../types";
@@ -181,7 +180,7 @@ export default function VideoViewer(props: VideoViewProps) {
   const { resetModal } = useModalProvider();
   const { addNewPendingMessages } = useMessageState();
   const video = useRef<Video>(null);
-  const [status, setStatus] = useState<AVPlaybackStatus>({ isLoaded: false });
+  const [status, setStatus] = useState<AVPlaybackStatus & AVPlaybackStatusMeta>({ isLoaded: false });
   const [loading, setLoading] = useState(false);
   const [timePlayedSecs, setTimePlayedSecs] = useState(0);
 
@@ -339,8 +338,8 @@ export default function VideoViewer(props: VideoViewProps) {
           video?.current?.playAsync();
           setLoading(false);
         }}
-        onPlaybackStatusUpdate={(status) => {
-          setStatus(() => status);
+        onPlaybackStatusUpdate={(status: AVPlaybackStatus) => {
+          setStatus(status as AVPlaybackStatus & AVPlaybackStatusMeta);
           setTimePlayedSecs((prev) => prev + 1);
         }}
       />

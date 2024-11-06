@@ -1,3 +1,4 @@
+import React from "react"
 import { TouchableOpacity, Text, ViewStyle } from "react-native";
 import { Colors } from "../../constants/Colors";
 import { getRandomColor } from "../../utils";

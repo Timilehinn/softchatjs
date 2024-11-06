@@ -26,8 +26,8 @@ const avatarSize = 50
 const ConversationAvatar = ({ type, chatUserId, participantList, groupMeta, conversationTitle }: { conversationTitle: string | undefined, chatUserId: string, type: ConversationType, participantList: ParticipantListInfo[], groupMeta: GroupChatMeta | null }) => {
   if(type === 'private-chat') {
     const userInfo = getUserInfoWithId(chatUserId, participantList);
-    if(userInfo.presentUser?.meta.profileImgUrl){
-      return <Image source={{ uri: userInfo.presentUser?.meta.profileImgUrl }} cachePolicy={"disk"} style={styles.avatar} />
+    if(userInfo.presentUser?.profileUrl){
+      return <Image source={{ uri: userInfo.presentUser.profileUrl }} cachePolicy={"disk"} style={styles.avatar} />
     }else{
       return (
         <View style={styles.avatar} >

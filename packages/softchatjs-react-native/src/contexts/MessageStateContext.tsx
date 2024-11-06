@@ -7,9 +7,8 @@ import {
   Media,
   SetState,
 } from "../types";
-import { Message, SendMessageGenerics } from "softchatjs-core";
 import { Audio, AVPlaybackStatus } from 'expo-av';
-import { Emoticon } from "softchatjs-core";
+import { Emoticon, Message, SendMessageGenerics } from "softchatjs-core";
 
 type MessageStateContext = {
   globalTextMessage: string,
@@ -19,6 +18,7 @@ type MessageStateContext = {
   pendingMessages: Array<Partial<Message>>,
   addNewPendingMessages: (message: Partial<Message>) => void;
   removePendingMessage: (messageId: string) => void;
+  updatePendingMessage: (messageId: string, message: Message) => void;
   playVoiceMessage: (media: Media) => void;
   pauseVoiceMessage: () => void;
   resumeVoiceMessage: () => void;
@@ -26,7 +26,7 @@ type MessageStateContext = {
   unload: () => void;
   sound: Audio.Sound | null,
   activeVoiceMessage: Media | null,
-  avPlayBackStatus: AVPlaybackStatus | null
+  avPlayBackStatus: AVPlaybackStatus & { positionMillis: number } | null
 };
 
 const initialMessageStateContext: MessageStateContext = {
@@ -37,6 +37,7 @@ const initialMessageStateContext: MessageStateContext = {
   pendingMessages: [],
   addNewPendingMessages: (message: Partial<Message>) => {},
   removePendingMessage: (messageId: string) => {},
+  updatePendingMessage: (messageId: string, message: Message) => {},
   playVoiceMessage: (media: Media) => {},
   pauseVoiceMessage: () => {},
   resumeVoiceMessage: () => {},
@@ -62,7 +63,7 @@ export const MessageStateProvider = ({ children }: { children: JSX.Element }) =>
   const [sound, setSound] = useState<Audio.Sound | null>(null);
   const [ audioState, setAudioState ] = useState<"playing" | "paused" | "loading" | null>(null);
   const [ activeVoiceMessage, setActiveVoiceMessage ] = useState<Media | null>(null);
-  const [ avPlayBackStatus, setAvPlayBackStatus ] = useState<AVPlaybackStatus | null>(null);
+  const [ avPlayBackStatus, setAvPlayBackStatus ] = useState<AVPlaybackStatus & { positionMillis: number } | null>(null);
 
   const addNewPendingMessages = (message: Partial<Message>) => {
     setPendingMessages((prev) => {
@@ -76,8 +77,16 @@ export const MessageStateProvider = ({ children }: { children: JSX.Element }) =>
       return filtered
     });
   }
+
+  const updatePendingMessage = (messageId: string, updatedMessage: Message) => {
+      setPendingMessages((prev) =>
+        prev.map((message) =>
+          message.messageId === messageId ? { ...message, ...updatedMessage } : message
+        )
+      );
+  }
   
-  const onPlaybackStatusUpdate = (data: AVPlaybackStatus) => {
+  const onPlaybackStatusUpdate = (data: AVPlaybackStatus & { didJustFinish: boolean , positionMillis: number}) => {
     setAvPlayBackStatus(data)
     if(data?.didJustFinish){
       setAudioState(null);
@@ -144,6 +153,7 @@ export const MessageStateProvider = ({ children }: { children: JSX.Element }) =>
         pendingMessages, 
         addNewPendingMessages,
         removePendingMessage,
+        updatePendingMessage,
         playVoiceMessage,
         pauseVoiceMessage,
         resumeVoiceMessage,

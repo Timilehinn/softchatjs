@@ -91,7 +91,7 @@ export const MessageOptions = forwardRef(
     const showAlert = () => {
       optionsRef?.current?.close();
       Alert.alert(
-        "Delete video",
+        "Delete message",
         "This action is irreversible. Proceed?",
         [
           {

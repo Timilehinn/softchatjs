@@ -8,6 +8,7 @@ import Manager from "./Manager";
 type BottomSheetprops = {
   height?: string;
   children: JSX.Element;
+  scrollRef?: any;
   onClose?: () => void;
 };
 

@@ -276,7 +276,7 @@ export type ChatHeaderRenderProps = {
 
 export type ConversationListRenderProps = {
   title: string | undefined,
-  recipient: Participant | undefined,
+  recipient: UserMeta | undefined,
   lastMessage: Message | undefined | null
 }
 

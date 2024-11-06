@@ -1,6 +1,6 @@
 import moment from 'moment';
 
-import { Conversation, StringOrNumber, Participant, ParticipantListInfo, Message, MessageStates } from "../types";
+import { Conversation, StringOrNumber, Participant, ParticipantListInfo, Message, MessageStates, UserMeta } from "../types";
 import { GestureResponderEvent } from 'react-native';
 
 export function generateConversationId(str1: StringOrNumber, str2: StringOrNumber) {
@@ -39,8 +39,8 @@ export const generateId = () => {
 
 
 export const getUserInfoWithId = (userId: string, participantList: ParticipantListInfo[]): {
-  presentUser: Participant | undefined,
-  receivingUser: Participant | undefined,
+  presentUser: UserMeta | undefined,
+  receivingUser: UserMeta | undefined,
 } => {
   let presentUser = participantList.find(participant => participant.participantId === userId);
   let otherParticipants = participantList.filter(participant => participant.participantId !== userId)
@@ -55,8 +55,8 @@ export const getConversationTitle = (userId: string, converstaion: Conversation)
   if(converstaion.conversationType === 'private-chat'){
     const userInfos = getUserInfoWithId(userId, converstaion.participantList);
 
-    const firstname = userInfos.receivingUser?.meta?.firstname
-    const username = userInfos.receivingUser?.meta?.username
+    const firstname = userInfos.receivingUser?.firstname
+    const username = userInfos.receivingUser?.username
     return firstname? firstname : username
   }
   if(converstaion.conversationType === 'group-chat') {

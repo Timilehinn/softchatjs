@@ -63,7 +63,7 @@ export const EmojiPanel = (props: EmojiPanelProps) => {
       reactions: [
         {
           emoji,
-          uid: config.userId,
+          uid: client.userMeta.uid,
         },
       ],
       to: recipientId,

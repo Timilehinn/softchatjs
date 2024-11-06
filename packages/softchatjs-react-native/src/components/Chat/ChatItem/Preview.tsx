@@ -32,8 +32,8 @@ export default function Preview({
             width: '100%',
             minWidth: 220,
             marginBottom: 5,
-            borderWidth: 1,
-            borderColor: theme?.icon,
+            // borderWidth: 1,
+            // borderColor: theme?.icon,
             padding: 8,
             borderRadius: 10
           }}

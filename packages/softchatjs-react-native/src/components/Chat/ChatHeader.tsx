@@ -1,3 +1,4 @@
+import React from 'react'
 import {
   View,
   TouchableOpacity,
@@ -44,7 +45,7 @@ export default function ChatHeader(props: ChatHeaderProps) {
         {renderChatHeader({
           conversationTitle,
           conversationType: conversation.conversationType,
-          activeUser: userInfo?.presentUser?.meta,
+          activeUser: userInfo?.presentUser,
           groupMeta: conversation?.groupMeta
         })}
       </>

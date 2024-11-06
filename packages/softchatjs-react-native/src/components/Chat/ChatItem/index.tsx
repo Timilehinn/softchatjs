@@ -91,7 +91,7 @@ export const ChatItem = forwardRef((props: ChatItemProps, ref: any) => {
   const [messageState, setMessageState] = useState<MessageStates>(
     MessageStates.LOADING
   );
-  const { removePendingMessage } = useMessageState();
+  const { removePendingMessage, updatePendingMessage } = useMessageState();
 
   const touchStart = useSharedValue({ x: 0, y: 0, time: 0 });
   const touchStartX = useSharedValue(0);
@@ -164,7 +164,7 @@ export const ChatItem = forwardRef((props: ChatItemProps, ref: any) => {
           Extrapolation.CLAMP
         ),
       },
-    ],
+    ] as any,
   }));
 
   useAnimatedReaction(
@@ -196,7 +196,7 @@ export const ChatItem = forwardRef((props: ChatItemProps, ref: any) => {
           media.mediaUrl,
           {
             filename: 'testfile.png',
-            mimeType: media.mimeType,
+            mimeType: media.mimeType as string,
           }
         )
         console.log(res);
@@ -212,20 +212,26 @@ export const ChatItem = forwardRef((props: ChatItemProps, ref: any) => {
               }
             ],
           });
+        }else{
+          throw new Error('upload failed');
         }
       }else{
         throw new Error("Client not initialized")
       }
     } catch (error) {
-      
+      updatePendingMessage(message.messageId, { ...message, messageState: MessageStates.FAILED });
     }
   }
 
+  const retryUpload = () => {
+    updatePendingMessage(message.messageId, { ...message, messageState: MessageStates.LOADING });
+  }
+
   useEffect(() => {
-    if(isPending){
+    if(isPending && message.messageState !== MessageStates.FAILED){
       uploadAttachment();
     }
-  },[ isPending ])
+  },[ isPending, message ])
 
   useEffect(() => {
     if (finished) {
@@ -262,6 +268,7 @@ export const ChatItem = forwardRef((props: ChatItemProps, ref: any) => {
         myMessage={position === 'right'}
         onScrollToIndex={(messageId) => onScrollToIndex(messageId)}
         isPending={isPending}
+        retryUpload={retryUpload}
        />;
     }
     return <Default 
@@ -275,6 +282,7 @@ export const ChatItem = forwardRef((props: ChatItemProps, ref: any) => {
       onScrollToIndex={(messageId) => onScrollToIndex(messageId)}
       isPending={isPending}
       threaded={threaded}
+      retryUpload={retryUpload}
     />
   };
 

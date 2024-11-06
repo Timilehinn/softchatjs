@@ -1,3 +1,4 @@
+import React from "react"
 import { View, Text } from "react-native";
 import { Colors } from "../constants/Colors";
 
@@ -21,4 +22,5 @@ export const UnreadMessagesBadge = (props: BadgeProps) => {
       <Text style={{ color: 'white', fontWeight: 'bold' }}>{label}</Text>
     </View>
   )
+
 }

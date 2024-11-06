@@ -6,17 +6,17 @@ import {
   ChatBubbleRenderProps,
   ConversationType,
   Message,
+  MessageStates,
   UserMeta,
-} from "softchatjs-react-native/src/types";
+} from "../../../../types";
 import MessageAvatar from "../../MessageAvatar";
 import Quoted from "../Quoted";
 import Sticker from "../Sticker";
-import { formatMessageTime } from "softchatjs-react-native/src/utils";
+import { formatMessageTime } from "../../../../utils";
 import Reactions from "../Reactions";
-import { useConfig } from "softchatjs-react-native/src/contexts/ChatProvider";
+import { useConfig } from "../../../../contexts/ChatProvider";
 import Preview from "../Preview";
 import MediaMessage from "../Media";
-import { ReplyIcon } from "softchatjs-react-native/src/assets/icons";
 
 type DefaultProps = {
   message: Message;
@@ -29,7 +29,8 @@ type DefaultProps = {
   renderChatBubble?: (props: ChatBubbleRenderProps) => void;
   onScrollToIndex: (messageId: string) => void;
   isPending?: boolean;
-  threaded?: boolean
+  threaded?: boolean;
+  retryUpload: () => void;
 };
 
 export default function Default(props: DefaultProps) {
@@ -44,7 +45,8 @@ export default function Default(props: DefaultProps) {
     renderChatBubble,
     onScrollToIndex,
     isPending,
-    threaded = false
+    threaded = false,
+    retryUpload
   } = props;
 
   const { theme } = useConfig();
@@ -283,7 +285,7 @@ export default function Default(props: DefaultProps) {
         />
       {/* </View> */}
 
-      {isPending && (
+      {isPending === true && message.messageState !== MessageStates.FAILED && (
         <Text
           style={[
             position == "right" && { marginEnd: 15 },
@@ -297,6 +299,23 @@ export default function Default(props: DefaultProps) {
           ]}
         >
           Uploading...
+        </Text>
+      )}
+       {isPending === true && message.messageState === MessageStates.FAILED && (
+        <Text
+          onPress={retryUpload}
+          style={[
+            position == "right" && { marginEnd: 15 },
+            position == "left" && { marginStart: 15 },
+            {
+              color: 'tomato',
+              fontSize: 11,
+              marginTop: 5,
+              fontStyle: "italic",
+            },
+          ]}
+        >
+          Upload failed
         </Text>
       )}
     </Animated.View>

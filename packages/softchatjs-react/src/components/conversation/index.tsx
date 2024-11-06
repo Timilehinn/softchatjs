@@ -85,22 +85,23 @@ export const Conversation = (props: ConversationProps) => {
   const hasAttachments = message?.attachedMedia?.length;
   const { config } = useChatClient();
   const stacked = true;
+  var chatUserId = client.userMeta.uid
 
   const oppositBubbleBoxes =
-    message.messageOwner.uid === config.userId && stacked;
+    message.messageOwner.uid === chatUserId && stacked;
 
   const chatBoxColor =
-    message.messageOwner.uid === config.userId
+    message.messageOwner.uid === chatUserId
       ? config.theme?.chatBubble?.right?.bgColor
       : config.theme?.chatBubble?.left?.bgColor || "#343434";
 
   const messageColor =
-    message.messageOwner.uid === config.userId
+    message.messageOwner.uid === chatUserId
       ? config.theme?.chatBubble?.right?.messageColor
       : config.theme?.chatBubble?.left?.messageColor || "white";
 
   const messageDateColor =
-    message.messageOwner.uid === config.userId
+    message.messageOwner.uid === chatUserId
       ? config.theme?.chatBubble?.right?.messageTimeColor
       : config.theme?.chatBubble?.left?.messageTimeColor || "grey";
 

@@ -1,9 +1,7 @@
+import React from "react";
 import { View, TouchableOpacity, Image, Text, Platform, ViewStyle } from "react-native";
 import { Reaction, ServerActions } from "../../../types";
-import { useChatClient } from "../../../contexts/ChatClientContext";
-import { useConnection } from "../../../contexts/ConnectionProvider";
 import { useConfig } from "../../../contexts/ChatProvider";
-import palette from "../../../theme/pallete";
 import theme from "../../../theme";
 
 type ReactionProps = {

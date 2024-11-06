@@ -8,4 +8,5 @@ export enum Events {
   NEW_CONVERSATION = 'new_conversation',
   CONVERSATION_LIST_META_CHANGED = 'conversation_list_meta_changed',
   DELETED_MESSAGE = 'deleted_message',
+  UPLOAD_FAILED = 'upload_failed',
 }

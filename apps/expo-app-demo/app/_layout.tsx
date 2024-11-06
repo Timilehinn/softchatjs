@@ -6,6 +6,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { useColorScheme } from '@/components/useColorScheme';
 import { ChatProvider } from "softchatjs-react-native"
+import ChatClient from "softchatjs-core"
 import { Platform } from 'react-native';
 export {
   // Catch any errors thrown by the Layout component.
@@ -45,7 +46,7 @@ export default function RootLayout() {
   return <RootLayoutNav />;
 }
 
-// const client = ChatClient.getInstance({ apiKey: '1234', projectId: '5909b61d-e6be-47b5-bb54-a60e56344580' });
+const client = ChatClient.getInstance({ subId: 'ef066542-6e13-4f25-a6c3-d3e3671e4662', projectId: '5909b61d-e6be-47b5-bb54-a60e56344580' });
 
 function RootLayoutNav() {
 
@@ -68,8 +69,9 @@ function RootLayoutNav() {
 
   return (
     <ChatProvider
-      subId='ef066542-6e13-4f25-a6c3-d3e3671e4662'
-      projectId='5909b61d-e6be-47b5-bb54-a60e56344580'
+    client={client}
+      // subId='ef066542-6e13-4f25-a6c3-d3e3671e4662'
+      // projectId='5909b61d-e6be-47b5-bb54-a60e56344580'
       // theme={{
       //   background: {
       //     primary: '#FFFFFF', // White background for light mode

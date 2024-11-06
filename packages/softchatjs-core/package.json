@@ -34,14 +34,9 @@
     "package.json"
   ],
   "exports": {
-    ".": {
       "require": "./dist/index.js",
       "import": "./dist/index.mjs",
       "types": "./dist/index.d.ts"
-    },
-    "./src": {
-      "default": "./src/index.ts"
-    }
   }
 }
 

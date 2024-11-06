@@ -1,4 +1,4 @@
-import ChatClient from "./ChatClient";
+import ChatClient, { NotificationConfig } from "./ChatClient";
 import MessageClient from "./MessageClient";
 import {
   CREATE_SESSION,
@@ -80,8 +80,9 @@ export default class Connection extends EventEmitter {
     return Connection.connection;
   }
 
-  async _initiateConnection() {
+  async _initiateConnection(notificationConfig?: NotificationConfig) {
     try {
+      
       // Ensure we have a valid userMeta.uid
       if (!this.userMeta?.uid) return null;
   
@@ -99,11 +100,7 @@ export default class Connection extends EventEmitter {
       console.log(res)
   
       // Emit connecting status
-      this.emit(Events.CONNECTION_CHANGED, {
-        connecting: true,
-        isConnected: false,
-        fetchingConversations: true,
-      });
+      
   
       // If session creation was successful
       if (res.success) {
@@ -118,7 +115,6 @@ export default class Connection extends EventEmitter {
         // Fetch conversations after acquiring the session
         await this._getConversations({
           token: res.data.token,
-          userId: this.userMeta.uid,
         });
   
         // Define the message to send on connection
@@ -130,6 +126,7 @@ export default class Connection extends EventEmitter {
           newConversation: true,
           recipientMeta: {},
           projectId: this.projectConfig.projectId,
+          expoPushToken: notificationConfig?.expo.expoPushToken
         });
   
         // Check if WebSocket is already open
@@ -259,16 +256,15 @@ export default class Connection extends EventEmitter {
 
   private async _getConversations({
     token,
-    userId,
   }: {
     token: string;
-    userId: string;
   }) {
     try {
       this.fetchingConversations = true;
       const response = await GET_CONVERSATIONS<{
         conversations: Conversation[];
-      }>(token, userId);
+      }>(token);
+      console.log(response,":::response")
       if (response.success) {
         const conversationListMeta: ConversationListMeta =
           response.data.conversations.reduce((acc, conversation) => {
@@ -334,7 +330,6 @@ export default class Connection extends EventEmitter {
 
       // Set the new interval
       this.healthCheckRef = setInterval(() => {
-
         // Check WebSocket connection status
         if (this.socket?.readyState === WebSocket.OPEN) {
           console.log("--Sending health check...");
@@ -346,8 +341,10 @@ export default class Connection extends EventEmitter {
               token: this.wsAccessConfig.token,
             },
           });
-
           this.socket.send(data); // send the health check message
+          this.emit(Events.CONVERSATION_LIST_META_CHANGED, {
+            conversationListMeta: this.conversationListMeta,
+          });
         }
       }, 30000);
     }

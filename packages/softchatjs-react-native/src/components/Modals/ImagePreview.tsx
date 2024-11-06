@@ -16,9 +16,7 @@ import {
   generateConversationId,
   generateFillerTimestamps,
   generateId,
-} from "../../utils";
-import { useChatClient } from "../../contexts/ChatClientContext";
-import { useConnection } from "../../contexts/ConnectionProvider";
+} from "softchatjs-core";
 import { Gesture, GestureDetector, GestureHandlerRootView } from "react-native-gesture-handler";
 import ChatInput from "../Chat/ChatInput";
 import { XIcon } from "../../assets/icons";
@@ -58,7 +56,6 @@ export default function ImagePreview(props: ImagePreviewProps) {
     setGlobalTextMessage
   } = useMessageState();
   const [ message, setMessage ] = useState(globalTextMessage)
-  const { conversation, socket, userMeta, wsAccessConfig } = useConnection();
 
   const screenWidth = width
   const screenHeight = height;
@@ -117,10 +114,8 @@ export default function ImagePreview(props: ImagePreviewProps) {
           attachmentType: AttachmentTypes.MEDIA,
           ...timeStamps,
           messageOwner: {
-            uid: chatUserId,
-            connectionId: "--",
-            projectId: "--",
-            meta: client.userMeta,
+            // uid: chatUserId,
+            ...client.userMeta,
             ...timeStamps,
           },
         };
@@ -310,12 +305,13 @@ export default function ImagePreview(props: ImagePreviewProps) {
             }}
           >
             <ChatInput
+              conversationId={conversationId || ''}
               hasEmojis={false}
               inputRef={inputRef}
               sendMessage={() => uploadImage()}
               chatUserId={chatUserId}
               recipientId={recipientId}
-              selectedMessage={activeQuote}
+              // selectedMessage={activeQuote}
               value={message}
               setValue={setMessage}
               messageType="multimedia-text"

@@ -8,8 +8,6 @@ import {
 } from "react";
 import styles from "./index.module.css";
 import { ChatEventGenerics, Conversation, Message } from "softchatjs-core";
-import { SoftChatContext } from "../../providers/softChatProvider";
-import { ConversationListMeta } from "softchatjs-core/dist/types";
 import Text from "../text/text";
 import { formatConversationTime, formatWhatsAppDate } from "../../helpers/date";
 import { useChatState } from "../../providers/clientStateProvider";
@@ -94,11 +92,11 @@ const ConversationItem = ({
   };
   onClick: () => void;
 }) => {
-  const { config } = useChatClient();
+  const { client, config } = useChatClient();
   const { activeConversation } = useChatState();
 
   const user = item.conversation.participantList.filter(
-    (p) => p.participantId !== config.userId
+    (p) => p.participantId !== client.userMeta.uid
   );
 
   const textColor = config?.theme?.text?.primary || "white";
@@ -230,7 +228,7 @@ const UserList = ({ userListRef }: { userListRef: any }) => {
       const conn = client.newConversation({
         uid: selectedUsers.id,
         username: selectedUsers.name,
-      });
+      }, null);
       conn.create("Hey there");
     }
   }, [selectedUsers]);

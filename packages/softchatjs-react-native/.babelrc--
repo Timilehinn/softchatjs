@@ -1,0 +1,8 @@
+{
+  "presets": [
+    "@babel/preset-typescript"  // Ensures compatibility with TypeScript files
+  ],
+  "plugins": [
+    "@babel/plugin-transform-flow-strip-types"  // Strips out Flow types
+  ]
+}

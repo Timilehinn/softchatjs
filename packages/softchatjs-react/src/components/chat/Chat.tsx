@@ -4,11 +4,12 @@ import ChatClient, {
   ChatEventGenerics,
   Conversation,
   Message,
+  UserMeta,
 } from "softchatjs-core";
 import {
   ConnectionEvent,
   ConversationListMeta,
-} from "softchatjs-core/dist/types";
+} from "softchatjs-core";
 import styles from "./chat.module.css";
 import ChatInput from "../inputs/chat-input";
 import MessageList from "../conversation-list/conversation-list";
@@ -30,6 +31,7 @@ type ChatProps = {
   renderChatHeader?: () => JSX.Element;
   renderAddConversationIcon?: () => JSX.Element;
   renderChatInput?: (props: { onChange: (e: string) => void }) => JSX.Element;
+  user: UserMeta
 };
 
 const Chat = (props: ChatProps) => {
@@ -85,6 +87,10 @@ const Chat = (props: ChatProps) => {
       setShowUserList(false);
     }
   };
+
+  useEffect(() => {
+    client.initializeUser(props.user);
+  },[])
 
   useEffect(() => {
     document.addEventListener("mousedown", closeGeneralMenu);
@@ -153,15 +159,28 @@ const Chat = (props: ChatProps) => {
     setIsConnected(event.isConnected);
   };
 
+  const handleConversationsListChanged = (e: {
+    conversationListMeta: ConversationListMeta;
+  }) => {
+    const conversationList = Object.values(
+      e.conversationListMeta
+    ).flat() as ConversationItem[];
+    console.log(conversationList, "::conversationList")
+    setConversations(conversationList);
+  };
+
   const clearUnread = () => {
-    const messageIds = activeConversation.unread;
-    const msClient = client.messageClient(
-      activeConversation.conversation.conversationId
-    );
-    msClient.readMessages(activeConversation?.conversation.conversationId, {
-      uid: config.userId,
-      messageIds,
-    });
+    if(client){
+      const messageIds = activeConversation.unread;
+      const msClient = client.messageClient(
+        activeConversation.conversation.conversationId
+      );
+      msClient.readMessages(activeConversation?.conversation.conversationId, {
+        uid: client.userMeta.uid,
+        messageIds,
+      });
+    }
+   
   };
 
   useEffect(() => {
@@ -198,6 +217,11 @@ const Chat = (props: ChatProps) => {
       client.subscribe("stopped_typing" as any, handleTypingStopped);
 
       client.subscribe("deleted_message" as any, handleDeletedMessage);
+
+      client.subscribe(
+        "conversation_list_meta_changed" as any,
+        handleConversationsListChanged
+      );
     }
 
     return () => {
@@ -207,6 +231,10 @@ const Chat = (props: ChatProps) => {
       client.unsubscribe("edited_message" as any, handleEditedMessage);
       client.unsubscribe("new_message" as any, handleMessage);
       client.unsubscribe("connection_changed" as any, handleConnectionChanged);
+      client.unsubscribe(
+        "conversation_list_meta_changed" as any,
+        handleConversationsListChanged
+      );
     };
   }, [client, activeConversation]);
 
@@ -247,31 +275,8 @@ const Chat = (props: ChatProps) => {
       setFetchingMore(false);
     }
   }, [presentPage]);
+  
 
-  const handleConversationsListChanged = (e: {
-    conversationListMeta: ConversationListMeta;
-  }) => {
-    const conversationList = Object.values(
-      e.conversationListMeta
-    ).flat() as ConversationItem[];
-    setConversations(conversationList);
-  };
-
-  useEffect(() => {
-    if (client) {
-      client.subscribe(
-        "conversation_list_meta_changed" as any,
-        handleConversationsListChanged
-      );
-      return () => {
-        client.unsubscribe(
-          "conversation_list_meta_changed" as any,
-          handleConversationsListChanged
-        );
-      };
-    }
-  }, [client]);
-  console.log(fecthingmore, "ftj");
   return (
     <div
       style={{ background: theme?.background?.primary || "#1b1d21" }}

@@ -4,8 +4,8 @@ import { PauseIcon, PlayIcon } from "../../../../assets/icons";
 import { convertToMinutes } from "../../../../utils";
 import { useConfig } from "../../../../contexts/ChatProvider";
 import { Media } from "softchatjs-core";
-import { useMessageState } from "softchatjs-react-native/src/contexts/MessageStateContext";
-import theme from "softchatjs-react-native/src/theme";
+import { useMessageState } from "../../../../contexts/MessageStateContext";
+import theme from "../../../../theme";
 
 type VoiceMessageProps = {
   media: Media;

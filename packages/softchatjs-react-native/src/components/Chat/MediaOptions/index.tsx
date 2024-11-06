@@ -2,7 +2,6 @@ import React from "react";
 import { View, Text, Dimensions, TouchableOpacity } from "react-native";
 import BottomSheet, { BottomSheetRef } from "../../BottomSheet";
 import { forwardRef, useRef, useState, useImperativeHandle } from "react";
-import { useConnection } from "../../../contexts/ConnectionProvider";
 import { generateId } from "../../../utils";
 import { CameraIcon, DocumentIcon, ImageIcon } from "../../../assets/icons";
 import * as ImagePicker from "expo-image-picker";
@@ -150,7 +149,7 @@ export const MediaOptions = forwardRef((props: MediaOptionsProps, ref: any) => {
                 mimeType: result.assets[0].mimeType,
                 ext: ".mp4",
                 mediaId: generateId(),
-                base64: result.assets[0].uri as string,
+                // base64: result.assets[0].uri as string,
                 mediaUrl: result.assets[0].uri,
                 meta: {
                   aspectRatio: width / height || 0,

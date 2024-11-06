@@ -21,12 +21,25 @@ let defaultUser = {
   custom: {}
 }
 
+export type NotificationConfig = {
+  expo: {
+    expoPushToken: string
+  },
+  web: {},
+  fcm: {
+    deviceId: string
+  },
+  apns: {
+    deviceId: string
+  }
+}
+
 export default class ChatClient {
   private static client_instance: ChatClient;
   private connection: Connection | null;
   subId: string;
   projectId: string;
-  userMeta: UserMeta
+  userMeta: UserMeta;
 
   constructor(subId: string, projectId: string) {
     this.subId = subId;
@@ -43,7 +56,7 @@ export default class ChatClient {
     return ChatClient.client_instance
   }
 
-  initializeUser(data: UserMeta) {
+  initializeUser(data: UserMeta, notificationConfig?: NotificationConfig) {
     if (data) {
       this.userMeta = data;
       if (ChatClient.client_instance) {
@@ -54,7 +67,7 @@ export default class ChatClient {
           isConnected: false,
           fetchingConversations: true,
         });
-        conn._initiateConnection();
+        conn._initiateConnection(notificationConfig);
       }
     }
   }
@@ -127,7 +140,7 @@ export default class ChatClient {
     }
   }
 
-  newConversation(participantDetails: UserMeta[] | UserMeta, groupMeta?: GroupChatMeta): Conversation {
+  newConversation(participantDetails: UserMeta[] | UserMeta, groupMeta: GroupChatMeta | null): Conversation {
     if(this.connection) {
       const conversation = Conversation.getInstance(this.connection, participantDetails, groupMeta);
       return conversation

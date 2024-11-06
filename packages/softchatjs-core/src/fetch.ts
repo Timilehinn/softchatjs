@@ -75,10 +75,9 @@ export async function CREATE_SESSION<Response>({
 
 export async function GET_CONVERSATIONS<Response>(
   token: string | undefined,
-  userId: string
 ): Promise<APIResponse<Response>> {
   return await chatApi<Response>({
-    endpoint: `${API}${ENDPOINTS.CONVERSATIONS}/${userId}`,
+    endpoint: `${API}${ENDPOINTS.CONVERSATIONS}`,
     body: {},
     method: "GET",
     token,
@@ -123,7 +122,7 @@ export async function UPLOAD_MEDIA<Response>(
 
 export async function GET_PRESIGNED_URL<Response>(
   token: string,
-  data: Prettify<UploadContent & { mediaType: string }>
+  data: Prettify<UploadContent & { mediaType: string, uid: string }>
 ): Promise<APIResponse<Response>> {
   return await chatApi<Response>({
     endpoint: `${API}${ENDPOINTS.GET_PRESIGNED_URL}`,

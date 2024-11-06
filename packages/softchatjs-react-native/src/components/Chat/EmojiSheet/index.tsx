@@ -1,3 +1,4 @@
+import React from 'react'
 import {
   View,
   Text,
@@ -6,13 +7,12 @@ import {
 } from "react-native";
 import { Image } from "expo-image";
 import BottomSheet, { BottomSheetRef } from "../../BottomSheet";
+import { Emoticon } from './type';
 import { Colors } from "../../../constants/Colors";
 import { forwardRef, useCallback, useEffect, useRef, useState, useImperativeHandle } from "react";
 import { GET_EMOJIS } from "../../../api";
-import { useConnection } from "../../../contexts/ConnectionProvider";
-import { generateConversationId, generateFillerTimestamps, generateId } from "../../../utils";
+import { generateConversationId, generateFillerTimestamps, generateId } from "softchatjs-core";
 import { KeyboardIcon, SearchIcon } from "../../../assets/icons";
-import { useChatClient } from "../../../contexts/ChatClientContext";
 import { AttachmentTypes, MediaType, Message, MessageStates, UserMeta } from "../../../types";
 import Search from "../../Search";
 import { FlashList } from "@shopify/flash-list";
@@ -29,7 +29,7 @@ export const EmojiSheet = forwardRef((props: EmojiListProps, ref: any) => {
   const emojiListRef = useRef<BottomSheetRef>();
   const { client, theme } = useConfig()
   const { openKeyboard, sendSticker, recipientId } = props;
-  const flatListRef = useRef(null);
+  const flatListRef = useRef<FlashList<Emoticon>>(null);
   const width = Dimensions.get("window").width;
   const emojiSize = 40;
   var noOfColumns = Math.floor(width / emojiSize);
@@ -58,7 +58,7 @@ export const EmojiSheet = forwardRef((props: EmojiListProps, ref: any) => {
     (async() => {
       if(client){
         const userId = client?.userMeta.uid
-        const conversationId = generateConversationId(userId as string, recipientId);
+        const conversationId = generateConversationId(userId as string, recipientId, client.projectId);
         const stickers = await client.messageClient(conversationId).getEmojiList();
         setStickers(stickers);
       }
@@ -68,9 +68,9 @@ export const EmojiSheet = forwardRef((props: EmojiListProps, ref: any) => {
   
     const renderItem = useCallback(({ item, index }: { item: any, index: number }) => {
       const userId = client?.userMeta.uid
-      const conversationId = generateConversationId(userId as string, recipientId);
+      const conversationId = generateConversationId(userId as string, recipientId, client?.projectId || '');
       const messageId = generateId();
-      const newMessage: Message = {
+      const newMessage: Partial<Message> = {
         conversationId,
         from: userId as string,
         to: recipientId,
@@ -88,11 +88,7 @@ export const EmojiSheet = forwardRef((props: EmojiListProps, ref: any) => {
         createdAt: new Date(),
         updatedAt: new Date(),
         messageOwner: {
-          uid: userId as string,
-          id: userId as string,
-          connectionId: "--",
-          projectId: client?.projectId as string,
-          meta: client?.userMeta as UserMeta,
+          ...client?.userMeta as UserMeta,
           ...generateFillerTimestamps(),
         },
       };
@@ -101,9 +97,8 @@ export const EmojiSheet = forwardRef((props: EmojiListProps, ref: any) => {
       <TouchableOpacity
         key={index}
         onPress={() => {
-          console.log(newMessage.attachedMedia[0]);
           if(client){
-            client.messageClient(newMessage.conversationId).sendMessage(newMessage)
+            client.messageClient(newMessage.conversationId as string).sendMessage(newMessage as Message)
           }
           setGlobalTextMessage('');
           closeSheet();

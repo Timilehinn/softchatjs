@@ -29,8 +29,6 @@ import TrashIcon, {
 import { Colors } from "../../constants/Colors";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { SelectedMessage, SendMessage } from ".";
-import { useChatClient } from "../../contexts/ChatClientContext";
-import { useConnection } from "../../contexts/ConnectionProvider";
 import { useConfig } from "../../contexts/ChatProvider";
 import { Audio } from "expo-av";
 import { convertToMinutes, generateId } from "../../utils";
@@ -52,7 +50,7 @@ type ChatInputProps = {
   mediaOptionsRef?: React.RefObject<any>;
   openEmojis?: () => void;
   sendMessage: () => void;
-  // chatUserId: string;
+  chatUserId: string;
   // recipientId: string;
   // selectedMessage: SelectedMessage;
   hasEmojis?: boolean;
@@ -134,7 +132,6 @@ export default function ChatInput(props: ChatInputProps) {
   var minInputHeight = Platform.OS === "android" ? 30 : 40;
   const { addNewPendingMessages, pauseVoiceMessage } = useMessageState();
   const { client } = useConfig();
-  const { userMeta } = useConnection();
   const [inputHeight, setInputHeight] = useState(minInputHeight);
   const [alignItems, setAlignItems] = useState<"center" | "flex-end">("center");
   const touchStart = useSharedValue({ x: 0, y: 0, time: 0 });

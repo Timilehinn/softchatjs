@@ -12,7 +12,7 @@ import {
   ParticipantListInfo,
   PrivateChatMeta,
 } from "../../types";
-import { useMemo, useRef } from "react";
+import React, { useMemo, useRef } from "react";
 import {
   formatMessageTime,
   getConversationTitle,

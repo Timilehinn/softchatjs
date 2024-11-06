@@ -277,11 +277,12 @@ export default function Chat(props: ChatProps) {
   const handleDeletedMessage = (event: any) => {
     console.log("new deleted message");
     setMessages((prev) => {
-      return prev.filter((message) => {
+      var prevMessage = prev.filter((message) => {
         if (typeof message !== "string") {
           return message.messageId !== event.message.messageId;
         }
       });
+      return restructureMessages(prevMessage);
     });
   };
 
@@ -619,7 +620,7 @@ export default function Chat(props: ChatProps) {
               onLongPress={({ message, chatItemRef, isMessageOwner }) => {}}
               inputRef={inputRef}
               position={chatUserId === message.from ? "right" : "left"}
-              message={message}
+              message={message as Message}
               onSelectedMessage={({ message, chatItemRef }) => {}}
               conversation={conversation}
               chatUserId={chatUserId}
@@ -740,7 +741,7 @@ export default function Chat(props: ChatProps) {
 
  
 
-  const chatInputProps = {
+  const chatInputProps: ChatInputRenderProps = {
     sendMessage: (externalInputRef: RefObject<TextInput>) =>
       isEditing ? sendEditedMessage(externalInputRef) : sendMessage(),
     value: globalTextMessage,
@@ -760,6 +761,8 @@ export default function Chat(props: ChatProps) {
     onStartRecording: startRecording,
     meteringProgress: audioWaves,
     isEditing,
+    sendVoiceMessage: () => sendVoiceMessage(),
+    isLoading: connectionStatus.connecting || loadingMessages
   };
 
   return (
@@ -868,7 +871,7 @@ export default function Chat(props: ChatProps) {
                 }
                 isLoading={connectionStatus.connecting || loadingMessages}
                 conversationId={conversationId}
-                // chatUserId={chatUserId}
+                chatUserId={chatUserId}
                 recipientId={recipientId}
                 // selectedMessage={activeQuote}
                 value={globalTextMessage}

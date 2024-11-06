@@ -803,6 +803,7 @@ export default class MessageClient {
         conversationId: this.connection.activeConversationId,
         key: generateId(),
         mediaType: meta.mimeType,
+        uid: this.connection.userMeta.uid
       });
 
       console.log(res);
@@ -854,8 +855,13 @@ export default class MessageClient {
         fileSize,
       };
     } catch (error) {
+      console.log(error)
       console.error("Error uploading file: ", error);
-      throw error;
+      return {
+        link: '',
+        success: false,
+        fileSize: '',
+      };
     }
   }
 
@@ -891,6 +897,8 @@ export default class MessageClient {
           conversationId: this.connection.activeConversationId,
           key: generateId(),
           mediaType,
+        uid: this.connection.userMeta.uid
+
         });
         const data = await fetch(res.data.uploadUrl, {
           method: "PUT",
@@ -1046,7 +1054,8 @@ export default class MessageClient {
               incomingMessagePayload.conversationType === "private-chat"
                 ? generateConversationId(
                     incomingMessage.from,
-                    incomingMessage.to
+                    incomingMessage.to,
+                    this.connection.projectConfig.projectId
                   )
                 : incomingMessagePayload.message.conversationId;
             const newMessage = {
@@ -1059,7 +1068,8 @@ export default class MessageClient {
               participants: [newMessage.from, newMessage.to],
               conversationId: generateConversationId(
                 newMessage.from,
-                newMessage.to
+                newMessage.to,
+                this.connection.projectConfig.projectId
               ),
               messages: [newMessage],
               admins: [newMessage.from],

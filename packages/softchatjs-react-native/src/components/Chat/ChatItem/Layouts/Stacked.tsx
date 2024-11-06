@@ -4,14 +4,15 @@ import {
   AttachmentTypes,
   ChatBubbleRenderProps,
   Message,
-} from "softchatjs-react-native/src/types";
+  MessageStates,
+} from "../../../../types";
 import MessageAvatar from "../../MessageAvatar";
 import Sticker from "../Sticker";
 import Animated from "react-native-reanimated";
-import { formatMessageTime, truncate } from "softchatjs-react-native/src/utils";
+import { formatMessageTime, truncate } from "../../../../utils";
 import Reactions from "../Reactions";
 import Quoted from "../Quoted";
-import { useConfig } from "softchatjs-react-native/src/contexts/ChatProvider";
+import { useConfig } from "../../../../contexts/ChatProvider";
 import Preview from "../Preview";
 import MediaMessage from "../Media";
 
@@ -25,6 +26,7 @@ type StackedProps = {
   renderChatBubble?: (props: ChatBubbleRenderProps) => void;
   onScrollToIndex: (messageId: string) => void;
   isPending?: boolean;
+  retryUpload: () => void;
 };
 
 export default function Stacked(props: StackedProps) {
@@ -39,6 +41,7 @@ export default function Stacked(props: StackedProps) {
     myMessage,
     onScrollToIndex,
     isPending,
+    retryUpload
   } = props;
 
   const RenderAttachment = useCallback(() => {
@@ -183,7 +186,7 @@ export default function Stacked(props: StackedProps) {
                   </Text>
                 </View>
               )}
-              {isPending && (
+            {isPending === true && message.messageState !== MessageStates.FAILED && (
               <Text
                 style={[
                   {
@@ -198,6 +201,23 @@ export default function Stacked(props: StackedProps) {
                 Uploading...
               </Text>
             )}
+             {isPending === true && message.messageState === MessageStates.FAILED && (
+              <Text
+                onPress={retryUpload}
+                style={[
+                  {
+                    color: 'tomato',
+                    fontSize: 11,
+                    marginTop: 5,
+                    fontStyle: "italic",
+                    marginStart: 15
+                  },
+                ]}
+              >
+                Upload failed
+              </Text>
+            )}
+       
               <Reactions
                 layout="stacked"
                 reactions={message.reactions}

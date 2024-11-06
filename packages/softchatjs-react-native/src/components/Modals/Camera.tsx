@@ -1,3 +1,4 @@
+import React from 'react';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useRef, useState } from 'react';
 import { Button, Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -6,6 +7,7 @@ import { useModalProvider } from '../../contexts/ModalProvider';
 import ImagePreview from './ImagePreview';
 import { MediaType } from '../../types';
 import { generateId } from '../../utils';
+import { useConfig } from '../../contexts/ChatProvider';
 
 const width = Dimensions.get("window").width
 
@@ -22,10 +24,11 @@ export default function AppCamera(props: Props) {
     recipientId,
     conversationId
   } = props;
+  const { theme } = useConfig();
 
   const camRef = useRef<CameraView | undefined>()
   const { displayModal, resetModal } = useModalProvider()
-  const [facing, setFacing] = useState('back');
+  const [facing, setFacing] = useState<"back" | "front">('back');
   const [permission, requestPermission] = useCameraPermissions();
 
   if (!permission) {
@@ -36,10 +39,42 @@ export default function AppCamera(props: Props) {
   if (!permission.granted) {
     // Camera permissions are not granted yet.
     return (
-      <View style={styles.container}>
-        <Text style={{ textAlign: 'center' }}>We need your permission to show the camera</Text>
-        <Button onPress={requestPermission} title="grant permission" />
+      <View style={{ width: "100%", alignItems: "center", justifyContent: 'center', backgroundColor: theme?.background.primary, height: '100%' }}>
+      <View
+        style={{
+          height: 250,
+          width: 250,
+          borderWidth: 0.5,
+          borderColor: "lightgrey",
+          marginTop: 5,
+          borderRadius: 30,
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}
+      >
+        <View
+          style={{
+            height: "60%",
+            width: "60%",
+            borderWidth: 0.5,
+            borderColor: "lightgrey",
+            borderRadius: 200,
+          }}
+        />
       </View>
+      <Text
+        style={{
+          fontSize: 25,
+          marginTop: 10,
+          textAlign: "center",
+          color: theme?.text.secondary,
+          marginBottom: 25
+        }}
+      >
+        We need permission to{"\n"} access Camera.
+      </Text>
+      <Button onPress={requestPermission} title='Gran permission' />
+    </View>
     );
   }
 
@@ -56,7 +91,7 @@ export default function AppCamera(props: Props) {
           scale: 10,
           isImageMirror: true
         });
-        if(captured?.base64){
+        if(captured?.uri){
           displayModal({
             justifyContent: 'flex-start',
             children: <ImagePreview clearActiveQuote={() => {}} conversationId={conversationId} activeQuote={null} chatUserId={chatUserId} recipientId={recipientId} image={
@@ -64,8 +99,9 @@ export default function AppCamera(props: Props) {
                 type: MediaType.IMAGE,
                 ext: '.png',
                 mediaId: generateId(),
-                base64: captured?.base64,
-                mediaUrl: "",
+                base64: captured?.uri,
+                mediaUrl: captured.uri,
+                mimeType: 'image/png',
                 meta: {
                   aspectRatio: captured.width / captured.height || 0,
                   height: captured.height,
@@ -90,7 +126,8 @@ export default function AppCamera(props: Props) {
 
   return (
     <View style={styles.container}>
-      <CameraView ref={camRef} style={styles.camera} facing={facing}>
+      <CameraView ref={camRef as any} style={styles.camera} facing={facing}>
+      {/* <CameraView ref={camRef} style={styles.camera} facing={facing}> */}
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
             <CameraFlipIcon size={40} />
@@ -103,6 +140,8 @@ export default function AppCamera(props: Props) {
           </TouchableOpacity>
         </View>
       </CameraView>
+
+    
     </View>
   );
 }
