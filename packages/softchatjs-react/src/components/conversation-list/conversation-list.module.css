@@ -2,6 +2,7 @@
   height: calc(100vh - 80px - 60px);
   overflow-y: auto;
   overflow-x: hidden;
+  flex: 1
 }
 
 .wrapper__sec{

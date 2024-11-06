@@ -7,6 +7,8 @@
   display: none;
   transform: translateY(200px);
   z-index: 200;
+  bottom: 80px;
+  position: absolute;
 }
 
 .editOpen {
@@ -24,7 +26,6 @@
   border-left: 6px solid greenyellow;
   display: flex;
   padding: 5px;
-
   justify-content: center;
   padding-left: 10px;
 }

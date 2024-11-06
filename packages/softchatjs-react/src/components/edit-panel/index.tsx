@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import styles from "./edit.module.css";
 import Text from "../text/text";
@@ -11,10 +11,11 @@ type EditPanelProps = {
   isEditing?: boolean;
   isReplying?: boolean;
   closePanel: () => void;
+  width: number
 };
 
 const EditPanel = (props: EditPanelProps) => {
-  const { isEditing, message, isReplying, closePanel } = props;
+  const { isEditing, message, isReplying, closePanel, width } = props;
   const { config } = useChatClient();
   const { theme } = config;
 
@@ -29,7 +30,7 @@ const EditPanel = (props: EditPanelProps) => {
           ? `${styles.edit} ${styles.editOpen}`
           : `${styles.edit}`
       }
-      style={{ background: secondaryColor || "#1b1d21" }}
+      style={{ background: secondaryColor || "#1b1d21", width: width }}
     >
       <div
         style={{ background: secondaryColor || "#222529" }}
@@ -44,7 +45,7 @@ const EditPanel = (props: EditPanelProps) => {
           />
         </div>
 
-        <div style={{ width: "10%" }}>
+        <div style={{ width: "10%", marginRight: '15px' }}>
           {message?.attachedMedia[0]?.mediaUrl && (
             <img
               style={{ height: "100%", width: "100%", borderRadius: "5px" }}

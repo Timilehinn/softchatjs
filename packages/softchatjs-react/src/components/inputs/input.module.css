@@ -137,8 +137,10 @@
 
 .input__emoji__picker{
   position: absolute;
-  top: -450px;
+  bottom: 40;
+  right: 40;
   right: 115px;
+  z-index: 100;
 }
 
 @media screen and (max-width:768px) {

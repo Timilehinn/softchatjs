@@ -355,6 +355,7 @@ const Chat = (props: ChatProps) => {
           textInputRef={textInputRef}
           renderChatInput={props.renderChatInput}
         />
+      {showImageModal.length > 0 && <ImageViewer />}
       </div>
     )
   }
@@ -410,7 +411,7 @@ const Chat = (props: ChatProps) => {
             renderChatBubble={props.renderChatBubble}
             renderChatHeader={props.renderChatHeader}
           />
-          <ChatInput
+           <ChatInput
             closeGeneralMenu={() => setMenuDetails({ element: null })}
             generalMenuRef={generalMenuRef}
             setMenuDetails={setMenuDetails}

@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
+import React, { Dispatch, SetStateAction, useEffect, useState, useRef } from "react";
 import styles from "./input.module.css";
 import ChatClient, { Media, Message } from "softchatjs-core";
 import {
@@ -73,11 +73,14 @@ const ChatInput = ({
   const [audioRecorder, setAudioRecorder] = useState<MediaRecorder | null>(
     null
   );
+  const inputContainerRef = useRef<HTMLDivElement>()
   const [voiceMessageDuration, setVoiceMessageDuration] = useState(0);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [audioBlobPLaceHolder, setAudioBlobPlaceHolder] = useState<Blob | null>(
     null
   );
+  const [inputContainerWidth, setInputContainerWidth] = useState(0);
+
 
   const msClient = client.messageClient(conversationId);
   const { config } = useChatClient();
@@ -85,6 +88,17 @@ const ChatInput = ({
 
   const primaryActionColor = theme?.icon || "white";
   const inputBg = config?.theme?.input.bgColor || "#222529";
+
+  const updateWidth = () => {
+    if (inputContainerRef.current) {
+      const { width } = inputContainerRef?.current?.getBoundingClientRect();
+      setInputContainerWidth(width);
+    }
+  };
+
+  useEffect(() => {
+    updateWidth();
+  },[])
 
   useEffect(() => {
     if (editProps?.isEditing) {
@@ -445,18 +459,18 @@ const ChatInput = ({
   }
 
   return (
+    <div ref={inputContainerRef} style={{ height: 'auto', width: '100%' }}>
+      <EditPanel
+        width={inputContainerWidth}
+        message={editProps?.message}
+        isEditing={editProps?.isEditing}
+        isReplying={editProps?.isReplying}
+        closePanel={() => setEditDetails(undefined)}
+      />
     <div
       style={{ backgroundColor: theme?.background?.secondary  }}
       className={styles.input}
     >
-      {
-        <EditPanel
-          message={editProps?.message}
-          isEditing={editProps?.isEditing}
-          isReplying={editProps?.isReplying}
-          closePanel={() => setEditDetails(undefined)}
-        />
-      }
       <div className={styles.input__wrap}>
         <div className={styles.input__icon}>
           {!audioBlob && (
@@ -579,6 +593,7 @@ const ChatInput = ({
           </div>
         ) : null}
       </div>
+    </div>
     </div>
   );
 };

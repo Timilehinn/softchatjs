@@ -6,12 +6,13 @@ export default defineConfig({
   dts: true,
   entry: ['src/index.ts'], 
   format: ["esm"],
-  sourcemap: false,
-  minify: false,
+  sourcemap: true,
   target: "esnext",
   outDir: "dist",
+  splitting: false,
   skipNodeModulesBundle: true,
   plugins: [cssModulesPlugin({ inject: true })],
+  minify: true,
   loader: {
     '.js': 'jsx',
     '.css': 'local-css'
