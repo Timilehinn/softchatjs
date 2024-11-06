@@ -15,8 +15,10 @@ const geistMono = localFont({
   variable: "--font-geist-mono",
 });
 
-
-const client = ChatClient.getInstance({ projectId: "5909b61d-e6be-47b5-bb54-a60e56344580", subId: "ef066542-6e13-4f25-a6c3-d3e3671e4662" })
+const client = ChatClient.getInstance({
+  projectId: "5909b61d-e6be-47b5-bb54-a60e56344580",
+  subId: "ef066542-6e13-4f25-a6c3-d3e3671e4662",
+});
 
 export default function RootLayout({
   children,
@@ -30,8 +32,8 @@ export default function RootLayout({
         <meta name="description" content="Description" />
       </head>
       <AppProvider client={client}>
-      <ChatClientProvider
-        client={client}
+        <ChatClientProvider
+          client={client}
           // theme: {
           //   background: {
           //     primary: "white",
@@ -62,11 +64,11 @@ export default function RootLayout({
           //     emojiPickerTheme: "light",
           //   },
           // },
-      >
-        <body className={`${geistSans.variable} ${geistMono.variable}`}>
-          <>{children}</>
-        </body>
-      </ChatClientProvider>
+        >
+          <body className={`${geistSans.variable} ${geistMono.variable}`}>
+            <>{children}</>
+          </body>
+        </ChatClientProvider>
       </AppProvider>
     </html>
   );

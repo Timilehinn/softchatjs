@@ -6,10 +6,9 @@
     "paths": {
       "@/*": ["./*"]
     },
-    "jsx": "react-native",
+    "jsx": "react-jsx",
     "allowSyntheticDefaultImports": true,
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "moduleResolution": "node",
     "strict": false,
     "skipLibCheck": true,
     "noEmit": false,

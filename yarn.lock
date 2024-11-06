@@ -2536,15 +2536,15 @@
   dependencies:
     web-streams-polyfill "^3.1.1"
 
-"@repo/eslint-config@*", "@repo/eslint-config@file:C:\\Users\\makin\\MSIDocs\\Pacavel\\softchatjs-2\\packages\\eslint-config":
+"@repo/eslint-config@*", "@repo/eslint-config@file:C:\\Users\\makin\\MSIDocs\\Pacavel\\softchatjsV2\\packages\\eslint-config":
   version "0.0.0"
   resolved "file:packages/eslint-config"
 
-"@repo/typescript-config@*", "@repo/typescript-config@file:C:\\Users\\makin\\MSIDocs\\Pacavel\\softchatjs-2\\packages\\typescript-config":
+"@repo/typescript-config@*", "@repo/typescript-config@file:C:\\Users\\makin\\MSIDocs\\Pacavel\\softchatjsV2\\packages\\typescript-config":
   version "0.0.0"
   resolved "file:packages/typescript-config"
 
-"@repo/ui@*", "@repo/ui@file:C:\\Users\\makin\\MSIDocs\\Pacavel\\softchatjs-2\\packages\\ui":
+"@repo/ui@*", "@repo/ui@file:C:\\Users\\makin\\MSIDocs\\Pacavel\\softchatjsV2\\packages\\ui":
   version "0.0.0"
   resolved "file:packages/ui"
   dependencies:
@@ -10874,7 +10874,7 @@ socks@^2.8.3:
     ip-address "^9.0.5"
     smart-buffer "^4.2.0"
 
-softchatjs-core@*, "softchatjs-core@file:C:\\Users\\makin\\MSIDocs\\Pacavel\\softchatjs-2\\packages\\softchatjs-core":
+softchatjs-core@*, "softchatjs-core@file:C:\\Users\\makin\\MSIDocs\\Pacavel\\softchatjsV2\\packages\\softchatjs-core":
   version "2.9.2"
   resolved "file:packages/softchatjs-core"
   dependencies:
@@ -10888,7 +10888,7 @@ softchatjs-core@*, "softchatjs-core@file:C:\\Users\\makin\\MSIDocs\\Pacavel\\sof
     undici "^6.19.7"
     ws "^8.18.0"
 
-"softchatjs-expo-app-demo@file:C:\\Users\\makin\\MSIDocs\\Pacavel\\softchatjs-2\\apps\\expo-app-demo":
+"softchatjs-expo-app-demo@file:C:\\Users\\makin\\MSIDocs\\Pacavel\\softchatjsV2\\apps\\expo-app-demo":
   version "1.0.0"
   resolved "file:apps/expo-app-demo"
   dependencies:
@@ -10919,7 +10919,7 @@ softchatjs-core@*, "softchatjs-core@file:C:\\Users\\makin\\MSIDocs\\Pacavel\\sof
     react-native-web "~0.19.10"
     softchatjs-react-native "*"
 
-"softchatjs-react-demo@file:C:\\Users\\makin\\MSIDocs\\Pacavel\\softchatjs-2\\apps\\react-app-demo":
+"softchatjs-react-demo@file:C:\\Users\\makin\\MSIDocs\\Pacavel\\softchatjsV2\\apps\\react-app-demo":
   version "0.1.0"
   resolved "file:apps/react-app-demo"
   dependencies:
@@ -10929,7 +10929,7 @@ softchatjs-core@*, "softchatjs-core@file:C:\\Users\\makin\\MSIDocs\\Pacavel\\sof
     react-dom "18.3.1"
     softchatjs-react "*"
 
-softchatjs-react-native@*, "softchatjs-react-native@file:C:\\Users\\makin\\MSIDocs\\Pacavel\\softchatjs-2\\packages\\softchatjs-react-native":
+softchatjs-react-native@*, "softchatjs-react-native@file:C:\\Users\\makin\\MSIDocs\\Pacavel\\softchatjsV2\\packages\\softchatjs-react-native":
   version "3.0.5"
   resolved "file:packages/softchatjs-react-native"
   dependencies:
@@ -10941,9 +10941,10 @@ softchatjs-react-native@*, "softchatjs-react-native@file:C:\\Users\\makin\\MSIDo
     expo-haptics "^13.0.1"
     lodash "^4.17.21"
     moment "^2.30.1"
-    softchatjs-core "*"
+    source-map-loader "^5.0.0"
+    ts-loader "^9.5.1"
 
-softchatjs-react@*, "softchatjs-react@file:C:\\Users\\makin\\MSIDocs\\Pacavel\\softchatjs-2\\packages\\softchatjs-react":
+softchatjs-react@*, "softchatjs-react@file:C:\\Users\\makin\\MSIDocs\\Pacavel\\softchatjsV2\\packages\\softchatjs-react":
   version "1.0.0"
   resolved "file:packages/softchatjs-react"
   dependencies:
