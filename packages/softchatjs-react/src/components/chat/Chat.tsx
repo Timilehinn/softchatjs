@@ -14,7 +14,6 @@ import styles from "./chat.module.css";
 import ChatInput from "../inputs/chat-input";
 import MessageList from "../conversation-list/conversation-list";
 import { ConversationList as MainList } from "../user-conversations";
-import { SoftChatContext } from "../../providers/softChatProvider";
 import {
   ConversationItem,
   useChatState,
@@ -89,8 +88,10 @@ const Chat = (props: ChatProps) => {
   };
 
   useEffect(() => {
-    client.initializeUser(props.user);
-  },[])
+    if(client){
+      client.initializeUser(props.user);
+    }
+  },[client])
 
   useEffect(() => {
     document.addEventListener("mousedown", closeGeneralMenu);
@@ -170,7 +171,7 @@ const Chat = (props: ChatProps) => {
   };
 
   const clearUnread = () => {
-    if(client){
+    if(client && activeConversation){
       const messageIds = activeConversation.unread;
       const msClient = client.messageClient(
         activeConversation.conversation.conversationId
@@ -180,7 +181,6 @@ const Chat = (props: ChatProps) => {
         messageIds,
       });
     }
-   
   };
 
   useEffect(() => {
@@ -225,16 +225,19 @@ const Chat = (props: ChatProps) => {
     }
 
     return () => {
-      client.unsubscribe("started_typing" as any, handleTypingStarted);
-      client.unsubscribe("stopped_typing" as any, handleTypingStopped);
-      client.unsubscribe("deleted_message" as any, handleDeletedMessage);
-      client.unsubscribe("edited_message" as any, handleEditedMessage);
-      client.unsubscribe("new_message" as any, handleMessage);
-      client.unsubscribe("connection_changed" as any, handleConnectionChanged);
-      client.unsubscribe(
-        "conversation_list_meta_changed" as any,
-        handleConversationsListChanged
-      );
+      if(client){
+        client.unsubscribe("started_typing" as any, handleTypingStarted);
+        client.unsubscribe("stopped_typing" as any, handleTypingStopped);
+        client.unsubscribe("deleted_message" as any, handleDeletedMessage);
+        client.unsubscribe("edited_message" as any, handleEditedMessage);
+        client.unsubscribe("new_message" as any, handleMessage);
+        client.unsubscribe("connection_changed" as any, handleConnectionChanged);
+        client.unsubscribe(
+          "conversation_list_meta_changed" as any,
+          handleConversationsListChanged
+        );
+      }
+      
     };
   }, [client, activeConversation]);
 
@@ -257,18 +260,22 @@ const Chat = (props: ChatProps) => {
       return;
     }
     try {
-      const getMoreMessages = async () => {
-        setFetchingMore(true);
-        const messageList = (await client
-          .messageClient(activeConversation?.conversation?.conversationId!)
-          .getMessages(presentPage)) as Array<Message>;
-        setMessages((prev) => {
-          return [...messageList, ...prev];
-        });
-        setScrollToKey(messages[0].messageId);
-      };
+      if(client){
+        const getMoreMessages = async () => {
+          setFetchingMore(true);
+          const messageList = (await client
+            .messageClient(activeConversation?.conversation?.conversationId!)
+            .getMessages(presentPage)) as Array<Message>;
+          setMessages((prev) => {
+            return [...messageList, ...prev];
+          });
+          if(messages[0]){
+            setScrollToKey(messages[0].messageId);
+          }
+        };
+        getMoreMessages();
+      }
 
-      getMoreMessages();
     } catch (err) {
       console.error(err);
     } finally {
