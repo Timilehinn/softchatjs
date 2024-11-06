@@ -1,6 +1,7 @@
 import { createContext, useContext } from "react";
 import ChatClient from "softchatjs-core";
 
+
 export const AppProviderContext = createContext<{ client: ChatClient | null }>({
   client: null,
 });

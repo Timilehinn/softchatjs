@@ -1,6 +1,7 @@
 "use client";
 import styles from "./page.module.css";
 import { Chat } from "softchatjs-react";
+import "softchatjs-react/dist/index.css"
 import { useAppProvider } from "./context/AppProvider";
 import { useEffect } from "react";
 

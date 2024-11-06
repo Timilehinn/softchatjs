@@ -33,13 +33,6 @@
     "postcss": "^8.4.47",
     "style-loader": "^4.0.0"
   },
-  "exports": {
-    ".": {
-      "require": "./dist/index.js",
-      "import": "./dist/index.mjs",
-      "types": "./dist/index.d.ts"
-    }
-  },
   "sideEffects": [
     "*.css"
   ],

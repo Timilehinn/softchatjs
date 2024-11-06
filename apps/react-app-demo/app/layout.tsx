@@ -6,6 +6,7 @@ import { ChatClientProvider } from "softchatjs-react";
 import ChatClient from "softchatjs-core";
 import { AppProvider } from "./context/AppProvider";
 
+
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
