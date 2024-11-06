@@ -440,7 +440,7 @@ const ChatInput = ({
 
   return (
     <div
-      style={{ backgroundColor: theme?.background?.secondary || "#1b1d21" }}
+      style={{ backgroundColor: theme?.background?.secondary  }}
       className={styles.input}
     >
       {

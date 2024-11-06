@@ -286,7 +286,7 @@ const Chat = (props: ChatProps) => {
 
   return (
     <div
-      style={{ background: theme?.background?.primary || "#1b1d21" }}
+      style={{ background: theme?.background?.primary  }}
       className={styles.chat}
     >
       <div
