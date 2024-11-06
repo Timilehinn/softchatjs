@@ -191,6 +191,8 @@ const MessageList = (props: MessageListProps) => {
     }
   }, []);
 
+
+  // Get's position of last message before pagination
   useLayoutEffect(() => {
     if (
       !scrollToKey ||
