@@ -1,4 +1,4 @@
-import {
+import React, {
   Dispatch,
   SetStateAction,
   useContext,
@@ -8,7 +8,6 @@ import {
 import EmojiPicker from "emoji-picker-react";
 import styles from "./emoji.module.css";
 import ChatClient, { Message } from "softchatjs-core";
-import { SoftChatContext } from "../../providers/softChatProvider";
 import { CiFaceSmile } from "react-icons/ci";
 import { BsReply } from "react-icons/bs";
 import { AiOutlineDelete } from "react-icons/ai";
@@ -164,7 +163,7 @@ export const InputEmojis = ({
       onEmojiClick={(e) => {
         onEmojiPick(e.emoji);
       }}
-      theme={config?.theme?.input?.emojiPickerTheme || ("dark" as any)}
+      theme={config?.theme?.input?.emojiPickerTheme as any}
     />
   );
 };

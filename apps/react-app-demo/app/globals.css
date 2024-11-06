@@ -33,6 +33,32 @@ a {
   text-decoration: none;
 }
 
+/* Styling for Webkit browsers (Chrome, Safari, Edge) */
+div::-webkit-scrollbar {
+  width: 10px;  /* Set the width of the scrollbar */
+}
+
+div::-webkit-scrollbar-thumb {
+  background-color: #555; /* Dark thumb color */
+  border-radius: 10px; /* Rounded corners for the thumb */
+}
+
+div::-webkit-scrollbar-thumb:hover {
+  background-color: #888; /* Lighter thumb color on hover */
+}
+
+div::-webkit-scrollbar-track {
+  background: #333; /* Dark track color */
+  border-radius: 10px;
+}
+
+/* Firefox-specific styles */
+div {
+  scrollbar-width: thin; /* Set scrollbar width */
+  scrollbar-color: #555 #333; /* thumb color and track color */
+}
+
+
 @media (prefers-color-scheme: dark) {
   html {
     color-scheme: dark;

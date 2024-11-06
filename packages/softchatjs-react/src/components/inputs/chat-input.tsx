@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import styles from "./input.module.css";
 import ChatClient, { Media, Message } from "softchatjs-core";
 import {
@@ -286,6 +286,12 @@ const ChatInput = ({
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && message?.message?.length) { // Check if Enter is pressed and message is not empty
+      sendHandler()
+    }
+  };
+
   const addAudioElement = (blob: any) => {
     const url = URL.createObjectURL(blob);
     const audio = document.createElement("audio");
@@ -492,6 +498,7 @@ const ChatInput = ({
                   background: inputBg,
                   color: theme?.input?.textColor || "white",
                 }}
+                onKeyDown={handleKeyDown}
                 ref={textInputRef}
                 value={message?.message}
                 onChange={(e) =>

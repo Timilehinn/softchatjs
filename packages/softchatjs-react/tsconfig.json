@@ -4,6 +4,7 @@
     "isolatedModules": false,
     "baseUrl": ".",
     "paths": {
+      // "@/*": ["./*.ts"]
       "@/*": ["./*"]
     },
     "jsx": "react-jsx",
@@ -14,6 +15,6 @@
     "noEmit": false,
     "noEmitOnError": false
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "**/*.css"],
   "exclude": ["node_modules"]
 }

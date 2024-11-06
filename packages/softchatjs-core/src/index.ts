@@ -13,6 +13,7 @@ export type {
   ChatEventGenerics,
   ConversationListMeta,
   SendMessageGenerics,
+  Reaction
 } from "./types";
 export { Emoticon } from './emoticon.type'
 export { generateFillerTimestamps, generateConversationId, generateId } from './utils'

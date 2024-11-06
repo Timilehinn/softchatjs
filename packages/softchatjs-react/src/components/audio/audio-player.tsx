@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import "./audio-recorder.css";
+// import "./audio-recorder.css";
 import { PauseIcon, PlayIcon } from "../assets/icons";
 import { convertToMinutes } from "../../helpers/date";
 import { FaSpinner } from "react-icons/fa6";

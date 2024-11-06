@@ -1,4 +1,4 @@
-import {
+import React, {
   Dispatch,
   Ref,
   SetStateAction,
@@ -8,6 +8,7 @@ import {
   useRef,
   useState,
   useLayoutEffect,
+  forwardRef
 } from "react";
 import styles from "./conversation-list.module.css";
 import ChatClient, { Message } from "softchatjs-core";
@@ -47,7 +48,7 @@ type MessageListProps = {
   renderChatHeader?: () => JSX.Element;
 };
 
-const MessageList = (props: MessageListProps) => {
+const MessageList = forwardRef((props: MessageListProps, ref: any) => {
   const {
     messages = [],
     setEditDetails,
@@ -72,7 +73,7 @@ const MessageList = (props: MessageListProps) => {
   const [quoteId, setQuoteId] = useState("");
   const optionsMenuRef: any = useRef(null);
   const emojiPickerRef: any = useRef(null);
-  const chatContainerRef: any = useRef<HTMLDivElement>(null);
+  // const ref: any = useRef<HTMLDivElement>(null);
   const [refMap, setRefMap] = useState<{ [key: string]: any }>({});
   const { activeConversation } = useChatState();
   const { config } = useChatClient();
@@ -175,11 +176,11 @@ const MessageList = (props: MessageListProps) => {
   console.log(sectionedMessages, "sce");
 
   // const handleScroll = () => {
-  //   if (chatContainerRef.current.scrollTop === 0) {
-  //     const scrollHeightBeforeFetch = chatContainerRef.current.scrollHeight;
+  //   if (ref.current.scrollTop === 0) {
+  //     const scrollHeightBeforeFetch = ref.current.scrollHeight;
   //     setPresentPage((prevPage) => prevPage + 1); // Increment page number
-  //     const scrollHeightAfterFetch = chatContainerRef.current.scrollHeight;
-  //     chatContainerRef.current.scrollTop =
+  //     const scrollHeightAfterFetch = ref.current.scrollHeight;
+  //     ref.current.scrollTop =
   //       scrollHeightAfterFetch - scrollHeightBeforeFetch;
   //   }
   // };
@@ -192,34 +193,29 @@ const MessageList = (props: MessageListProps) => {
   }, []);
 
 
-  // Get's position of last message before pagination
-  useLayoutEffect(() => {
-    if (
-      !scrollToKey ||
-      (chatContainerRef.current as HTMLDivElement).scrollTop !== 0
-    )
-      return;
-    if (itemRefs.current[scrollToKey]) {
-      itemRefs.current[scrollToKey].scrollIntoView();
-    }
-  }, [scrollToKey]);
+  // // Get's position of last message before pagination
+  // useLayoutEffect(() => {
+  //   if (
+  //     !scrollToKey ||
+  //     (ref.current as HTMLDivElement).scrollTop !== 0
+  //   )
+  //     return;
+  //   if (itemRefs.current[scrollToKey]) {
+  //     itemRefs.current[scrollToKey].scrollIntoView();
+  //   }
+  // }, [scrollToKey]);
 
   return (
-    <div ref={chatContainerRef} onScroll={onScroll} className={styles.wrapper}>
-      <ChatTopNav
-        setMainListOpen={props.setMainListOpen}
-        message={activeConversation?.lastMessage!}
-        renderChatHeader={renderChatHeader}
-      />
+    <div ref={ref} onScroll={onScroll} className={styles.wrapper}>
       {fetchingMore && (
         <div className={styles.loading}>
           <Text styles={{ color: "white" }} size="sm" text="Loading more..." />
         </div>
       )}
-
       {sectionedMessages.map((_item, i) => {
         return (
           <div
+            key={i}
             style={{
               borderTop: `${config?.theme?.hideDivider ? "0" : "1"}px solid ${
                 theme?.divider || "rgba(128, 128, 128, 0.136)"
@@ -292,47 +288,10 @@ const MessageList = (props: MessageListProps) => {
       {recipientTyping && (
         <TypingIndicator message={sectionedMessages[0]?.messages[0]} />
       )}
-      <div ref={messagesEndRef} style={{ height: "20px", width: "100%" }} />
+      <div ref={messagesEndRef} style={{ height: "1px", width: "100%" }} />
     </div>
   );
-};
+})
 
-const ChatTopNav = ({
-  message,
-  setMainListOpen,
-  renderChatHeader,
-}: {
-  message: Message;
-  setMainListOpen: any;
-  renderChatHeader?: () => JSX.Element;
-}) => {
-  const { client, config } = useChatClient();
-  const { theme } = config;
-
-  return (
-    <div
-      style={{ backgroundColor: theme?.background?.secondary || "#222529" }}
-      className={styles.topnav}
-    >
-      {renderChatHeader ? (
-        renderChatHeader()
-      ) : (
-        <div
-          style={{ paddingLeft: "10px", display: "flex", alignItems: "center" }}
-        >
-          <div className={styles.topnav__menu} style={{ marginRight: "10px" }}>
-            <MdOutlineMenu
-              color={theme?.icon}
-              onClick={() => setMainListOpen(true)}
-              size={22}
-            />
-          </div>
-
-          <Avartar message={message} />
-        </div>
-      )}
-    </div>
-  );
-};
 
 export default MessageList;

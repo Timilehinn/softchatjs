@@ -1,5 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
-
+import React, { useContext, useEffect, useRef, useState, useMemo } from "react";
 import ChatClient, {
   ChatEventGenerics,
   Conversation,
@@ -20,6 +19,7 @@ import {
 } from "../../providers/clientStateProvider";
 import { useChatClient } from "../../providers/chatClientProvider";
 import { ImageViewer } from "../modals";
+import { ChatTopNav } from "./ChatTopNav";
 
 type ChatProps = {
   renderChatBubble?: (message: Message) => JSX.Element;
@@ -57,11 +57,11 @@ const Chat = (props: ChatProps) => {
   const [mainListOpen, setMainListOpen] = useState(true);
   const [showUserList, setShowUserList] = useState(false);
   const [scrollToKey, setScrollToKey] = useState<string>("");
-  const messagesEndRef: any = useRef<null | HTMLDivElement>(null);
+  const messagesEndRef = useRef<null | HTMLDivElement>(null);
   const [forceScrollCount, setForceScrollCount] = useState(0);
   const [recipientId, setRecipientId] = useState("");
-
   const conversationId = activeConversation?.conversation.conversationId!;
+  const [isSmallScreen, setIsSmallScreen] = useState(false);
 
   const { theme } = config;
 
@@ -94,6 +94,25 @@ const Chat = (props: ChatProps) => {
   },[client])
 
   useEffect(() => {
+    const checkScreenSize = () => {
+      const screenWidth = window.innerWidth;
+      const screenHeight = window.innerHeight;
+
+      if (screenWidth < 1024 || screenHeight < 768) {
+        setIsSmallScreen(true);
+      } else {
+        setIsSmallScreen(false);
+      }
+    };
+
+    checkScreenSize();
+
+    window.addEventListener('resize', checkScreenSize);
+
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
+
+  useEffect(() => {
     document.addEventListener("mousedown", closeGeneralMenu);
   }, [generalMenuRef, closeGeneralMenu]);
 
@@ -108,7 +127,13 @@ const Chat = (props: ChatProps) => {
           return [...prev, event.message];
         });
         setForceScrollCount(forceScrollCount + 1); //((:)
-        messagesEndRef.current.scrollIntoView({});
+        setTimeout(() => {
+          messagesEndRef?.current?.scrollIntoView({
+            block: "end",
+            behavior: "smooth"
+          })
+        },300)
+       
       }
     }
   };
@@ -283,6 +308,56 @@ const Chat = (props: ChatProps) => {
     }
   }, [presentPage]);
   
+  const showMainList = useMemo(() => {
+    if(isSmallScreen){
+      return false
+    }
+    return mainListOpen
+  },[mainListOpen, isSmallScreen]);
+
+  if(isSmallScreen && activeConversation){
+    return (
+      <div className={styles.chat__messages} style={{ width: '100%' }}>
+        <ChatTopNav
+          setMainListOpen={setMainListOpen}
+          message={activeConversation?.lastMessage!}
+          renderChatHeader={props.renderChatHeader}
+        />
+        <MessageList
+          setEditDetails={setEditDetails}
+          messages={messages}
+          mousePosition={position}
+          conversationId={conversationId}
+          client={client}
+          textInputRef={textInputRef}
+          presentPage={presentPage}
+          setPresentPage={setpresentPage}
+          recipientTyping={recipientTyping}
+          setMainListOpen={setMainListOpen}
+          recipientId={recipientId}
+          scrollToKey={scrollToKey}
+          fetchingMore={fecthingmore}
+          messagesEndRef={messagesEndRef}
+          renderChatBubble={props.renderChatBubble}
+          renderChatHeader={props.renderChatHeader}
+        />
+        <ChatInput
+          closeGeneralMenu={() => setMenuDetails({ element: null })}
+          generalMenuRef={generalMenuRef}
+          setMenuDetails={setMenuDetails}
+          menuDetails={menuDetails}
+          setEditDetails={setEditDetails}
+          editProps={editDetails as any}
+          recipientId={recipientId}
+          conversationId={conversationId}
+          client={client}
+          recipientTyping={recipientTyping}
+          textInputRef={textInputRef}
+          renderChatInput={props.renderChatInput}
+        />
+      </div>
+    )
+  }
 
   return (
     <div
@@ -290,11 +365,7 @@ const Chat = (props: ChatProps) => {
       className={styles.chat}
     >
       <div
-        className={`${
-          mainListOpen
-            ? styles.chat__conversations
-            : styles.chat__conversations__hidden
-        }`}
+        className={`${styles.chat__conversations}`}
       >
         {props.renderConversationList ? (
           props.renderConversationList({
@@ -302,7 +373,7 @@ const Chat = (props: ChatProps) => {
             onCoversationItemClick: (item) => {
               setActiveConversation(item);
               setMainListOpen(false);
-            },
+            }
           })
         ) : (
           <MainList
@@ -316,6 +387,11 @@ const Chat = (props: ChatProps) => {
       </div>
       {activeConversation && (
         <div className={styles.chat__messages}>
+           <ChatTopNav
+              setMainListOpen={setMainListOpen}
+              message={activeConversation?.lastMessage!}
+              renderChatHeader={props.renderChatHeader}
+            />
           <MessageList
             setEditDetails={setEditDetails}
             messages={messages}

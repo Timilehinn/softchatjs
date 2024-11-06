@@ -1,18 +1,24 @@
-
-
-
 .chat {
   height: 100vh;
   display: flex;
   overflow:hidden;
-  
-
 }
 
 .chat__conversations{
   width: 30%;
   height: 100%;
- 
+}
+
+.topnav{
+  height: 60px;
+  width: 100%;
+  top: 0;
+  z-index: 2000;
+  display: flex;
+  /* justify-content: center; */
+  align-items: center;
+
+  
 }
 
 .chat__conversations__hidden{

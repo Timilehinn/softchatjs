@@ -2,8 +2,8 @@ import dayjs from "dayjs";
 import moment from 'moment';
 
 
-const localizedFormat = require("dayjs/plugin/localizedFormat");
-const calendarFormat = require("dayjs/plugin/calendar");
+import localizedFormat from "dayjs/plugin/localizedFormat";
+import calendarFormat from "dayjs/plugin/calendar";
 dayjs.extend(localizedFormat);
 dayjs.extend(calendarFormat);
 

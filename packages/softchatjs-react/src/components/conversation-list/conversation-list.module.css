@@ -1,16 +1,11 @@
 .wrapper{
-   
-   height: 92vh;
-   overflow-y:scroll;
-   padding-top: 50px;
- overflow-x: hidden;
- padding-top :100px;
-   
- 
+  height: calc(100vh - 80px - 60px);
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .wrapper__sec{
-  padding: 20px 0px 20px 0px;
+  /* padding: 20px 0px 20px 0px; */
 }
 
 .wrapper__date{
@@ -24,21 +19,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
- 
 }
 
-.topnav{
-  height: 60px;
-  width: 70%;
-  position: absolute;
-  top: 0;
-  z-index: 2000;
-  display: flex;
-  /* justify-content: center; */
-  align-items: center;
-
-  
-}
 
 .loading{
   top:70px;

@@ -1,21 +1,15 @@
 .input {
-
-  position: absolute;
- bottom: 0px;
-  padding: 10px 10px 10px 10px;
-
-  width: 70%;
-  /* display: flex;
+  height: 80px;
+  width: 100%;
+  display: flex;
   align-items: center;
   z-index: 600;
-  padding-bottom: 20px; */
 }
 
 .input__wrap{
   display: flex;
   align-items: center;
   z-index: 600;
-  padding-bottom: 20px;
   width: 100%;
 }
 

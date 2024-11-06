@@ -13,5 +13,5 @@ export default defineConfig({
   loader: {
     '.js': 'jsx',
   },
-  external: ['softchatjs-core']
+  external: ['softchatjs-core', 'react', 'react-dom'],
 })

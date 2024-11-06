@@ -1,4 +1,4 @@
-import {
+import React, {
   Dispatch,
   SetStateAction,
   useContext,
@@ -15,8 +15,7 @@ import { formatMessageTime } from "../../helpers/date";
 import OptionsPanel from "../options-panel/options-panel";
 import { EmojiPanel, ReactionPanel } from "../emoji";
 import EmojiPicker from "emoji-picker-react";
-import { Media, Reaction } from "softchatjs-core/dist/types";
-import { SoftChatContext } from "../../providers/softChatProvider";
+import { Media, Reaction } from "softchatjs-core";
 import { useChatClient } from "../../providers/chatClientProvider";
 import { ThreeDots } from "react-loader-spinner";
 import { BsCheck, BsCheckAll, BsClock, BsX } from "react-icons/bs";
