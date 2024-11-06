@@ -51,7 +51,7 @@ export const ConversationList = ({
 
   return (
     <div
-      style={{ background: config?.theme?.background?.secondary || "#202326" }}
+      style={{ background: config?.theme?.background?.secondary  }}
       className={styles.list}
     >
       {conversations.map((item, index) => (
@@ -202,25 +202,10 @@ const UserList = ({ userListRef }: { userListRef: any }) => {
 
   const dummyUserList = [
     {
-      id: "80",
+      id: "20",
       name: "Romanreins",
     },
-    {
-      id: "50",
-      name: "mic",
-    },
-    {
-      id: "200",
-      name: "tom",
-    },
-    {
-      id: "250",
-      name: "sheldon",
-    },
-    {
-      id: "260",
-      name: "raj",
-    },
+   
   ];
 
   const startConvo = useCallback(() => {
