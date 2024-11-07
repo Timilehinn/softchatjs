@@ -1,4 +1,10 @@
-import React, { Dispatch, SetStateAction, useEffect, useState, useRef } from "react";
+import React, {
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useState,
+  useRef,
+} from "react";
 import styles from "./input.module.css";
 import ChatClient, { Media, Message } from "softchatjs-core";
 import {
@@ -73,7 +79,7 @@ const ChatInput = ({
   const [audioRecorder, setAudioRecorder] = useState<MediaRecorder | null>(
     null
   );
-  const inputContainerRef = useRef<HTMLDivElement>()
+  const inputContainerRef = useRef<HTMLDivElement>();
   const [voiceMessageDuration, setVoiceMessageDuration] = useState(0);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [audioBlobPLaceHolder, setAudioBlobPlaceHolder] = useState<Blob | null>(
@@ -81,10 +87,10 @@ const ChatInput = ({
   );
   const [inputContainerWidth, setInputContainerWidth] = useState(0);
 
-
   const msClient = client.messageClient(conversationId);
   const { config } = useChatClient();
   const { theme } = config;
+  const { activeConversation } = useChatState();
 
   const primaryActionColor = theme?.icon || "white";
   const inputBg = config?.theme?.input.bgColor || "#222529";
@@ -98,7 +104,7 @@ const ChatInput = ({
 
   useEffect(() => {
     updateWidth();
-  },[])
+  }, []);
 
   useEffect(() => {
     if (editProps?.isEditing) {
@@ -301,8 +307,9 @@ const ChatInput = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && message?.message?.length) { // Check if Enter is pressed and message is not empty
-      sendHandler()
+    if (e.key === "Enter" && message?.message?.length) {
+      // Check if Enter is pressed and message is not empty
+      sendHandler();
     }
   };
 
@@ -343,6 +350,16 @@ const ChatInput = ({
     setAudioBlobPlaceHolder(null);
   };
 
+  if (
+    activeConversation.conversation.conversationType === ("admin-chat" as any)
+  ) {
+    return (
+      <div style={{padding:"20px"}}>
+        <Text size="xs"  text="Sending messages is not allowed in this chat." />
+      </div>
+    );
+  }
+
   if (isRecording) {
     return (
       <div
@@ -350,7 +367,7 @@ const ChatInput = ({
           backgroundColor: theme?.background?.secondary,
           justifyContent: "flex-end",
           width: "100%",
-          flex: 1
+          flex: 1,
         }}
         className={styles.input}
       >
@@ -460,7 +477,7 @@ const ChatInput = ({
   }
 
   return (
-    <div ref={inputContainerRef} style={{ height: 'auto', width: '100%' }}>
+    <div ref={inputContainerRef} style={{ height: "auto", width: "100%" }}>
       <EditPanel
         width={inputContainerWidth}
         message={editProps?.message}
@@ -469,134 +486,132 @@ const ChatInput = ({
         closePanel={() => setEditDetails(undefined)}
       />
       {files.length || audioBlob ? (
-            <ChatAttachments
-        width={inputContainerWidth}
-              files={files}
-              setFiles={setFiles}
-              audioBlob={audioBlobPLaceHolder}
-              voiceMessageDuration={voiceMessageDuration}
-              cancelAudioAttachment={cancelAudioAttachments}
-            />
-          ) : null}
-    <div
-      style={{ backgroundColor: theme?.background?.secondary  }}
-      className={styles.input}
-    >
-      <div className={styles.input__wrap}>
-        <div className={styles.input__icon}>
-          {!audioBlob && (
-            <div>
-              <AiOutlinePlus
-                onClick={() =>
-                  setMenuDetails?.({
-                    element: (
-                      <AttachmentMenu
-                        closeGeneralMenu={closeGeneralMenu}
-                        setFiles={setFiles}
-                      />
-                    ),
-                  })
-                }
-                color={primaryActionColor}
-                size={22}
-              />
-            </div>
-          )}
-        </div>
-        <div
-          className={styles.input__inner}
-          style={{ flex: 1, fontStyle: "italic", background: inputBg }}
-        >
-          {renderChatInput ? (
-            renderChatInput({
-              onChange: (e) => {
-                setMessage({
-                  ...message,
-                  message: e,
-                });
-              },
-            })
-          ) : (
-            <div style={{ display: "flex", alignItems: "center" }}>
-              <input
-                style={{
-                  background: inputBg,
-                  color: theme?.input?.textColor || "white",
-                }}
-                onKeyDown={handleKeyDown}
-                ref={textInputRef}
-                value={message?.message}
-                onChange={(e) =>
+        <ChatAttachments
+          width={inputContainerWidth}
+          files={files}
+          setFiles={setFiles}
+          audioBlob={audioBlobPLaceHolder}
+          voiceMessageDuration={voiceMessageDuration}
+          cancelAudioAttachment={cancelAudioAttachments}
+        />
+      ) : null}
+      <div
+        style={{ backgroundColor: theme?.background?.secondary }}
+        className={styles.input}
+      >
+        <div className={styles.input__wrap}>
+          <div className={styles.input__icon}>
+            {!audioBlob && (
+              <div>
+                <AiOutlinePlus
+                  onClick={() =>
+                    setMenuDetails?.({
+                      element: (
+                        <AttachmentMenu
+                          closeGeneralMenu={closeGeneralMenu}
+                          setFiles={setFiles}
+                        />
+                      ),
+                    })
+                  }
+                  color={primaryActionColor}
+                  size={22}
+                />
+              </div>
+            )}
+          </div>
+          <div
+            className={styles.input__inner}
+            style={{ flex: 1, fontStyle: "italic", background: inputBg }}
+          >
+            {renderChatInput ? (
+              renderChatInput({
+                onChange: (e) => {
                   setMessage({
                     ...message,
-                    message: e.target.value,
-                  })
-                }
-                placeholder="Type your message"
-              />
+                    message: e,
+                  });
+                },
+              })
+            ) : (
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <input
+                  style={{
+                    background: inputBg,
+                    color: theme?.input?.textColor || "white",
+                  }}
+                  onKeyDown={handleKeyDown}
+                  ref={textInputRef}
+                  value={message?.message}
+                  onChange={(e) =>
+                    setMessage({
+                      ...message,
+                      message: e.target.value,
+                    })
+                  }
+                  placeholder="Type your message"
+                />
 
-              <CiFaceSmile
-                onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                className={styles.input__emoji}
-                size={24}
-                color={primaryActionColor}
-              />
-            </div>
-          )}
-
-          
-        </div>
-        <div className={styles.input__button}>
-          {audioBlob || message?.message || files.length ? (
-            <div style={{ marginRight: "10px" }}>
-              {sending ? (
-                "..."
-              ) : (
-                <VscSend
-                  onClick={sendHandler}
-                  size={22}
+                <CiFaceSmile
+                  onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                  className={styles.input__emoji}
+                  size={24}
                   color={primaryActionColor}
                 />
-              )}
+              </div>
+            )}
+          </div>
+          <div className={styles.input__button}>
+            {audioBlob || message?.message || files.length ? (
+              <div style={{ marginRight: "10px" }}>
+                {sending ? (
+                  "..."
+                ) : (
+                  <VscSend
+                    onClick={sendHandler}
+                    size={22}
+                    color={primaryActionColor}
+                  />
+                )}
+              </div>
+            ) : null}
+
+            {!files.length && (
+              <button
+                onClick={recordVoiceMessage}
+                style={{
+                  backgroundColor: "transparent",
+                  border: 0,
+                  cursor: "pointer",
+                }}
+              >
+                <AiOutlineAudio color={primaryActionColor} size={20} />
+              </button>
+            )}
+          </div>
+          {menuDetails.element ? (
+            <div className={styles.input__menu}>
+              <Menu
+                generalMenuRef={generalMenuRef}
+                element={menuDetails.element}
+              />
             </div>
           ) : null}
-
-          {!files.length && (
-            <button
-              onClick={recordVoiceMessage}
-              style={{
-                backgroundColor: "transparent",
-                border: 0,
-                cursor: "pointer",
-              }}
-            >
-              <AiOutlineAudio color={primaryActionColor} size={20} />
-            </button>
-          )}
+          {showEmojiPicker ? (
+            <div className={styles.input__emoji__picker}>
+              <InputEmojis
+                onEmojiPick={(e) => {
+                  setMessage({
+                    ...message,
+                    message: e,
+                  });
+                  setShowEmojiPicker(false);
+                }}
+              />
+            </div>
+          ) : null}
         </div>
-        {menuDetails.element ? (
-          <div className={styles.input__menu}>
-            <Menu
-              generalMenuRef={generalMenuRef}
-              element={menuDetails.element}
-            />
-          </div>
-        ) : null}
-        {showEmojiPicker ? (
-          <div className={styles.input__emoji__picker}>
-            <InputEmojis
-              onEmojiPick={(e) => {
-                setMessage({
-                  ...message,
-                  message: e,
-                });
-                setShowEmojiPicker(false);
-              }}
-            />
-          </div>
-        ) : null}
       </div>
-    </div>
     </div>
   );
 };
@@ -607,14 +622,14 @@ const ChatAttachments = ({
   cancelAudioAttachment,
   files,
   setFiles,
-  width
+  width,
 }: {
   audioBlob: Blob;
   voiceMessageDuration: number;
   files: any[];
   setFiles: any;
   cancelAudioAttachment: () => void;
-  width: number
+  width: number;
 }) => {
   const deleteAttachment = (id: string) => {
     const imgs = files.filter((i) => i.name !== id);
@@ -640,8 +655,17 @@ const ChatAttachments = ({
           <div onClick={cancelAudioAttachment} className={styles.audioCancel}>
             <MdCancel size={20} color="grey" />
           </div>
-          <div style={{ border: `1px solid ${theme.divider}`, borderRadius: '5px' }}>
-          <AudioPlayer style={{ padding: '15px' }} blob={audioBlob} duration={voiceMessageDuration} />
+          <div
+            style={{
+              border: `1px solid ${theme.divider}`,
+              borderRadius: "5px",
+            }}
+          >
+            <AudioPlayer
+              style={{ padding: "15px" }}
+              blob={audioBlob}
+              duration={voiceMessageDuration}
+            />
           </div>
         </div>
       ) : null}
@@ -651,7 +675,7 @@ const ChatAttachments = ({
             return (
               <div className={styles.chatPhotos__item}>
                 {item.type === "video/quicktime" ? (
-                  <video style={{  }} src={url} />
+                  <video style={{}} src={url} />
                 ) : (
                   <img src={url as any} alt="" />
                 )}
