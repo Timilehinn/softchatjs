@@ -127,7 +127,7 @@ export type ParticipantListInfo = {
   participantDetails: UserMeta
 } & Timetamps
 
-export type ConversationType = 'private-chat' | 'group-chat'
+export type ConversationType = 'private-chat' | 'group-chat' | "admin-chat"
 
 export type GroupChatMeta = {
   groupName: string,

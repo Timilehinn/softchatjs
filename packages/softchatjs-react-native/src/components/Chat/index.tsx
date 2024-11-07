@@ -6,7 +6,7 @@ import React, {
   useEffect,
   useRef,
   useState,
-  useMemo
+  useMemo,
 } from "react";
 import {
   View,
@@ -52,7 +52,7 @@ import {
 import { BottomSheetRef } from "../BottomSheet";
 import { format, isThisWeek } from "date-fns";
 import { useMessageState } from "../../contexts/MessageStateContext";
-import { MessagePlus } from "../../assets/icons";
+import { LockIcon, MessagePlus } from "../../assets/icons";
 import { Audio } from "expo-av";
 import { interpolate } from "react-native-reanimated";
 
@@ -65,9 +65,9 @@ type ChatProps = {
   renderChatBubble?: (props: Prettify<ChatBubbleRenderProps>) => void;
   renderChatInput?: (props: Prettify<ChatInputRenderProps>) => void;
   renderChatHeader?: (props: Prettify<ChatHeaderRenderProps>) => void;
-  participantId?: string
-  placeholder?: Children,
-  keyboardOffset?: number
+  participantId?: string;
+  placeholder?: Children;
+  keyboardOffset?: number;
   // participant?: UserMeta
 };
 
@@ -97,15 +97,17 @@ export default function Chat(props: ChatProps) {
     // participant,
     chatUser,
     placeholder,
-    keyboardOffset = Platform.OS === 'ios'? 10 : 0
+    keyboardOffset = Platform.OS === "ios" ? 10 : 0,
   } = props;
   const chatUserId = chatUser.uid;
-  const _conversationId = conversation.conversationId
+  const _conversationId = conversation.conversationId;
   const [permissionResponse, requestPermission] = Audio.usePermissions();
   const scrollRef = useRef<FlashList<Message | string> | null>(null);
   const inputRef = useRef<TextInput>(null);
   const emojiListRef = useRef<BottomSheetRef>(null);
-  const mediaOptionsRef = useRef<BottomSheetRef & { pickAttachment: () => void }>(null);
+  const mediaOptionsRef = useRef<
+    BottomSheetRef & { pickAttachment: () => void }
+  >(null);
   const messageOptionsRef = useRef<BottomSheetRef>(null);
   const [isTyping, showTyping] = useState(false);
   const [loadingMessages, setLoadingMessages] = useState(false);
@@ -118,10 +120,12 @@ export default function Chat(props: ChatProps) {
     activeVoiceMessage,
     unload,
   } = useMessageState();
-  const [ conversationMeta, setConversationMeta ] = useState<Conversation | null>(conversation)
-  const [messages, setMessages] = useState<Array<string | Message>>(conversation? [
-    ...conversation.messages.reverse(),
-  ]: []);
+  const [conversationMeta, setConversationMeta] = useState<Conversation | null>(
+    conversation
+  );
+  const [messages, setMessages] = useState<Array<string | Message>>(
+    conversation ? [...conversation.messages.reverse()] : []
+  );
   const [isEditing, setIsEditing] = useState(false);
   const [refMap, setRefMap] = useState<{
     [key: string]: { ref: RefObject<View> | null; index: number };
@@ -180,7 +184,7 @@ export default function Chat(props: ChatProps) {
   //   } catch (error) {
   //     throw new Error(error.message)
   //   }
-   
+
   // },[participantId, chatUser, client, conversationId]);
 
   useEffect(() => {
@@ -233,7 +237,9 @@ export default function Chat(props: ChatProps) {
     try {
       if (client && messages.length > 0) {
         setLoadingOlderMessages(true);
-        const olderMessages = (await client.messageClient(_conversationId).getMessages(currentPage)) as Array<Message>;
+        const olderMessages = (await client
+          .messageClient(_conversationId)
+          .getMessages(currentPage)) as Array<Message>;
         setMessages((prev) => {
           return restructureMessages([...prev, ...olderMessages.reverse()]);
         });
@@ -250,19 +256,17 @@ export default function Chat(props: ChatProps) {
 
   const getConversation = async () => {
     try {
-      if(client){
-        const conversation = await client
-        ?.messageClient(_conversationId)
-        .getConversation(_conversationId) as  Conversation
-        console.log(conversation, '---the conversation')
-        if(conversation){
+      if (client) {
+        const conversation = (await client
+          ?.messageClient(_conversationId)
+          .getConversation(_conversationId)) as Conversation;
+        console.log(conversation, "---the conversation");
+        if (conversation) {
           setConversationMeta(conversation);
         }
       }
-    } catch (error) {
-      
-    }
-  }
+    } catch (error) {}
+  };
 
   useEffect(() => {
     if (conversation) {
@@ -271,12 +275,11 @@ export default function Chat(props: ChatProps) {
         (id) => id !== client?.userMeta.uid
       );
       setRecipientId(recipients[0]);
-    }else{
+    } else {
       // getConversation();
       // setRecipientId(participantId)
     }
     getMessages();
-
   }, [conversation]);
 
   const handleNewMessages = (event: any) => {
@@ -630,7 +633,7 @@ export default function Chat(props: ChatProps) {
           setTimeout(() => {
             setActiveQuote(selectedMessage);
             inputRef.current?.focus();
-          },500)
+          }, 500);
         }}
         onStartEditing={() => {
           messageOptionsRef?.current?.close();
@@ -639,7 +642,7 @@ export default function Chat(props: ChatProps) {
           setTimeout(() => {
             inputRef?.current?.focus();
             setGlobalTextMessage(selectedMessage.message?.message || "");
-          },500)
+          }, 500);
         }}
         theme={theme}
       />
@@ -714,7 +717,7 @@ export default function Chat(props: ChatProps) {
                   paddingHorizontal: 5,
                   color: theme?.text.secondary,
                   fontSize: 11,
-                  fontFamily
+                  fontFamily,
                 }}
               >
                 {item}
@@ -745,7 +748,7 @@ export default function Chat(props: ChatProps) {
                 paddingHorizontal: 15,
                 color: theme?.text.secondary,
                 fontSize: 11,
-                fontFamily
+                fontFamily,
               }}
             >
               {item}
@@ -770,7 +773,7 @@ export default function Chat(props: ChatProps) {
           }}
           layout={layout}
           onLongPress={({ message, chatItemRef, isMessageOwner }) =>
-            onChatItemLongPress(message, chatItemRef, isMessageOwner)
+          conversation.conversationType !== "admin-chat"? onChatItemLongPress(message, chatItemRef, isMessageOwner) : null
           }
           inputRef={inputRef}
           position={chatUserId === item.from ? "right" : "left"}
@@ -790,23 +793,25 @@ export default function Chat(props: ChatProps) {
   );
 
   const renderPlaceholder = useCallback(() => {
-    if(placeholder) return placeholder
+    if (placeholder) return placeholder;
     return (
       <View
-            style={{
-              flex: 1,
-              height: Dimensions.get("window").height,
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <MessagePlus size={100} color={theme?.icon} />
-            <Text style={{ color: theme?.text.disabled, marginTop: 20, fontFamily }}>
-              Start by sending a message.
-            </Text>
-          </View>
-    )
-  },[placeholder])
+        style={{
+          flex: 1,
+          height: Dimensions.get("window").height,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <MessagePlus size={100} color={theme?.icon} />
+        <Text
+          style={{ color: theme?.text.disabled, marginTop: 20, fontFamily }}
+        >
+          Start by sending a message.
+        </Text>
+      </View>
+    );
+  }, [placeholder]);
 
   const chatInputProps: ChatInputRenderProps = {
     sendMessage: (externalInputRef: RefObject<TextInput>) =>
@@ -850,56 +855,53 @@ export default function Chat(props: ChatProps) {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={keyboardOffset}
       >
-        {messages.length === 0 ? renderPlaceholder() : (
-        <View
-          style={{
-            flex: 1,
-            height: "100%",
-          }}
-        >
-          <FlashList
-            ref={scrollRef}
-            inverted
-            onScroll={() => (isScrolling ? null : onStartedScrolling())}
-            data={messages}
-            keyExtractor={(_, index) => index.toString()}
-            renderItem={renderChatItem}
-            refreshControl={
-              <RefreshControl
-                refreshing={false}
-                onRefresh={getMessages}
-              />
-            }
-            showsHorizontalScrollIndicator={false}
-            ListHeaderComponent={messageListHeader}
-            ListFooterComponent={() => (
-              <View
-                style={{
-                  display: loadingOlderMessages ? "flex" : "none",
-                  paddingVertical: 10,
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Text
-                  style={{ color: theme?.text.disabled, fontFamily }}
+        {messages.length === 0 ? (
+          renderPlaceholder()
+        ) : (
+          <View
+            style={{
+              flex: 1,
+              height: "100%",
+            }}
+          >
+            <FlashList
+              ref={scrollRef}
+              inverted
+              onScroll={() => (isScrolling ? null : onStartedScrolling())}
+              data={messages}
+              keyExtractor={(_, index) => index.toString()}
+              renderItem={renderChatItem}
+              refreshControl={
+                <RefreshControl refreshing={false} onRefresh={getMessages} />
+              }
+              showsHorizontalScrollIndicator={false}
+              ListHeaderComponent={messageListHeader}
+              ListFooterComponent={() => (
+                <View
+                  style={{
+                    display: loadingOlderMessages ? "flex" : "none",
+                    paddingVertical: 10,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
                 >
-                  Loading older messages...
-                </Text>
-              </View>
-            )}
-            contentContainerStyle={{
-              paddingTop: 0,
-            }}
-            estimatedItemSize={100}
-            // onViewableItemsChanged={onViewRef.current}
-            viewabilityConfig={viewConfigRef.current}
-            onEndReached={() => {
-              console.log("end reached");
-              getOlderMessages();
-            }}
-          />
-        </View>
+                  <Text style={{ color: theme?.text.disabled, fontFamily }}>
+                    Loading older messages...
+                  </Text>
+                </View>
+              )}
+              contentContainerStyle={{
+                paddingTop: 0,
+              }}
+              estimatedItemSize={100}
+              // onViewableItemsChanged={onViewRef.current}
+              viewabilityConfig={viewConfigRef.current}
+              onEndReached={() => {
+                console.log("end reached");
+                getOlderMessages();
+              }}
+            />
+          </View>
         )}
 
         <View>
@@ -912,40 +914,61 @@ export default function Chat(props: ChatProps) {
               onClear={clearSelectedMessage}
             />
           )}
-          <View>
-            <>
-              {renderChatInput ? (
-                renderChatInput(chatInputProps)
-              ) : (
-                <ChatInput
-                  openEmojis={openEmojis}
-                  inputRef={inputRef}
-                  mediaOptionsRef={mediaOptionsRef}
-                  sendMessage={() =>
-                    isEditing ? sendEditedMessage() : sendMessage()
-                  }
-                  isLoading={connectionStatus.connecting || loadingMessages}
-                  conversationId={_conversationId}
-                  chatUserId={chatUserId}
-                  recipientId={recipientId}
-                  // selectedMessage={activeQuote}
-                  value={globalTextMessage}
-                  audioWaves={audioWaves}
-                  audioTime={audioTime}
-                  setValue={setGlobalTextMessage}
-                  onStopEditing={() => {
-                    setIsEditing(false);
-                    clearSelectedMessage();
-                  }}
-                  isEditing={isEditing}
-                  sendVoiceMessage={() => sendVoiceMessage()}
-                  onStartRecording={() => startRecording()}
-                  onDeleteRecording={() => deleteRecording()}
-                  isRecording={recording !== undefined}
-                />
-              )}
-            </>
-          </View>
+          {conversation.conversationType === "admin-chat" ? (
+            <View
+              style={{
+                height: 50,
+                width: "100%",
+                borderTopWidth: 1,
+                borderTopColor: theme.divider,
+                alignItems: "center",
+                flexDirection: 'row',
+                justifyContent: "center",
+              }}
+            >
+              <LockIcon size={15} />
+              <Text
+                style={{ marginStart: 5, fontFamily, fontSize: 14, color: theme.text.disabled }}
+              >
+               Only the Admin can send messages.
+              </Text>
+            </View>
+          ) : (
+            <View>
+              <>
+                {renderChatInput ? (
+                  renderChatInput(chatInputProps)
+                ) : (
+                  <ChatInput
+                    openEmojis={openEmojis}
+                    inputRef={inputRef}
+                    mediaOptionsRef={mediaOptionsRef}
+                    sendMessage={() =>
+                      isEditing ? sendEditedMessage() : sendMessage()
+                    }
+                    isLoading={connectionStatus.connecting || loadingMessages}
+                    conversationId={_conversationId}
+                    chatUserId={chatUserId}
+                    recipientId={recipientId}
+                    // selectedMessage={activeQuote}
+                    value={globalTextMessage}
+                    audioWaves={audioWaves}
+                    audioTime={audioTime}
+                    setValue={setGlobalTextMessage}
+                    onStopEditing={() => {
+                      setIsEditing(false);
+                      clearSelectedMessage();
+                    }}
+                    isEditing={isEditing}
+                    sendVoiceMessage={() => sendVoiceMessage()}
+                    onStartRecording={() => startRecording()}
+                    onDeleteRecording={() => deleteRecording()}
+                    isRecording={recording !== undefined}
+                  />
+                )}
+              </>
+            </View>
+          )}
         </View>
       </KeyboardAvoidingView>
       <EmojiSheet

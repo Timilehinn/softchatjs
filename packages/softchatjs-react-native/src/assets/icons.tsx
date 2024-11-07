@@ -1,4 +1,4 @@
-import React from 'react'
+import React from "react";
 import { View } from "react-native";
 import { Svg, Path, G, Defs, ClipPath, Rect } from "react-native-svg";
 
@@ -480,6 +480,19 @@ export const StopIcon = (props: Icon) => {
       />
       <Path
         d="M10 6V10H6V6H10ZM10 5H6C5.73478 5 5.48043 5.10536 5.29289 5.29289C5.10536 5.48043 5 5.73478 5 6V10C5 10.2652 5.10536 10.5196 5.29289 10.7071C5.48043 10.8946 5.73478 11 6 11H10C10.2652 11 10.5196 10.8946 10.7071 10.7071C10.8946 10.5196 11 10.2652 11 10V6C11 5.73478 10.8946 5.48043 10.7071 5.29289C10.5196 5.10536 10.2652 5 10 5Z"
+        fill={color}
+      />
+    </Svg>
+  );
+};
+
+export const LockIcon = (props: Icon) => {
+  const { size = 25, color = "black" } = props;
+
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M18 8H17V6C17 3.24 14.76 1 12 1C9.24 1 7 3.24 7 6V8H6C4.9 8 4 8.9 4 10V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V10C20 8.9 19.1 8 18 8ZM9 6C9 4.34 10.34 3 12 3C13.66 3 15 4.34 15 6V8H9V6ZM18 20H6V10H18V20ZM12 17C13.1 17 14 16.1 14 15C14 13.9 13.1 13 12 13C10.9 13 10 13.9 10 15C10 16.1 10.9 17 12 17Z"
         fill={color}
       />
     </Svg>

@@ -52,16 +52,14 @@ export const truncate = (str: string, len: number) => {
 }
 
 export const getConversationTitle = (userId: string, converstaion: Conversation) => {
-  if(converstaion.conversationType === 'private-chat'){
+  if(converstaion.conversationType !== 'group-chat'){
     const userInfos = getUserInfoWithId(userId, converstaion.participantList);
 
     const firstname = userInfos.receivingUser?.firstname
     const username = userInfos.receivingUser?.username
     return firstname? firstname : username
   }
-  if(converstaion.conversationType === 'group-chat') {
-    return converstaion.groupMeta?.groupName || 'no-groupname'
-  }
+  return converstaion.groupMeta?.groupName || 'no-groupname'
 }
 
 export const getUsernameInitials = (username: string) =>{
