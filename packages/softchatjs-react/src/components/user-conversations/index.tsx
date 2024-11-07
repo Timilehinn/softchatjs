@@ -28,18 +28,40 @@ export const ConversationList = ({
   showUserList,
   userListRef,
   renderAddConversationIcon,
+  renderConversationList,
 }: {
   setMainListOpen: any;
   setShowUserList: Dispatch<SetStateAction<boolean>>;
   showUserList: boolean;
   userListRef: any;
   renderAddConversationIcon?: () => JSX.Element;
+  renderConversationList?: (props: {
+    conversations: ConversationItem[];
+    onCoversationItemClick: (conversationItem: ConversationItem) => void;
+  }) => JSX.Element;
 }) => {
   const { client, config } = useChatClient();
   const { setActiveConversation, conversations } = useChatState();
   // const [conversations, setConversations] = useState<
   //   { conversation: Conversation; lastMessage: Message; unread: string[] }[]
   // >([]);
+
+  const renderAddMessage = () => {
+    return (
+      <div
+        onClick={() => {
+          setShowUserList(true);
+        }}
+        className={styles.newMessage}
+      >
+        {renderAddConversationIcon ? (
+          renderAddConversationIcon()
+        ) : (
+          <MdMessage size={40} color="#015EFF" />
+        )}
+      </div>
+    );
+  };
 
   if (conversations.length === 0) {
     return (
@@ -48,18 +70,30 @@ export const ConversationList = ({
           styles={{ textAlign: "center" }}
           text="Start a new conversation."
         />
-        <div
-          onClick={() => {
-            setShowUserList(true);
-          }}
-          className={styles.newMessage}
-        >
-          {renderAddConversationIcon ? (
-            renderAddConversationIcon()
-          ) : (
-            <MdMessage size={40} color="#015EFF" />
-          )}
-        </div>
+        {renderAddMessage()}
+        {showUserList && <UserList userListRef={userListRef} />}
+      </div>
+    );
+  }
+
+  if (renderConversationList) {
+    return (
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          background: "green",
+          position: "relative",
+        }}
+      >
+        {renderConversationList({
+          conversations,
+          onCoversationItemClick: (item) => {
+            setActiveConversation(item);
+            setMainListOpen(false);
+          },
+        })}
+        {renderAddMessage()}
         {showUserList && <UserList userListRef={userListRef} />}
       </div>
     );
