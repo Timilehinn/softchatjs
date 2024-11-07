@@ -28,12 +28,17 @@ export const ConversationList = ({
   showUserList,
   userListRef,
   renderAddConversationIcon,
+  renderConversationList,
 }: {
   setMainListOpen: any;
   setShowUserList: Dispatch<SetStateAction<boolean>>;
   showUserList: boolean;
   userListRef: any;
   renderAddConversationIcon?: () => JSX.Element;
+  renderConversationList?: (props: {
+    conversations: ConversationItem[];
+    onCoversationItemClick: (conversationItem: ConversationItem) => void;
+  }) => JSX.Element;
 }) => {
   const { client, config } = useChatClient();
   const { setActiveConversation, conversations } = useChatState();
@@ -41,17 +46,62 @@ export const ConversationList = ({
   //   { conversation: Conversation; lastMessage: Message; unread: string[] }[]
   // >([]);
 
+  const renderAddMessage = () => {
+    return (
+      <div
+        onClick={() => {
+          setShowUserList(true);
+        }}
+        className={styles.newMessage}
+      >
+        {renderAddConversationIcon ? (
+          renderAddConversationIcon()
+        ) : (
+          <MdMessage size={40} color="#015EFF" />
+        )}
+      </div>
+    );
+  };
+
   if (conversations.length === 0) {
     return (
-      <div className={styles.list}>
-        <Text text="No conversations yet" />
+      <div className={styles.list__empty}>
+        <Text
+          styles={{ textAlign: "center" }}
+          text="Start a new conversation."
+        />
+        {renderAddMessage()}
+        {showUserList && <UserList userListRef={userListRef} />}
+      </div>
+    );
+  }
+
+  if (renderConversationList) {
+    return (
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          background: "green",
+          position: "relative",
+        }}
+      >
+        {renderConversationList({
+          conversations,
+          onCoversationItemClick: (item) => {
+            setActiveConversation(item);
+            setMainListOpen(false);
+          },
+        })}
+        {renderAddMessage()}
+        {showUserList && <UserList userListRef={userListRef} />}
       </div>
     );
   }
 
   return (
     <div
-      style={{ background: config?.theme?.background?.secondary  }}
+      style={{ background: config?.theme?.background?.secondary }}
       className={styles.list}
     >
       {conversations.map((item, index) => (
@@ -205,15 +255,17 @@ const UserList = ({ userListRef }: { userListRef: any }) => {
       id: "20",
       name: "Romanreins",
     },
-   
   ];
 
   const startConvo = useCallback(() => {
     if (selectedUsers) {
-      const conn = client.newConversation({
-        uid: selectedUsers.id,
-        username: selectedUsers.name,
-      }, null);
+      const conn = client.newConversation(
+        {
+          uid: selectedUsers.id,
+          username: selectedUsers.name,
+        },
+        null
+      );
       conn.create("Hey there");
     }
   }, [selectedUsers]);

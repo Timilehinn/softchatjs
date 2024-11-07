@@ -84,10 +84,9 @@ export const Conversation = (props: ConversationProps) => {
   const hasAttachments = message?.attachedMedia?.length;
   const { config } = useChatClient();
   const stacked = true;
-  var chatUserId = client.userMeta.uid
+  var chatUserId = client.userMeta.uid;
 
-  const oppositBubbleBoxes =
-    message.messageOwner.uid === chatUserId && stacked;
+  const oppositBubbleBoxes = message.messageOwner.uid === chatUserId && stacked;
 
   const chatBoxColor =
     message.messageOwner.uid === chatUserId
@@ -213,7 +212,7 @@ export const Conversation = (props: ConversationProps) => {
               {message.message ? (
                 <div
                   style={{
-                    display: "flex",
+                    // display: "flex",
                     alignItems: "center",
                     paddingLeft: hasAttachments && "10px",
                     paddingRight: hasAttachments && "10px",
@@ -230,12 +229,24 @@ export const Conversation = (props: ConversationProps) => {
                     text={message?.message}
                   />
                   {/* <FormattedText content={message.message} /> */}
-                  <Text
-                    size="xs"
-                    styles={{ marginTop: "12px", color: messageDateColor }}
-                    text={formatMessageTime(message.createdAt as string)}
-                  />
-                  {oppositBubbleBoxes && <>{messageState()}</>}
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "flex-end",
+                      alignItems: "center",
+                      // background: "red",
+                      // height: "5px",
+                      marginTop:
+                        message?.message?.length > 10 ? "0px" : "-25px",
+                    }}
+                  >
+                    <Text
+                      size="xs"
+                      styles={{ color: messageDateColor }}
+                      text={formatMessageTime(message.createdAt as string)}
+                    />
+                    {oppositBubbleBoxes && <>{messageState()}</>}
+                  </div>
                 </div>
               ) : null}
               {message.lastEdited && (
@@ -410,7 +421,7 @@ export const QuotedMessage = ({
 };
 
 export const FormattedText = ({ content }: { content: string }) => {
-  const lines = content?.split("\n");
+  const lines = content?.split("/");
 
   return (
     <>
