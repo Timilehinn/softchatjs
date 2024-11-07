@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, CSSProperties } from "react";
 // import "./audio-recorder.css";
 import { PauseIcon, PlayIcon } from "../assets/icons";
 import { convertToMinutes } from "../../helpers/date";
@@ -9,9 +9,10 @@ type AudioPlayerProps = {
   blob: Blob;
   url?: string;
   duration: number;
+  style?: CSSProperties
 };
 export default function AudioPlayer(props: AudioPlayerProps) {
-  const { blob, duration, url } = props;
+  const { blob, duration, url, style } = props;
 
   const [audioUrl, setAudioUrl] = useState("");
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -87,7 +88,7 @@ export default function AudioPlayer(props: AudioPlayerProps) {
   }, [isLoading, isPlaying]);
 
   return (
-    <div style={{ display: "flex", alignItems: "center", padding: "5px" }}>
+    <div style={{ display: "flex", alignItems: "center", padding: "5px", ...style }}>
       {renderAction()}
       <audio
         ref={audioRef}

@@ -347,9 +347,10 @@ const ChatInput = ({
     return (
       <div
         style={{
-          backgroundColor: theme?.background?.secondary || "#1b1d21",
+          backgroundColor: theme?.background?.secondary,
           justifyContent: "flex-end",
           width: "100%",
+          flex: 1
         }}
         className={styles.input}
       >
@@ -362,7 +363,7 @@ const ChatInput = ({
             alignItems: "center",
             justifyContent: "space-between",
             padding: "10px",
-            backgroundColor: theme?.background?.secondary || "#1b1d21",
+            backgroundColor: theme?.background?.secondary,
             boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
           }}
         >
@@ -467,6 +468,16 @@ const ChatInput = ({
         isReplying={editProps?.isReplying}
         closePanel={() => setEditDetails(undefined)}
       />
+      {files.length || audioBlob ? (
+            <ChatAttachments
+        width={inputContainerWidth}
+              files={files}
+              setFiles={setFiles}
+              audioBlob={audioBlobPLaceHolder}
+              voiceMessageDuration={voiceMessageDuration}
+              cancelAudioAttachment={cancelAudioAttachments}
+            />
+          ) : null}
     <div
       style={{ backgroundColor: theme?.background?.secondary  }}
       className={styles.input}
@@ -533,15 +544,7 @@ const ChatInput = ({
             </div>
           )}
 
-          {files.length || audioBlob ? (
-            <ChatAttachments
-              files={files}
-              setFiles={setFiles}
-              audioBlob={audioBlobPLaceHolder}
-              voiceMessageDuration={voiceMessageDuration}
-              cancelAudioAttachment={cancelAudioAttachments}
-            />
-          ) : null}
+          
         </div>
         <div className={styles.input__button}>
           {audioBlob || message?.message || files.length ? (
@@ -604,12 +607,14 @@ const ChatAttachments = ({
   cancelAudioAttachment,
   files,
   setFiles,
+  width
 }: {
   audioBlob: Blob;
   voiceMessageDuration: number;
   files: any[];
   setFiles: any;
   cancelAudioAttachment: () => void;
+  width: number
 }) => {
   const deleteAttachment = (id: string) => {
     const imgs = files.filter((i) => i.name !== id);
@@ -621,7 +626,7 @@ const ChatAttachments = ({
   const { theme } = config;
   console.log(files, "vid");
   return (
-    <div className={styles.chatPhotos}>
+    <div className={styles.chatPhotos} style={{ width, paddingBottom: "10px" }}>
       {audioBlob ? (
         <div
           style={{
@@ -635,17 +640,18 @@ const ChatAttachments = ({
           <div onClick={cancelAudioAttachment} className={styles.audioCancel}>
             <MdCancel size={20} color="grey" />
           </div>
-          <AudioPlayer blob={audioBlob} duration={voiceMessageDuration} />
+          <div style={{ border: `1px solid ${theme.divider}`, borderRadius: '5px' }}>
+          <AudioPlayer style={{ padding: '15px' }} blob={audioBlob} duration={voiceMessageDuration} />
+          </div>
         </div>
       ) : null}
       {files.length
         ? files.map((item) => {
             const url = URL.createObjectURL(item);
-
             return (
               <div className={styles.chatPhotos__item}>
                 {item.type === "video/quicktime" ? (
-                  <video style={{ height: "35px", width: "35px" }} src={url} />
+                  <video style={{  }} src={url} />
                 ) : (
                   <img src={url as any} alt="" />
                 )}

@@ -4,6 +4,8 @@
   display: flex;
   align-items: center;
   z-index: 600;
+  padding-left: 10px;
+  padding-right: 10px;
 }
 
 .input__wrap{
@@ -14,7 +16,8 @@
 }
 
 .input__inner {
-  width: 90%;
+  flex: 1;
+  width: 100%;
   background-color: #222529;
   height: 100%;
   border-radius: 30px;
@@ -90,15 +93,15 @@
 
 .chatPhotos {
   height: auto;
-  width: 300px;
   display: flex;
-  margin-bottom: 20px;
   padding-left: 20px;
+  position: absolute;
+  bottom: 80px
 }
 
 .chatPhotos__item {
-  height: 35px;
-  width: 35px;
+  height: 100px;
+  width: 100px;
   margin-right: 10px; position: relative;
 }
 

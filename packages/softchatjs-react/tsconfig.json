@@ -1,21 +1,45 @@
+// {
+//   "compilerOptions": {
+//     "target": "es5",
+//     "lib": ["dom", "esnext"], 
+//     "allowJs": true,
+//     "skipLibCheck": true,
+//     "esModuleInterop": true,
+//     "allowSyntheticDefaultImports": true,
+//     "strict": false,
+//     "forceConsistentCasingInFileNames": true,
+//     "noFallthroughCasesInSwitch": true,
+//     "module": "esnext",
+//     "moduleResolution": "node",
+//     "resolveJsonModule": true,
+//     "isolatedModules": true,
+//     "noEmit": true,
+//     "jsx": "react-jsx",
+//     "paths": {
+//       "@/*": ["./*"]
+//     },
+//     // "outDir": "./dist"
+//   },
+//   "include": ["src"]
+// }
+
 {
+  "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
-    "target": "es5",
-    "lib": ["dom", "esnext"], 
-    "allowJs": true,
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "strict": false,
-    "forceConsistentCasingInFileNames": true,
-    "noFallthroughCasesInSwitch": true,
-    "module": "esnext",
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "noEmit": true,
+    "isolatedModules": false,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"]
+    },
     "jsx": "react-jsx",
-    "outDir": "./dist"
+    "allowSyntheticDefaultImports": true,
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": false,
+    "skipLibCheck": true,
+    "noEmit": false,
+    "noEmitOnError": false
   },
-  "include": ["src"]
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules"]
 }
