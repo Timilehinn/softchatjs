@@ -5,10 +5,7 @@ import ChatClient, {
   Message,
   UserMeta,
 } from "softchatjs-core";
-import {
-  ConnectionEvent,
-  ConversationListMeta,
-} from "softchatjs-core";
+import { ConnectionEvent, ConversationListMeta } from "softchatjs-core";
 import styles from "./chat.module.css";
 import ChatInput from "../inputs/chat-input";
 import MessageList from "../conversation-list/conversation-list";
@@ -30,7 +27,7 @@ type ChatProps = {
   renderChatHeader?: () => JSX.Element;
   renderAddConversationIcon?: () => JSX.Element;
   renderChatInput?: (props: { onChange: (e: string) => void }) => JSX.Element;
-  user: UserMeta
+  user: UserMeta;
 };
 
 const Chat = (props: ChatProps) => {
@@ -88,10 +85,10 @@ const Chat = (props: ChatProps) => {
   };
 
   useEffect(() => {
-    if(client){
+    if (client) {
       client.initializeUser(props.user);
     }
-  },[client])
+  }, [client]);
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -107,9 +104,9 @@ const Chat = (props: ChatProps) => {
 
     checkScreenSize();
 
-    window.addEventListener('resize', checkScreenSize);
+    window.addEventListener("resize", checkScreenSize);
 
-    return () => window.removeEventListener('resize', checkScreenSize);
+    return () => window.removeEventListener("resize", checkScreenSize);
   }, []);
 
   useEffect(() => {
@@ -130,10 +127,9 @@ const Chat = (props: ChatProps) => {
         setTimeout(() => {
           messagesEndRef?.current?.scrollIntoView({
             block: "end",
-            behavior: "smooth"
-          })
-        },300)
-       
+            behavior: "smooth",
+          });
+        }, 300);
       }
     }
   };
@@ -191,12 +187,12 @@ const Chat = (props: ChatProps) => {
     const conversationList = Object.values(
       e.conversationListMeta
     ).flat() as ConversationItem[];
-    console.log(conversationList, "::conversationList")
+    console.log(conversationList, "::conversationList");
     setConversations(conversationList);
   };
 
   const clearUnread = () => {
-    if(client && activeConversation){
+    if (client && activeConversation) {
       const messageIds = activeConversation.unread;
       const msClient = client.messageClient(
         activeConversation.conversation.conversationId
@@ -250,19 +246,21 @@ const Chat = (props: ChatProps) => {
     }
 
     return () => {
-      if(client){
+      if (client) {
         client.unsubscribe("started_typing" as any, handleTypingStarted);
         client.unsubscribe("stopped_typing" as any, handleTypingStopped);
         client.unsubscribe("deleted_message" as any, handleDeletedMessage);
         client.unsubscribe("edited_message" as any, handleEditedMessage);
         client.unsubscribe("new_message" as any, handleMessage);
-        client.unsubscribe("connection_changed" as any, handleConnectionChanged);
+        client.unsubscribe(
+          "connection_changed" as any,
+          handleConnectionChanged
+        );
         client.unsubscribe(
           "conversation_list_meta_changed" as any,
           handleConversationsListChanged
         );
       }
-      
     };
   }, [client, activeConversation]);
 
@@ -285,7 +283,7 @@ const Chat = (props: ChatProps) => {
       return;
     }
     try {
-      if(client){
+      if (client) {
         const getMoreMessages = async () => {
           setFetchingMore(true);
           const messageList = (await client
@@ -294,30 +292,29 @@ const Chat = (props: ChatProps) => {
           setMessages((prev) => {
             return [...messageList, ...prev];
           });
-          if(messages[0]){
+          if (messages[0]) {
             setScrollToKey(messages[0].messageId);
           }
         };
         getMoreMessages();
       }
-
     } catch (err) {
       console.error(err);
     } finally {
       setFetchingMore(false);
     }
   }, [presentPage]);
-  
-  const showMainList = useMemo(() => {
-    if(isSmallScreen){
-      return false
-    }
-    return mainListOpen
-  },[mainListOpen, isSmallScreen]);
 
-  if(isSmallScreen && activeConversation){
+  const showMainList = useMemo(() => {
+    if (isSmallScreen) {
+      return false;
+    }
+    return mainListOpen;
+  }, [mainListOpen, isSmallScreen]);
+
+  if (isSmallScreen && activeConversation) {
     return (
-      <div className={styles.chat__messages} style={{ width: '100%' }}>
+      <div className={styles.chat__messages} style={{ width: "100%" }}>
         <ChatTopNav
           setMainListOpen={setMainListOpen}
           message={activeConversation?.lastMessage!}
@@ -355,44 +352,59 @@ const Chat = (props: ChatProps) => {
           textInputRef={textInputRef}
           renderChatInput={props.renderChatInput}
         />
-      {showImageModal.length > 0 && <ImageViewer />}
+        {showImageModal.length > 0 && <ImageViewer />}
       </div>
-    )
+    );
   }
 
   return (
     <div
-      style={{ background: theme?.background?.primary  }}
+      style={{ background: theme?.background?.primary }}
       className={styles.chat}
     >
-      <div
-        className={`${styles.chat__conversations}`}
-      >
-        {props.renderConversationList ? (
-          props.renderConversationList({
-            conversations,
-            onCoversationItemClick: (item) => {
-              setActiveConversation(item);
-              setMainListOpen(false);
-            }
-          })
-        ) : (
-          <MainList
-            setShowUserList={setShowUserList}
-            showUserList={showUserList}
-            setMainListOpen={setMainListOpen}
-            userListRef={userListRef}
-            renderAddConversationIcon={props.renderAddConversationIcon}
-          />
-        )}
+      <div className={`${styles.chat__conversations}`}>
+        {/* {props.renderConversationList ? (
+          <div
+            style={{
+              width: "100%",
+              height: "100%",
+              background: "black",
+              position: "relative",
+            }}
+          >
+            {props.renderConversationList({
+              conversations,
+              onCoversationItemClick: (item) => {
+                setActiveConversation(item);
+                setMainListOpen(false);
+              },
+            })}
+            {props.renderAddConversationIcon ? (
+              <div
+                style={{ position: "absolute", bottom: "10px", right: "10px" }}
+              >
+                {props.renderAddConversationIcon()}
+              </div>
+            ) : null}
+          </div>
+        ) : ( */}
+        <MainList
+          setShowUserList={setShowUserList}
+          showUserList={showUserList}
+          setMainListOpen={setMainListOpen}
+          userListRef={userListRef}
+          renderAddConversationIcon={props.renderAddConversationIcon}
+          renderConversationList={props.renderConversationList}
+        />
+        {/* )} */}
       </div>
       {activeConversation && (
         <div className={styles.chat__messages}>
-           <ChatTopNav
-              setMainListOpen={setMainListOpen}
-              message={activeConversation?.lastMessage!}
-              renderChatHeader={props.renderChatHeader}
-            />
+          <ChatTopNav
+            setMainListOpen={setMainListOpen}
+            message={activeConversation?.lastMessage!}
+            renderChatHeader={props.renderChatHeader}
+          />
           <MessageList
             setEditDetails={setEditDetails}
             messages={messages}
@@ -411,7 +423,7 @@ const Chat = (props: ChatProps) => {
             renderChatBubble={props.renderChatBubble}
             renderChatHeader={props.renderChatHeader}
           />
-           <ChatInput
+          <ChatInput
             closeGeneralMenu={() => setMenuDetails({ element: null })}
             generalMenuRef={generalMenuRef}
             setMenuDetails={setMenuDetails}
