@@ -43,15 +43,31 @@ export const ConversationList = ({
 
   if (conversations.length === 0) {
     return (
-      <div className={styles.list}>
-        <Text text="No conversations yet" />
+      <div className={styles.list__empty}>
+        <Text
+          styles={{ textAlign: "center" }}
+          text="Start a new conversation."
+        />
+        <div
+          onClick={() => {
+            setShowUserList(true);
+          }}
+          className={styles.newMessage}
+        >
+          {renderAddConversationIcon ? (
+            renderAddConversationIcon()
+          ) : (
+            <MdMessage size={40} color="#015EFF" />
+          )}
+        </div>
+        {showUserList && <UserList userListRef={userListRef} />}
       </div>
     );
   }
 
   return (
     <div
-      style={{ background: config?.theme?.background?.secondary  }}
+      style={{ background: config?.theme?.background?.secondary }}
       className={styles.list}
     >
       {conversations.map((item, index) => (
@@ -205,15 +221,17 @@ const UserList = ({ userListRef }: { userListRef: any }) => {
       id: "20",
       name: "Romanreins",
     },
-   
   ];
 
   const startConvo = useCallback(() => {
     if (selectedUsers) {
-      const conn = client.newConversation({
-        uid: selectedUsers.id,
-        username: selectedUsers.name,
-      }, null);
+      const conn = client.newConversation(
+        {
+          uid: selectedUsers.id,
+          username: selectedUsers.name,
+        },
+        null
+      );
       conn.create("Hey there");
     }
   }, [selectedUsers]);

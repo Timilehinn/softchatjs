@@ -80,7 +80,7 @@ display: none;
 .conversation__text__wrap{
   background-color: #343434;
   max-width: 300px;
-
+  min-width: 150px;
 }
 
 .conversation__text__wrap p{
