@@ -2,13 +2,16 @@
   "name": "softchatjs",
   "private": true,
   "scripts": {
-    "build": "turbo build",
+    "build": "turbo --filterbuild",
     "dev": "turbo dev",
+    "dev:react": "turbo --filter=softchatjs-react-demo --filter=softchatjs-react dev",
+    "dev:expo": "turbo --filter=softchatjs-expo-app-demo dev",
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "devDependencies": {
     "prettier": "^3.2.5",
+    "tiny-glob": "^0.2.9",
     "turbo": "^2.1.3",
     "typescript": "^5.4.5"
   },
@@ -22,7 +25,6 @@
   ],
   "dependencies": {
     "css-loader": "^7.1.2",
-    "softchatjs-react": "^1.0.0",
     "style-loader": "^4.0.0"
   }
 }

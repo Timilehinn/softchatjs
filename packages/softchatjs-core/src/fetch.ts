@@ -5,6 +5,7 @@ let API = "https://wlw2w86sy5.execute-api.eu-west-2.amazonaws.com/staging";
 
 enum ENDPOINTS {
   CONVERSATIONS = "/conversations",
+  CONVERSATION = "/conversation",
   MESSAGES = "/messages",
   UPLOAD = "/upload",
   UPLOAD_ATTACHMENT = "/upload-attachment",
@@ -78,6 +79,17 @@ export async function GET_CONVERSATIONS<Response>(
 ): Promise<APIResponse<Response>> {
   return await chatApi<Response>({
     endpoint: `${API}${ENDPOINTS.CONVERSATIONS}`,
+    body: {},
+    method: "GET",
+    token,
+  });
+}
+
+export async function GET_CONVERSATION<Response>(
+  token: string | undefined, conversationId: string
+): Promise<APIResponse<Response>> {
+  return await chatApi<Response>({
+    endpoint: `${API}${ENDPOINTS.CONVERSATION}/${conversationId}`,
     body: {},
     method: "GET",
     token,

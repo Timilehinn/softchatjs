@@ -30,7 +30,7 @@ type StackedProps = {
 };
 
 export default function Stacked(props: StackedProps) {
-  const { theme } = useConfig();
+  const { theme, fontFamily } = useConfig();
   const {
     message,
     animatedStyles,
@@ -72,6 +72,7 @@ export default function Stacked(props: StackedProps) {
           <Text
             key={index}
             style={{
+              fontFamily,
               textDecorationLine: "underline",
               textTransform: "lowercase",
             }}
@@ -81,7 +82,7 @@ export default function Stacked(props: StackedProps) {
           </Text>
         );
       } else {
-        return <Text key={index}>{part}</Text>;
+        return <Text style={{ fontFamily }} key={index}>{part}</Text>;
       }
     });
   };
@@ -140,12 +141,13 @@ export default function Stacked(props: StackedProps) {
                   marginBottom: 5,
                 }}
               >
-                <Text style={[{ color: theme?.text.secondary }]}>
+                <Text style={[{ color: theme?.text.secondary, fontFamily }]}>
                   {message.messageOwner?.username}
                 </Text>
                 <Text
                   style={[
                     {
+                      fontFamily,
                       color: theme?.text.disabled,
                       marginStart: 10,
                       fontSize: 9,
@@ -168,6 +170,7 @@ export default function Stacked(props: StackedProps) {
                   <Text
                     style={{
                       color: theme?.text.secondary,
+                      fontFamily,
                       fontSize: 17,
                     }}
                   >
@@ -176,6 +179,7 @@ export default function Stacked(props: StackedProps) {
                       <Text
                         style={{
                           fontSize: 11,
+                          fontFamily,
                           fontStyle: "italic",
                           color: theme?.text.disabled,
                         }}
@@ -191,6 +195,7 @@ export default function Stacked(props: StackedProps) {
                 style={[
                   {
                     color: theme?.text.disabled,
+                    fontFamily,
                     fontSize: 11,
                     marginTop: 5,
                     fontStyle: "italic",
@@ -210,7 +215,8 @@ export default function Stacked(props: StackedProps) {
                     fontSize: 11,
                     marginTop: 5,
                     fontStyle: "italic",
-                    marginStart: 15
+                    marginStart: 15,
+                    fontFamily
                   },
                 ]}
               >

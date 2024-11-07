@@ -6,6 +6,7 @@ import React, {
   useEffect,
   useRef,
   useState,
+  useMemo
 } from "react";
 import {
   View,
@@ -22,6 +23,7 @@ import {
   ChatBubbleRenderProps,
   ChatHeaderRenderProps,
   ChatInputRenderProps,
+  Children,
   Conversation,
   MediaType,
   Message,
@@ -44,6 +46,7 @@ import {
   ChatEventGenerics,
   ConnectionEvent,
   Events,
+  generateConversationId,
   generateId,
 } from "softchatjs-core";
 import { BottomSheetRef } from "../BottomSheet";
@@ -54,14 +57,18 @@ import { Audio } from "expo-av";
 import { interpolate } from "react-native-reanimated";
 
 type ChatProps = {
-  conversationId: string;
+  conversationId?: string;
   unread: string[];
-  conversation: Conversation;
+  conversation: Conversation | null;
   layout?: "stacked";
   chatUser: UserMeta;
   renderChatBubble?: (props: Prettify<ChatBubbleRenderProps>) => void;
   renderChatInput?: (props: Prettify<ChatInputRenderProps>) => void;
   renderChatHeader?: (props: Prettify<ChatHeaderRenderProps>) => void;
+  participantId?: string
+  placeholder?: Children,
+  keyboardOffset?: number
+  // participant?: UserMeta
 };
 
 export type SendMessage = {
@@ -78,7 +85,7 @@ export type SelectedMessage = {
 type GroupedMessages = Array<string | Message>;
 
 export default function Chat(props: ChatProps) {
-  const { client, theme } = useConfig();
+  const { client, theme, fontFamily } = useConfig();
   const {
     layout,
     conversationId,
@@ -87,15 +94,18 @@ export default function Chat(props: ChatProps) {
     renderChatInput,
     renderChatHeader,
     conversation,
+    // participant,
     chatUser,
+    placeholder,
+    keyboardOffset = Platform.OS === 'ios'? 10 : 0
   } = props;
   const chatUserId = chatUser.uid;
+  const _conversationId = conversation.conversationId
   const [permissionResponse, requestPermission] = Audio.usePermissions();
-
   const scrollRef = useRef<FlashList<Message | string> | null>(null);
   const inputRef = useRef<TextInput>(null);
   const emojiListRef = useRef<BottomSheetRef>(null);
-  const mediaOptionsRef = useRef<BottomSheetRef>(null);
+  const mediaOptionsRef = useRef<BottomSheetRef & { pickAttachment: () => void }>(null);
   const messageOptionsRef = useRef<BottomSheetRef>(null);
   const [isTyping, showTyping] = useState(false);
   const [loadingMessages, setLoadingMessages] = useState(false);
@@ -106,11 +116,12 @@ export default function Chat(props: ChatProps) {
     pauseVoiceMessage,
     addNewPendingMessages,
     activeVoiceMessage,
-    unload
+    unload,
   } = useMessageState();
-  const [messages, setMessages] = useState<Array<string | Message>>([
+  const [ conversationMeta, setConversationMeta ] = useState<Conversation | null>(conversation)
+  const [messages, setMessages] = useState<Array<string | Message>>(conversation? [
     ...conversation.messages.reverse(),
-  ]);
+  ]: []);
   const [isEditing, setIsEditing] = useState(false);
   const [refMap, setRefMap] = useState<{
     [key: string]: { ref: RefObject<View> | null; index: number };
@@ -147,7 +158,6 @@ export default function Chat(props: ChatProps) {
     [key: number]: { metering: number; height: number };
   }>({});
   const [recording, setRecording] = useState<Audio.Recording>();
-
   // const onViewRef = useRef((viewableItems: any) => {
   //   let Check = [];
   //   for (var i = 0; i < viewableItems.viewableItems.length; i++) {
@@ -157,6 +167,21 @@ export default function Chat(props: ChatProps) {
   // });
 
   const viewConfigRef = useRef({ viewAreaCoveragePercentThreshold: 80 });
+
+  // const _conversationId = useMemo(() => {
+  //   try {
+  //     if(!participantId && !conversationId){
+  //       throw new Error('ConversationId and Participant cannot be null')
+  //     }
+  //     if(participantId && conversationId){
+  //       throw new Error('One of ConversationId or Participant can be passed but not both.')
+  //     }
+  //     return participantId? generateConversationId(chatUser.uid, participantId, client.projectId) : conversationId;
+  //   } catch (error) {
+  //     throw new Error(error.message)
+  //   }
+   
+  // },[participantId, chatUser, client, conversationId]);
 
   useEffect(() => {
     setRefMap((prevMap) => {
@@ -189,7 +214,7 @@ export default function Chat(props: ChatProps) {
     try {
       setLoadingMessages(true);
       const messages = (await client
-        ?.messageClient(conversationId)
+        ?.messageClient(_conversationId)
         .getMessages()) as Array<Message>;
       if (messages.length > 0) {
         var restructuredMessages: GroupedMessages = restructureMessages(
@@ -206,18 +231,15 @@ export default function Chat(props: ChatProps) {
 
   async function getOlderMessages() {
     try {
-      // if(messages.length < 25) {
-      //   return null
-      // }
-      setLoadingOlderMessages(true);
-      const olderMessages = (await client
-        ?.messageClient(conversationId)
-        .getMessages(currentPage)) as Array<Message>;
-      setMessages((prev) => {
-        return restructureMessages([...prev, ...olderMessages.reverse()]);
-      });
-      if (olderMessages.length > 0) {
-        setCurrentPage((prev) => prev + 1);
+      if (client && messages.length > 0) {
+        setLoadingOlderMessages(true);
+        const olderMessages = (await client.messageClient(_conversationId).getMessages(currentPage)) as Array<Message>;
+        setMessages((prev) => {
+          return restructureMessages([...prev, ...olderMessages.reverse()]);
+        });
+        if (olderMessages.length > 0) {
+          setCurrentPage((prev) => prev + 1);
+        }
       }
     } catch (error) {
       console.log(error);
@@ -226,14 +248,35 @@ export default function Chat(props: ChatProps) {
     }
   }
 
+  const getConversation = async () => {
+    try {
+      if(client){
+        const conversation = await client
+        ?.messageClient(_conversationId)
+        .getConversation(_conversationId) as  Conversation
+        console.log(conversation, '---the conversation')
+        if(conversation){
+          setConversationMeta(conversation);
+        }
+      }
+    } catch (error) {
+      
+    }
+  }
+
   useEffect(() => {
     if (conversation) {
-      getMessages();
-      const recipients = conversation?.participants.filter(
+      // getMessages();
+      const recipients = conversationMeta?.participants.filter(
         (id) => id !== client?.userMeta.uid
       );
       setRecipientId(recipients[0]);
+    }else{
+      // getConversation();
+      // setRecipientId(participantId)
     }
+    getMessages();
+
   }, [conversation]);
 
   const handleNewMessages = (event: any) => {
@@ -263,13 +306,13 @@ export default function Chat(props: ChatProps) {
   };
 
   const handleTypingStarted = (event: any) => {
-    if (event.conversationId === conversationId) {
+    if (event.conversationId === _conversationId) {
       showTyping(true);
     }
   };
 
   const handleStoppedStarted = (event: any) => {
-    if (event.conversationId === conversationId) {
+    if (event.conversationId === _conversationId) {
       showTyping(false);
     }
   };
@@ -294,7 +337,7 @@ export default function Chat(props: ChatProps) {
 
   useEffect(() => {
     if (client) {
-      client.messageClient(conversationId).setActiveConversation();
+      client.messageClient(_conversationId).setActiveConversation();
       client.subscribe(Events.NEW_MESSAGE, handleNewMessages);
       client.subscribe(Events.EDITED_MESSAGE, handleEditedMessage);
       client.subscribe(Events.HAS_STARTED_TYPING, handleTypingStarted);
@@ -304,7 +347,7 @@ export default function Chat(props: ChatProps) {
     }
     return () => {
       if (client) {
-        client.messageClient(conversationId).unSetActiveConversation();
+        client.messageClient(_conversationId).unSetActiveConversation();
         client.unsubscribe(Events.NEW_MESSAGE, handleNewMessages);
         client.unsubscribe(Events.EDITED_MESSAGE, handleEditedMessage);
         client.unsubscribe(Events.HAS_STARTED_TYPING, handleTypingStarted);
@@ -323,10 +366,10 @@ export default function Chat(props: ChatProps) {
   const sendMessage = async () => {
     try {
       if (!globalTextMessage) return null;
-      if (conversation) {
+      if (_conversationId) {
         if (client) {
-          client.messageClient(conversationId).sendMessage({
-            conversationId,
+          client.messageClient(_conversationId).sendMessage({
+            conversationId: _conversationId,
             to: recipientId,
             message: globalTextMessage,
             reactions: [],
@@ -390,7 +433,7 @@ export default function Chat(props: ChatProps) {
         addNewPendingMessages({
           from: client.userMeta.uid,
           messageId: generateId(),
-          conversationId,
+          conversationId: _conversationId,
           to: recipientId,
           message: "",
           reactions: [],
@@ -491,7 +534,7 @@ export default function Chat(props: ChatProps) {
       debounceTimer = setTimeout(() => {
         if (client) {
           client
-            .messageClient(conversation.conversationId)
+            .messageClient(_conversationId)
             .sendTypingNotification(recipientId);
           debounceTimer = undefined; // clear debounce timer reference after sending the typing notification
         }
@@ -502,25 +545,25 @@ export default function Chat(props: ChatProps) {
       idleTimer = setTimeout(() => {
         if (client) {
           client
-            .messageClient(conversation.conversationId)
+            .messageClient(_conversationId)
             .sendStoppedTypingNotification(recipientId);
         }
       }, 1300);
     }
     return () => clearTimeout(debounceTimer);
-  }, [client, globalTextMessage, conversation]);
+  }, [client, globalTextMessage, _conversationId]);
 
   useEffect(() => {
-    if (client && conversation.conversationId) {
-      const msClient = client.messageClient(conversation.conversationId);
-      msClient.readMessages(conversation.conversationId, {
+    if (client && _conversationId) {
+      const msClient = client.messageClient(_conversationId);
+      msClient.readMessages(_conversationId, {
         uid: client.userMeta.uid,
         messageIds: unread,
       });
 
       console.log("sent messageIds for read");
     }
-  }, [client, conversation, unread]);
+  }, [client, _conversationId, unread]);
 
   const onStartedScrolling = () => {
     let scrollStateRef: NodeJS.Timeout | undefined = undefined;
@@ -584,14 +627,19 @@ export default function Chat(props: ChatProps) {
         isMessageOwner={selectedMessage.isMessageOwner}
         onReply={() => {
           messageOptionsRef?.current?.close();
-          setActiveQuote(selectedMessage);
-          inputRef.current?.focus();
+          setTimeout(() => {
+            setActiveQuote(selectedMessage);
+            inputRef.current?.focus();
+          },500)
         }}
         onStartEditing={() => {
           messageOptionsRef?.current?.close();
-          inputRef?.current?.focus();
           setIsEditing(true);
-          setGlobalTextMessage(selectedMessage.message?.message || "");
+
+          setTimeout(() => {
+            inputRef?.current?.focus();
+            setGlobalTextMessage(selectedMessage.message?.message || "");
+          },500)
         }}
         theme={theme}
       />
@@ -610,7 +658,7 @@ export default function Chat(props: ChatProps) {
     return (
       <View style={{ width: "100%" }}>
         {pendingMessages
-          .filter((message) => message.conversationId === conversationId)
+          .filter((message) => message.conversationId === _conversationId)
           .map((message, index) => (
             <ChatItem
               key={index}
@@ -622,7 +670,7 @@ export default function Chat(props: ChatProps) {
               position={chatUserId === message.from ? "right" : "left"}
               message={message as Message}
               onSelectedMessage={({ message, chatItemRef }) => {}}
-              conversation={conversation}
+              conversation={conversationMeta}
               chatUserId={chatUserId}
               recipientId={recipientId}
               renderChatBubble={renderChatBubble}
@@ -666,6 +714,7 @@ export default function Chat(props: ChatProps) {
                   paddingHorizontal: 5,
                   color: theme?.text.secondary,
                   fontSize: 11,
+                  fontFamily
                 }}
               >
                 {item}
@@ -696,6 +745,7 @@ export default function Chat(props: ChatProps) {
                 paddingHorizontal: 15,
                 color: theme?.text.secondary,
                 fontSize: 11,
+                fontFamily
               }}
             >
               {item}
@@ -729,17 +779,34 @@ export default function Chat(props: ChatProps) {
             setActiveQuote({ message, ref: chatItemRef, itemIndex: index });
           }}
           threaded={threaded(item, index)}
-          conversation={conversation}
+          conversation={conversationMeta}
           chatUserId={chatUserId}
           recipientId={recipientId}
           renderChatBubble={renderChatBubble}
         />
       );
     },
-    [conversation, renderChatBubble, refMap, theme, layout]
+    [conversationMeta, renderChatBubble, refMap, theme, layout]
   );
 
- 
+  const renderPlaceholder = useCallback(() => {
+    if(placeholder) return placeholder
+    return (
+      <View
+            style={{
+              flex: 1,
+              height: Dimensions.get("window").height,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <MessagePlus size={100} color={theme?.icon} />
+            <Text style={{ color: theme?.text.disabled, marginTop: 20, fontFamily }}>
+              Start by sending a message.
+            </Text>
+          </View>
+    )
+  },[placeholder])
 
   const chatInputProps: ChatInputRenderProps = {
     sendMessage: (externalInputRef: RefObject<TextInput>) =>
@@ -762,7 +829,7 @@ export default function Chat(props: ChatProps) {
     meteringProgress: audioWaves,
     isEditing,
     sendVoiceMessage: () => sendVoiceMessage(),
-    isLoading: connectionStatus.connecting || loadingMessages
+    isLoading: connectionStatus.connecting || loadingMessages,
   };
 
   return (
@@ -773,7 +840,7 @@ export default function Chat(props: ChatProps) {
       }}
     >
       <ChatHeader
-        conversation={conversation}
+        conversation={conversationMeta}
         chatUserId={chatUserId}
         renderChatHeader={renderChatHeader}
         isTyping={isTyping}
@@ -781,23 +848,9 @@ export default function Chat(props: ChatProps) {
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 10 : 0}
+        keyboardVerticalOffset={keyboardOffset}
       >
-        {messages.length === 0 && (
-          <View
-            style={{
-              flex: 1,
-              height: Dimensions.get("window").height,
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <MessagePlus size={100} color={theme?.icon} />
-            <Text style={{ color: theme?.text.disabled, marginTop: 20 }}>
-              Start by sending a message.
-            </Text>
-          </View>
-        )}
+        {messages.length === 0 ? renderPlaceholder() : (
         <View
           style={{
             flex: 1,
@@ -813,10 +866,11 @@ export default function Chat(props: ChatProps) {
             renderItem={renderChatItem}
             refreshControl={
               <RefreshControl
-                refreshing={loadingMessages}
+                refreshing={false}
                 onRefresh={getMessages}
               />
             }
+            showsHorizontalScrollIndicator={false}
             ListHeaderComponent={messageListHeader}
             ListFooterComponent={() => (
               <View
@@ -828,7 +882,7 @@ export default function Chat(props: ChatProps) {
                 }}
               >
                 <Text
-                  style={{ color: theme?.text.disabled, fontStyle: "italic" }}
+                  style={{ color: theme?.text.disabled, fontFamily }}
                 >
                   Loading older messages...
                 </Text>
@@ -846,6 +900,7 @@ export default function Chat(props: ChatProps) {
             }}
           />
         </View>
+        )}
 
         <View>
           {activeQuote.message && (
@@ -859,36 +914,36 @@ export default function Chat(props: ChatProps) {
           )}
           <View>
             <>
-            {renderChatInput ? (
+              {renderChatInput ? (
                 renderChatInput(chatInputProps)
-            ) : (
-              <ChatInput
-                openEmojis={openEmojis}
-                inputRef={inputRef}
-                mediaOptionsRef={mediaOptionsRef}
-                sendMessage={() =>
-                  isEditing ? sendEditedMessage() : sendMessage()
-                }
-                isLoading={connectionStatus.connecting || loadingMessages}
-                conversationId={conversationId}
-                chatUserId={chatUserId}
-                recipientId={recipientId}
-                // selectedMessage={activeQuote}
-                value={globalTextMessage}
-                audioWaves={audioWaves}
-                audioTime={audioTime}
-                setValue={setGlobalTextMessage}
-                onStopEditing={() => {
-                  setIsEditing(false);
-                  clearSelectedMessage();
-                }}
-                isEditing={isEditing}
-                sendVoiceMessage={() => sendVoiceMessage()}
-                onStartRecording={() => startRecording()}
-                onDeleteRecording={() => deleteRecording()}
-                isRecording={recording !== undefined}
-              />
-            )}
+              ) : (
+                <ChatInput
+                  openEmojis={openEmojis}
+                  inputRef={inputRef}
+                  mediaOptionsRef={mediaOptionsRef}
+                  sendMessage={() =>
+                    isEditing ? sendEditedMessage() : sendMessage()
+                  }
+                  isLoading={connectionStatus.connecting || loadingMessages}
+                  conversationId={_conversationId}
+                  chatUserId={chatUserId}
+                  recipientId={recipientId}
+                  // selectedMessage={activeQuote}
+                  value={globalTextMessage}
+                  audioWaves={audioWaves}
+                  audioTime={audioTime}
+                  setValue={setGlobalTextMessage}
+                  onStopEditing={() => {
+                    setIsEditing(false);
+                    clearSelectedMessage();
+                  }}
+                  isEditing={isEditing}
+                  sendVoiceMessage={() => sendVoiceMessage()}
+                  onStartRecording={() => startRecording()}
+                  onDeleteRecording={() => deleteRecording()}
+                  isRecording={recording !== undefined}
+                />
+              )}
             </>
           </View>
         </View>
@@ -900,7 +955,7 @@ export default function Chat(props: ChatProps) {
         recipientId={recipientId}
       />
       <MediaOptions
-        conversationId={conversationId}
+        conversationId={_conversationId}
         clearActiveQuote={clearSelectedMessage}
         activeQuote={activeQuote?.message}
         ref={mediaOptionsRef}

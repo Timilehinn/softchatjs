@@ -9,12 +9,13 @@ import { useModalProvider } from '../../contexts/ModalProvider';
 type UserListProps = {
   data: Array<UserMeta>,
   goToChat: () => void;
+  title?: string
 }
 
 export default function UserList(props: UserListProps) {
 
-  const { data, goToChat } = props;
-  const { theme, client } = useConfig();
+  const { data, goToChat, title = "Start conversation"} = props;
+  const { theme, client, fontFamily } = useConfig();
   const { resetModal } = useModalProvider();
 
   const startChat = (data: UserMeta) => {
@@ -31,7 +32,7 @@ export default function UserList(props: UserListProps) {
   return (
     <View style={{ ...styles.container, backgroundColor: theme?.background.primary }}>
       <View style={{ ...styles.header }}>
-        <Text style={{ color: theme?.text.secondary, fontSize: 25 }}>Start conversation</Text>
+        <Text style={{ color: theme?.text.secondary, fontFamily, fontSize: 25 }}>{title}</Text>
         <TouchableOpacity onPress={() => resetModal()}>
           <XIcon size={25} color={theme?.icon} />
         </TouchableOpacity>
@@ -50,8 +51,8 @@ export default function UserList(props: UserListProps) {
               style={{ marginEnd: 15 }}
             />
             <View style={{ flex: 1 }}>
-              <Text style={{ color: theme?.text.secondary, fontSize: 18 }}>{item.firstname} {item.lastname}</Text>
-              <Text style={{ color: theme?.text.secondary, fontSize: 12 }}>{item.username}</Text>
+              <Text style={{ color: theme?.text.secondary, fontSize: 18, fontFamily }}>{item.firstname} {item.lastname}</Text>
+              <Text style={{ color: theme?.text.secondary, fontFamily, fontSize: 12 }}>{item.username}</Text>
             </View>
           </TouchableOpacity>
         )}

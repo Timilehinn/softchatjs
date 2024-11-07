@@ -27,10 +27,17 @@
   "devDependencies": {
     "@types/css-modules": "^1.0.5",
     "@types/uuid": "^10.0.0",
+    "autoprefixer": "^10.4.20",
+    "concurrently": "^9.1.0",
     "cpx": "^1.5.0",
     "css-loader": "^7.1.2",
     "esbuild-css-modules-plugin": "^3.1.2",
+    "esbuild-plugin-inline-css": "^0.0.1",
     "postcss": "^8.4.47",
+    "postcss-cli": "^11.0.0",
+    "rollup": "^4.24.4",
+    "rollup-plugin-postcss": "^4.0.2",
+    "rollup-plugin-typescript2": "^0.36.0",
     "style-loader": "^4.0.0"
   },
   "sideEffects": [
@@ -39,5 +46,13 @@
   "files": [
     "dist",
     "package.json"
-  ]
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./dist": "./dist/index.js"
+  }
 }

@@ -1,12 +1,11 @@
-import { useEffect, useState } from "react";
-
+import React from "react";
 import styles from "./text.module.css";
 
 type TextProps = {
   text: string;
-  styles?:  React.CSSProperties | undefined;
+  styles?: React.CSSProperties | undefined;
   weight?: "bold" | "medium";
-  size?: "sm" | "md" | 'xs';
+  size?: "sm" | "md" | "xs";
 };
 
 const Text = (props: TextProps) => {
@@ -18,7 +17,7 @@ const Text = (props: TextProps) => {
   const textSize: any = {
     sm: styles.textSmall,
     md: styles.textSizeMd,
-    xs: styles.textExtraSmall
+    xs: styles.textExtraSmall,
   };
 
   return (

@@ -13,7 +13,7 @@ export default function Preview({
   message: string;
   color: string;
 }) {
-  const { theme } = useConfig();
+  const { theme, fontFamily } = useConfig();
 
   const urlRegex = /(https?:\/\/[^\s]+)/gi;
 
@@ -58,7 +58,7 @@ export default function Preview({
                 color: color,
                 marginStart: 8,
                 textDecorationLine: "underline",
-                fontWeight: '600'
+                fontFamily
               }}
             >
               {data.previewData?.title}
@@ -71,6 +71,7 @@ export default function Preview({
                 fontSize: 12,
                 marginStart: 8,
                 textDecorationLine: "underline",
+                fontFamily
               }}
             >
               {truncate(data.previewData?.description || "", 100)}

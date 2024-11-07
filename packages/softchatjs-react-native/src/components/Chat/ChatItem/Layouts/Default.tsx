@@ -49,7 +49,7 @@ export default function Default(props: DefaultProps) {
     retryUpload
   } = props;
 
-  const { theme } = useConfig();
+  const { theme, fontFamily } = useConfig();
 
   const getStyle = useMemo(() => {
     // if(threaded) {
@@ -136,6 +136,7 @@ export default function Default(props: DefaultProps) {
             style={{
               textDecorationLine: "underline",
               textTransform: "lowercase",
+              fontFamily
             }}
             onPress={() => Linking.openURL(part)}
           >
@@ -143,7 +144,7 @@ export default function Default(props: DefaultProps) {
           </Text>
         );
       } else {
-        return <Text key={index}>{part}</Text>;
+        return <Text style={{ fontFamily }} key={index}>{part}</Text>;
       }
     });
   };
@@ -197,6 +198,7 @@ export default function Default(props: DefaultProps) {
             {hasTextMessage && (
               <Text
                 style={{
+                  fontFamily,
                   fontSize: 17,
                   color:
                     position === "left"
@@ -224,6 +226,7 @@ export default function Default(props: DefaultProps) {
           >
             <Text
               style={{
+                fontFamily,
                 fontSize: 11,
                 color:
                   position === "left"
@@ -231,7 +234,7 @@ export default function Default(props: DefaultProps) {
                     : theme?.chatBubble.right.messageTimeColor,
               }}
             >
-              <Text style={{ fontStyle: 'italic' }}>
+              <Text style={{ fontStyle: 'italic', fontFamily }}>
               {message.lastEdited && "Edited"}{" "}
               </Text>
               {formatMessageTime(message.createdAt)}
@@ -291,6 +294,7 @@ export default function Default(props: DefaultProps) {
             position == "right" && { marginEnd: 15 },
             position == "left" && { marginStart: 15 },
             {
+              fontFamily,
               color: theme?.text.disabled,
               fontSize: 11,
               marginTop: 5,
@@ -308,6 +312,7 @@ export default function Default(props: DefaultProps) {
             position == "right" && { marginEnd: 15 },
             position == "left" && { marginStart: 15 },
             {
+              fontFamily,
               color: 'tomato',
               fontSize: 11,
               marginTop: 5,

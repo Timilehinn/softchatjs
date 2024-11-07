@@ -56,7 +56,7 @@ export default class ChatClient {
     return ChatClient.client_instance
   }
 
-  initializeUser(data: UserMeta, notificationConfig?: NotificationConfig) {
+  initializeUser(data: UserMeta, config?: { notificationConfig?: NotificationConfig, connectionConfig?: { reset: boolean } }) {
     if (data) {
       this.userMeta = data;
       if (ChatClient.client_instance) {
@@ -67,7 +67,7 @@ export default class ChatClient {
           isConnected: false,
           fetchingConversations: true,
         });
-        conn._initiateConnection(notificationConfig);
+        conn._initiateConnection(config);
       }
     }
   }
@@ -154,6 +154,7 @@ export default class ChatClient {
       const msClient = MessageClient.getInstace(this.connection, conversationId);
       return {
         getMessages: msClient.getMessages.bind(msClient),
+        getConversation: msClient.getConversation.bind(msClient),
         sendMessage: msClient.sendMessage.bind(msClient),
         editMessage: msClient.editMessage.bind(msClient),
         sendTypingNotification: msClient.sendTypingNotification.bind(msClient),

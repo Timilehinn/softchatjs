@@ -18,6 +18,8 @@ import Search from "../../Search";
 import { FlashList } from "@shopify/flash-list";
 import { useConfig } from "../../../contexts/ChatProvider";
 import { useMessageState } from "../../../contexts/MessageStateContext";
+import ActionSheet, { ActionSheetRef } from "react-native-actions-sheet";
+
 
 type EmojiListProps = {
   openKeyboard: () => void;
@@ -26,8 +28,9 @@ type EmojiListProps = {
 };
 
 export const EmojiSheet = forwardRef((props: EmojiListProps, ref: any) => {
-  const emojiListRef = useRef<BottomSheetRef>();
-  const { client, theme } = useConfig()
+  const emojiListRef = useRef<ActionSheetRef>(null);
+
+  const { client, theme, fontFamily } = useConfig()
   const { openKeyboard, sendSticker, recipientId } = props;
   const flatListRef = useRef<FlashList<Emoticon>>(null);
   const width = Dimensions.get("window").width;
@@ -36,13 +39,14 @@ export const EmojiSheet = forwardRef((props: EmojiListProps, ref: any) => {
   const [height, setHeight] = useState("45%");
   const [searchValue, setSearchValue] = useState("");
   const { stickers, setStickers, globalTextMessage, setGlobalTextMessage } = useMessageState();
+  const [ isSearching, setIsSearching ] = useState(false)
 
   const closeSheet = () => {
-    emojiListRef?.current?.close();
+    emojiListRef?.current?.hide();
   };
 
   const openSheet = () => {
-    emojiListRef?.current?.open();
+    emojiListRef?.current?.show();
   };
 
   const onClose = () => {
@@ -129,15 +133,17 @@ export const EmojiSheet = forwardRef((props: EmojiListProps, ref: any) => {
   const emoji_list = filtered_emojis.length > 0 ? filtered_emojis : stickers;
 
   return (
-    <BottomSheet
-      ref={emojiListRef}
-      onClose={onClose}
-      scrollRef={flatListRef}
-      height={height}
-    >
+    // <BottomSheet
+    //   ref={emojiListRef}
+    //   onClose={onClose}
+    //   scrollRef={flatListRef}
+    //   height={height}
+    // >
+    <ActionSheet ref={emojiListRef} onClose={() => { emojiListRef.current.snapToIndex(0); setIsSearching(false) }} gestureEnabled snapPoints={[60, 100]} containerStyle={{ height: '70%', padding: 0 }}>
+
       <View
         style={{
-          flex: 1,
+          // flex: 1,
           height: "100%",
           width: "100%",
           justifyContent: "center",
@@ -150,7 +156,7 @@ export const EmojiSheet = forwardRef((props: EmojiListProps, ref: any) => {
             marginBottom: 10,
           }}
         >
-          {height === "80%" ? (
+          {isSearching ? (
             <Search 
                 value={searchValue}
                 setValue={setSearchValue}
@@ -169,16 +175,13 @@ export const EmojiSheet = forwardRef((props: EmojiListProps, ref: any) => {
               <TouchableOpacity
                 style={{ padding: 10 }}
                 onPress={() => {
-                  closeSheet();
-                  setTimeout(() => {
-                    setHeight("80%");
-                    openSheet();
-                  }, 300);
+                  emojiListRef.current.snapToIndex(1);
+                  setIsSearching(true)
                 }}
               >
                 <SearchIcon color={theme?.text.secondary} />
               </TouchableOpacity>
-              <Text style={{ fontSize: 25, color: theme?.text.secondary }}>Stickers</Text>
+              <Text style={{ fontSize: 25, color: theme?.text.secondary, fontFamily }}>Stickers</Text>
               <TouchableOpacity
                 style={{ padding: 10 }}
                 onPress={() => {
@@ -210,7 +213,7 @@ export const EmojiSheet = forwardRef((props: EmojiListProps, ref: any) => {
           />
         </View>
       </View>
-    </BottomSheet>
+    </ActionSheet>
   );
 })
 

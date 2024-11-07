@@ -20,6 +20,7 @@ import {
 } from "../../utils";
 import { Colors } from "../../constants/Colors";
 import { Image } from "expo-image";
+import { useConfig } from "../../contexts/ChatProvider";
 
 const avatarSize = 50;
 
@@ -36,6 +37,7 @@ export const ConversationAvatar = ({
   participantList: ParticipantListInfo[];
   groupMeta: GroupChatMeta | null;
 }) => {
+  const { fontFamily } = useConfig()
   const userInfo = useMemo(() => {
     if (type === "private-chat") {
       return getUserInfoWithId(chatUserId, participantList);
@@ -54,7 +56,7 @@ export const ConversationAvatar = ({
       <Image source={{ uri: imageUri }} style={styles.avatar} cachePolicy="disk" />
     ) : (
       <View style={styles.avatar}>
-        <Text style={styles.avatarInitials}>{initials}</Text>
+        <Text style={{ ...styles.avatarInitials, fontFamily }}>{initials}</Text>
       </View>
     )
   );
@@ -66,7 +68,6 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   conversationTitle: {
-    fontWeight: "800",
     color: "black",
     fontSize: 20,
     textTransform: "capitalize",
@@ -86,7 +87,6 @@ const styles = StyleSheet.create({
     marginEnd: 10,
   },
   avatarInitials: {
-    fontWeight: "700",
     fontSize: 30,
     textTransform: "capitalize",
     color: "white",

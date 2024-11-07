@@ -23,7 +23,7 @@ type SelectedMessageProps = {
 
 export default function SelectedMessage(props: SelectedMessageProps) {
   const { message, onClear, messageRef, scrollRef, itemIndex } = props;
-  const { theme } = useConfig();
+  const { theme, fontFamily } = useConfig();
   
   const highLightChat = () => {
     try {
@@ -58,7 +58,8 @@ export default function SelectedMessage(props: SelectedMessageProps) {
         <TouchableOpacity style={{ flex: 1 }} onPress={() => highLightChat()}>
           <Text style={{
             ...styles.message,
-            color: theme?.text.secondary
+            color: theme?.text.secondary,
+            fontFamily
           }}>{message.attachmentType === AttachmentTypes.NONE? truncate(message.message, 55) : message.attachedMedia?.[0]?.type || '...'}</Text>
         </TouchableOpacity>
       )}

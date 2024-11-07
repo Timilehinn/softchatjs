@@ -8,6 +8,7 @@ import {
   Text,
   Platform,
   ActivityIndicator,
+  ViewStyle
 } from "react-native";
 import Animated, {
   interpolate,
@@ -74,13 +75,15 @@ const ActionContainer = ({
   loading,
   onPress,
   children,
+  style
 }: {
   loading: boolean;
   onPress: () => void;
   children: Children;
+  style?: ViewStyle
 }) => {
   if (loading) {
-    return <ActivityIndicator />;
+    return <ActivityIndicator style={{ ...style }} />;
   }
   return (
     <TouchableOpacity
@@ -88,6 +91,7 @@ const ActionContainer = ({
       style={{
         padding: Platform.OS === "ios" ? 3 : 1.5,
         borderRadius: 100,
+        ...style,
       }}
       onPress={onPress}
     >
@@ -131,7 +135,7 @@ export default function ChatInput(props: ChatInputProps) {
 
   var minInputHeight = Platform.OS === "android" ? 30 : 40;
   const { addNewPendingMessages, pauseVoiceMessage } = useMessageState();
-  const { client } = useConfig();
+  const { client, fontFamily } = useConfig();
   const [inputHeight, setInputHeight] = useState(minInputHeight);
   const [alignItems, setAlignItems] = useState<"center" | "flex-end">("center");
   const touchStart = useSharedValue({ x: 0, y: 0, time: 0 });
@@ -266,7 +270,7 @@ export default function ChatInput(props: ChatInputProps) {
         {hasEmojis && (
           <TouchableOpacity
             onPress={() => {
-              mediaOptionsRef?.current.open();
+              mediaOptionsRef?.current.pickAttachment();
               inputRef?.current?.blur();
             }}
             style={{
@@ -284,7 +288,7 @@ export default function ChatInput(props: ChatInputProps) {
             backgroundColor: theme?.background.secondary,
             flex: 1,
             flexDirection: "row",
-            alignItems: "flex-end",
+            alignItems: "center",
             borderRadius: 15,
             padding: Platform.OS === "ios" ? 5 : 2,
           }}
@@ -295,6 +299,7 @@ export default function ChatInput(props: ChatInputProps) {
               ...styles.textInput,
               color: theme?.text.secondary,
               backgroundColor: theme?.background.secondary,
+              fontFamily
             }}
             onFocus={() => setIsInputFocused(true)}
             onBlur={() => setIsInputFocused(false)}
@@ -355,18 +360,10 @@ export default function ChatInput(props: ChatInputProps) {
             )}
           </TouchableOpacity>
         ) : (
-          <TouchableOpacity
-            style={{
-              display: isEditing ? "none" : "flex",
-              marginStart: 5,
-              padding: Platform.OS === "ios" ? 3 : 1.5,
-              borderRadius: 100,
-              // backgroundColor: theme?.icon,
-            }}
-            onPress={() => onStartRecording?.()}
-          >
+          <ActionContainer loading={isLoading} style={{ marginLeft: 5 }} onPress={() => onStartRecording?.()}>
             <MicIcon color={theme?.icon} />
-          </TouchableOpacity>
+          </ActionContainer>
+          
         )}
       </View>
     </View>

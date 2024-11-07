@@ -27,6 +27,8 @@ import Search from "../../Search";
 import { FlashList } from "@shopify/flash-list";
 import { emojis } from "../../../assets/emoji";
 import { useConfig } from "../../../contexts/ChatProvider";
+import ActionSheet, { ActionSheetRef } from "react-native-actions-sheet";
+
 
 type MessageOptionsProps = {
   recipientId: string;
@@ -41,8 +43,9 @@ var defaultSheetHeight = "55%";
 
 export const MessageOptions = forwardRef(
   (props: MessageOptionsProps, ref: any) => {
-    const optionsRef = useRef<BottomSheetRef>();
-    const { client } = useConfig();
+    const optionsRef = useRef<ActionSheetRef>(null);
+    // const optionsRef = useRef<BottomSheetRef>();
+    const { client, fontFamily } = useConfig();
     const {
       recipientId,
       message,
@@ -62,12 +65,12 @@ export const MessageOptions = forwardRef(
 
     const close = () => {
       setHeight(defaultSheetHeight);
-      optionsRef?.current?.close();
+      optionsRef?.current?.hide();
       changeView("preview");
     };
 
     const open = () => {
-      optionsRef?.current?.open();
+      optionsRef?.current?.show();
     };
 
     useImperativeHandle(ref, () => ({
@@ -89,7 +92,7 @@ export const MessageOptions = forwardRef(
     };
 
     const showAlert = () => {
-      optionsRef?.current?.close();
+      optionsRef?.current?.hide();
       Alert.alert(
         "Delete message",
         "This action is irreversible. Proceed?",
@@ -173,7 +176,7 @@ export const MessageOptions = forwardRef(
             to: recipientId,
           });
 
-          optionsRef?.current?.close();
+          optionsRef?.current?.hide();
         } else {
           console.log("not sending");
         }
@@ -210,6 +213,7 @@ export const MessageOptions = forwardRef(
               <Text
                 style={{
                   fontSize: Platform.OS === "ios" ? emojiSize : emojiSize - 5,
+                  fontFamily
                 }}
               >
                 {emoji.emoji}
@@ -261,7 +265,7 @@ export const MessageOptions = forwardRef(
               borderRadius: emojiSize,
             }}
           >
-            <Text style={{ fontSize: Platform.OS === "android" ? 25 : 35 }}>
+            <Text style={{ fontSize: Platform.OS === "android" ? 25 : 35, fontFamily }}>
               {item.emoji}
             </Text>
           </TouchableOpacity>
@@ -271,17 +275,17 @@ export const MessageOptions = forwardRef(
     );
 
     return (
-      <BottomSheet
-        ref={optionsRef}
-        onClose={close}
-        scrollRef={flatListRef}
-        height={height}
-      >
-        <>
+      // <BottomSheet
+      //   ref={optionsRef}
+      //   onClose={close}
+      //   scrollRef={flatListRef}
+      //   height={height}
+      // >
+    <ActionSheet ref={optionsRef} onClose={close} gestureEnabled containerStyle={{ height: '40%', padding: 0 }}>
           {view === "preview" && (
             <View
               style={{
-                flex: 1,
+                // flex: 1,
                 height: "100%",
                 width: "100%",
                 justifyContent: "flex-start",
@@ -328,8 +332,8 @@ export const MessageOptions = forwardRef(
                     <Text
                       style={{
                         marginStart: 15,
+                        fontFamily,
                         fontSize: 17,
-                        fontWeight: "700",
                         color:
                           option.label === "Delete"
                             ? "red"
@@ -346,13 +350,14 @@ export const MessageOptions = forwardRef(
           {view === "emojis" && (
             <View
               style={{
-                flex: 1,
+                // flex: 1,
                 height: "100%",
                 width: "100%",
                 paddingTop: 5,
+                padding: 15,
                 flexDirection: "row",
                 flexWrap: "wrap",
-                flexGrow: 1,
+                // flexGrow: 1,
               }}
             >
               <Search
@@ -372,8 +377,8 @@ export const MessageOptions = forwardRef(
               </View>
             </View>
           )}
-        </>
-      </BottomSheet>
+      {/* </BottomSheet> */}
+      </ActionSheet>
     );
   }
 );

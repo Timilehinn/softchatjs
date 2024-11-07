@@ -3,14 +3,15 @@ import { View, Text, Dimensions, TouchableOpacity } from "react-native";
 import BottomSheet, { BottomSheetRef } from "../../BottomSheet";
 import { forwardRef, useRef, useState, useImperativeHandle } from "react";
 import { generateId } from "../../../utils";
-import { CameraIcon, DocumentIcon, ImageIcon } from "../../../assets/icons";
+import { CameraIcon, DocumentIcon, ImageIcon, LocationIcon } from "../../../assets/icons";
 import * as ImagePicker from "expo-image-picker";
 import { Media, MediaType, Message } from "../../../types";
 import { useModalProvider } from "../../../contexts/ModalProvider";
 import ImagePreview from "../../Modals/ImagePreview";
-import AppCamera from "../../Modals/Camera";
+// import AppCamera from "../../Modals/Camera";
 import { useConfig } from "../../../contexts/ChatProvider";
 import VideoViewer from "../../Modals/VideoViewer";
+import ActionSheet, { ActionSheetRef } from "react-native-actions-sheet";
 
 type MediaOptionsProps = {
   recipientId: string;
@@ -23,8 +24,9 @@ type MediaOptionsProps = {
 let defaultSheetHeight = "45%";
 
 export const MediaOptions = forwardRef((props: MediaOptionsProps, ref: any) => {
-  const sheetRef = useRef<BottomSheetRef>();
-  const { theme } = useConfig();
+  // const sheetRef = useRef<BottomSheetRef>();
+  const sheetRef = useRef<ActionSheetRef>(null);
+  const { theme, fontFamily } = useConfig();
   const { displayModal } = useModalProvider();
 
   const {
@@ -36,27 +38,29 @@ export const MediaOptions = forwardRef((props: MediaOptionsProps, ref: any) => {
   } = props;
 
   const closeSheet = () => {
-    ref.current.close();
+    // ref.current.close();
+    sheetRef.current.hide()
   };
 
   useImperativeHandle(ref, () => ({
-    open: () => sheetRef?.current?.open(),
+    open: () => sheetRef?.current?.show(),
     close: () => closeSheet(),
+    pickAttachment: () => pickImage(),
   }));
 
-  const openCamera = () => {
-    sheetRef?.current?.close();
-    displayModal({
-      justifyContent: "flex-start",
-      children: (
-        <AppCamera
-          conversationId={conversationId}
-          chatUserId={chatUserId}
-          recipientId={recipientId}
-        />
-      ),
-    });
-  };
+  // const openCamera = () => {
+  //   sheetRef?.current?.close();
+  //   displayModal({
+  //     justifyContent: "flex-start",
+  //     children: (
+  //       <AppCamera
+  //         conversationId={conversationId}
+  //         chatUserId={chatUserId}
+  //         recipientId={recipientId}
+  //       />
+  //     ),
+  //   });
+  // };
 
   const options = [
     {
@@ -65,22 +69,22 @@ export const MediaOptions = forwardRef((props: MediaOptionsProps, ref: any) => {
       icon: <ImageIcon size={20} />,
       onPress: () => pickImage(),
     },
-    {
-      id: 1,
-      label: "camera",
-      icon: <CameraIcon size={20} />,
-      onPress: () => openCamera(),
-    },
     // {
-    //   id: 2,
-    //   label: "location",
-    //   icon: <LocationIcon size={40} />,
+    //   id: 1,
+    //   label: "camera",
+    //   icon: <CameraIcon size={20} />,
+    //   onPress: () => openCamera(),
     // },
     {
-      id: 3,
-      label: "document",
-      icon: <DocumentIcon size={20} color="lightblue" />,
+      id: 2,
+      label: "location",
+      icon: <LocationIcon size={20} />,
     },
+    // {
+    //   id: 3,
+    //   label: "document",
+    //   icon: <DocumentIcon size={20} color="lightblue" />,
+    // },
   ];
 
   const flatListRef = useRef(null);
@@ -91,7 +95,7 @@ export const MediaOptions = forwardRef((props: MediaOptionsProps, ref: any) => {
   >(null);
 
   const pickImage = async () => {
-    sheetRef?.current?.close();
+    // sheetRef?.current?.hide();
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       // allowsEditing: true,
@@ -171,28 +175,21 @@ export const MediaOptions = forwardRef((props: MediaOptionsProps, ref: any) => {
   };
 
   return (
-    <BottomSheet
-      ref={sheetRef}
-      onClose={close}
-      scrollRef={flatListRef}
-      height={defaultSheetHeight}
-    >
-      <View
-        style={{
-          flex: 1,
-          height: "100%",
-          width: "100%",
-          justifyContent: "flex-start",
-          paddingTop: 30,
-          padding: 20,
-        }}
-      >
+    // <BottomSheet
+    //   ref={sheetRef}
+    //   onClose={close}
+    //   scrollRef={flatListRef}
+    //   height={defaultSheetHeight}
+    // >
+    <ActionSheet ref={sheetRef} gestureEnabled containerStyle={{ height: '40%', padding: 20 }}>
         <View
           style={{
             width: "100%",
+            height: '100%',
             backgroundColor: theme?.background.secondary,
             borderRadius: 20,
             padding: 10,
+            marginTop: 10
           }}
         >
           {options.map((option, i) => (
@@ -218,7 +215,7 @@ export const MediaOptions = forwardRef((props: MediaOptionsProps, ref: any) => {
                 style={{
                   marginStart: 15,
                   textTransform: "capitalize",
-                  fontWeight: "700",
+                  fontFamily,
                   fontSize: 17,
                   color:
                     option.label === "Delete" ? "red" : theme?.text.secondary,
@@ -229,8 +226,9 @@ export const MediaOptions = forwardRef((props: MediaOptionsProps, ref: any) => {
             </TouchableOpacity>
           ))}
         </View>
-      </View>
-    </BottomSheet>
+    {/* </BottomSheet> */}
+    </ActionSheet>
+
   );
 });
 

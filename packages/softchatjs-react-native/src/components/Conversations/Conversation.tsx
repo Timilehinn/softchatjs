@@ -31,7 +31,7 @@ export type ConversationItemProps = {
 };
 
 export const ConversationItem = (props: ConversationItemProps) => {
-  const { theme } = useConfig();
+  const { theme, fontFamily } = useConfig();
   const { conversation, chatUserId, isLastItem, onPress, lastMessage, unread } =
     props;
 
@@ -53,7 +53,7 @@ export const ConversationItem = (props: ConversationItemProps) => {
     ) {
 
       return (
-        <Text style={{ ...styles.messageText, color: theme?.text.secondary }}>
+        <Text style={{ ...styles.messageText, color: theme?.text.secondary, fontFamily }}>
           <Text style={{ fontStyle: "italic" }}>
             @
             {
@@ -69,7 +69,7 @@ export const ConversationItem = (props: ConversationItemProps) => {
     }
     if (lastMessage.message) {
       return (
-        <Text style={{ ...styles.messageText, color: theme?.text.secondary }}>
+        <Text style={{ ...styles.messageText, color: theme?.text.secondary, fontFamily }}>
           {lastMessage.from === chatUserId ? "You: " : ""}
           {truncate(lastMessage.message, 35)}
         </Text>
@@ -77,15 +77,15 @@ export const ConversationItem = (props: ConversationItemProps) => {
     } else {
       return (
         <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <Text style={{ ...styles.messageText, color: theme?.text.secondary }}>
+          <Text style={{ ...styles.messageText, color: theme?.text.secondary, fontFamily }}>
             {lastMessage.from === chatUserId ? "You: " : ""}
           </Text>
           <View style={{ padding: 3, borderWidth: 1, borderColor: theme?.divider, borderRadius: 3 }}>
             <Text
               style={{
                 ...styles.messageText,
+                fontFamily,
                 fontSize: 10,
-                fontWeight: "bold",
                 color: theme?.text.secondary
               }}
             >
@@ -133,6 +133,7 @@ export const ConversationItem = (props: ConversationItemProps) => {
               style={{
                 ...styles.conversationTitle,
                 color: theme?.text.secondary,
+                fontFamily
               }}
             >
               {conversationTitle}
@@ -148,6 +149,7 @@ export const ConversationItem = (props: ConversationItemProps) => {
               style={{
                 ...styles.messageTime,
                 color: theme?.text.secondary,
+                fontFamily
               }}
             >
               {formatConversationTime(lastMessage?.createdAt)}
@@ -167,7 +169,6 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   conversationTitle: {
-    fontWeight: "800",
     fontSize: 20,
     textTransform: "capitalize",
   },
@@ -176,7 +177,6 @@ const styles = StyleSheet.create({
   },
   messageTime: {},
   avatarInitials: {
-    fontWeight: "700",
     fontSize: 30,
     textTransform: "capitalize",
     color: "white",

@@ -1,11 +1,11 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
+import { processFontFamily, useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { useColorScheme } from '@/components/useColorScheme';
-import { ChatProvider } from "softchatjs-react-native"
+import { ChatProvider } from "softchatjs-react-native/src"
 import ChatClient from "softchatjs-core"
 import { Platform } from 'react-native';
 export {
@@ -21,6 +21,40 @@ export const unstable_settings = {
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
+
+const beautySpaceTheme = {
+  background: {
+    primary: '#FFFFFF', // White background for light mode
+    secondary: '#F5F5F5', // Light grey for secondary background
+    disabled: '#F5F5F5'
+  },
+  text: {
+    primary: '#000000', // Black text for high contrast
+    secondary: '#4A4A4A', // Dark grey for secondary text
+    disabled: '#9E9E9E', // Light grey for disabled text
+  },
+  action: {
+    primary: '#4F9ED0', // Dark teal for primary action buttons
+    secondary: '#4F9ED0', // Light teal for secondary action buttons
+  },
+  chatBubble: {
+    left: {
+      bgColor: '#F0F0F0', // Light grey for incoming message background
+      messageColor: '#212121', // Dark grey for incoming message text
+      messageTimeColor: '#757575', // Medium grey for message time
+      replyBorderColor: 'red'
+    },
+    right: {
+      bgColor: '#4F9ED0', // Light teal for outgoing message background
+      messageColor: 'white', // Black for outgoing message text
+      messageTimeColor: 'lightgrey', // Medium grey for message time
+      replyBorderColor: 'green'
+    }
+  },
+  icon: '#4F9ED0', // Dark grey for icons
+  divider: '#E0E0E0', // Light grey for dividers
+}
+
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
@@ -67,9 +101,13 @@ function RootLayoutNav() {
   
   //   },[client])
 
+  const fontFamly = processFontFamily("SpaceMono")
+
   return (
     <ChatProvider
     client={client}
+    theme={beautySpaceTheme}
+    fontFamily={fontFamly}
       // subId='ef066542-6e13-4f25-a6c3-d3e3671e4662'
       // projectId='5909b61d-e6be-47b5-bb54-a60e56344580'
       // theme={{

@@ -3,6 +3,7 @@ import { TouchableOpacity, Text, ViewStyle } from "react-native";
 import { Colors } from "../../constants/Colors";
 import { getRandomColor } from "../../utils";
 import { Image } from "expo-image";
+import { useConfig } from "../../contexts/ChatProvider";
 
 type MessageAvatarProps = {
   initials: string;
@@ -13,6 +14,7 @@ type MessageAvatarProps = {
 
 export default function MessageAvatar(props: MessageAvatarProps) {
   const { imgUrl, initials, size = 40, style } = props;
+  const { fontFamily } = useConfig();
 
   return (
     <TouchableOpacity
@@ -40,10 +42,10 @@ export default function MessageAvatar(props: MessageAvatarProps) {
       ) : (
         <Text
           style={{
-            fontWeight: "800",
             fontSize: size/2,
             textTransform: "uppercase",
             color: "white",
+            fontFamily
           }}
         >
           {initials}

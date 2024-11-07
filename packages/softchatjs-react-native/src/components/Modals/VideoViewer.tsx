@@ -176,7 +176,7 @@ export default function VideoViewer(props: VideoViewProps) {
   } = props;
 
   const sliderRef = useRef<{ reset: () => void }>(null);
-  const { client } = useConfig();
+  const { client, fontFamily } = useConfig();
   const { resetModal } = useModalProvider();
   const { addNewPendingMessages } = useMessageState();
   const video = useRef<Video>(null);
@@ -264,10 +264,10 @@ export default function VideoViewer(props: VideoViewProps) {
           <View style={{ height: '100%', backgroundColor: 'white', width: `${position/duration * 100}%`, borderRadius: 5 }} />
         </View> */}
         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-          <Text style={{ color: "white" }}>
+          <Text style={{ color: "white", fontFamily }}>
             {convertToMinutes(position / 1000)}
           </Text>
-          <Text style={{ color: "white" }}>
+          <Text style={{ color: "white", fontFamily }}>
             {convertToMinutes(duration / 1000)}
           </Text>
         </View>

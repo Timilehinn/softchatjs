@@ -1,8 +1,7 @@
 import { StyleSheet, View, Text, Platform, TextInput, TouchableOpacity } from 'react-native';
-import Chat from 'softchatjs-react-native/src/components/Chat';
+import { Chat } from 'softchatjs-react-native/src';
 import { useLocalSearchParams } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import MessageAvatar from 'softchatjs-react-native/src/components/Chat/MessageAvatar';
 import { useRef } from 'react';
 import { Conversation, Message, UserMeta } from 'softchatjs-react-native/src/types';
 
@@ -22,6 +21,14 @@ export default function TabTwoScreen() {
         // layout='stacked'
         chatUser={chatUser}
         conversationId={conversationId} 
+        // participant={{
+        //   username: "fitness_fanatic",
+        //   uid: "t6u7v8w9x0",
+        //   firstname: "Nina",
+        //   profileUrl: "https://avatar.iran.liara.run/public",
+        //   custom: { activity: "Yoga", goal: "Well-being" },
+        //   color: "#1abc9c",
+        // }}
         unread={unread} 
         conversation={conversation}
         // renderChatHeader={(props) => (

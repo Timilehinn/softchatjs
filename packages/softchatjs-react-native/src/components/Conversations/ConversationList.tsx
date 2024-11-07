@@ -23,7 +23,7 @@ type ListItemProps = {
 
 const avatarSize = 50
 
-const ConversationAvatar = ({ type, chatUserId, participantList, groupMeta, conversationTitle }: { conversationTitle: string | undefined, chatUserId: string, type: ConversationType, participantList: ParticipantListInfo[], groupMeta: GroupChatMeta | null }) => {
+const ConversationAvatar = ({ type, chatUserId, participantList, groupMeta, conversationTitle, fontFamily }: { fontFamily: string | null, conversationTitle: string | undefined, chatUserId: string, type: ConversationType, participantList: ParticipantListInfo[], groupMeta: GroupChatMeta | null }) => {
   if(type === 'private-chat') {
     const userInfo = getUserInfoWithId(chatUserId, participantList);
     if(userInfo.presentUser?.profileUrl){
@@ -31,7 +31,7 @@ const ConversationAvatar = ({ type, chatUserId, participantList, groupMeta, conv
     }else{
       return (
         <View style={styles.avatar} >
-          <Text style={styles.avatarInitials}>{conversationTitle? conversationTitle.substring(0,1) : ''}</Text>
+          <Text style={{ ...styles.avatarInitials, fontFamily }}>{conversationTitle? conversationTitle.substring(0,1) : ''}</Text>
         </View>
       )
     }
@@ -41,14 +41,14 @@ const ConversationAvatar = ({ type, chatUserId, participantList, groupMeta, conv
     }else{
       return (
         <View style={styles.avatar}>
-          <Text>{conversationTitle? conversationTitle.substring(0,1) : ''}</Text>
+          <Text style={{ fontFamily }}>{conversationTitle? conversationTitle.substring(0,1) : ''}</Text>
         </View>
       )
     }
   }
 }
 
-export const ConversationTitle = ({ title }: { title: string }) => {
+export const ConversationTitle = ({ title, fontFamily }: { title: string, fontFamily: string | null }) => {
 
   const { theme } = useConfig();
 
@@ -56,6 +56,7 @@ export const ConversationTitle = ({ title }: { title: string }) => {
     <View>
       <Text style={{ 
         ...styles.conversationTitle,
+        fontFamily,
         color: theme?.text.secondary,
       }}>{title}</Text>
     </View>
@@ -71,6 +72,8 @@ export const ListItem = (props: ListItemProps) => {
   
   let conversationTitle = getConversationTitle(chatUserId, conversation)
 
+  const { fontFamily } = useConfig()
+
   return (
     <TouchableOpacity 
     onPress={onPress}
@@ -78,6 +81,7 @@ export const ListItem = (props: ListItemProps) => {
     >
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <ConversationAvatar 
+        fontFamily={fontFamily}
           chatUserId={chatUserId}
           participantList={conversation.participantList}
           type={conversation.conversationType}
@@ -86,13 +90,13 @@ export const ListItem = (props: ListItemProps) => {
         />
         <View style={{ maxWidth: '80%' }}>
           {conversationTitle && (
-            <ConversationTitle title={conversationTitle} />
+            <ConversationTitle fontFamily={fontFamily} title={conversationTitle} />
           )}
-          <Text style={styles.messageText}>{truncate(lastMessage.message, 45)}</Text>
+          <Text style={{ ...styles.messageText, fontFamily }}>{truncate(lastMessage.message, 45)}</Text>
         </View>
         </View>
       
-      <Text style={styles.messageTime}>{formatMessageTime(lastMessage.createdAt)}</Text>
+      <Text style={{ ...styles.messageTime, fontFamily }}>{formatMessageTime(lastMessage.createdAt)}</Text>
     </TouchableOpacity>
   )
 }
@@ -133,7 +137,6 @@ const styles = StyleSheet.create({
     width: '100%'
   },
   conversationTitle: {
-    fontWeight: '800',
     fontSize: 20,
     textTransform: 'capitalize'
   },
@@ -154,7 +157,6 @@ const styles = StyleSheet.create({
     marginEnd: 10
   },
   avatarInitials: {
-    fontWeight: '700',
     fontSize: 30,
     textTransform: 'capitalize',
     color: 'white',

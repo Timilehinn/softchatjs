@@ -80,9 +80,11 @@ export default class Connection extends EventEmitter {
     return Connection.connection;
   }
 
-  async _initiateConnection(notificationConfig?: NotificationConfig) {
+  async _initiateConnection(config?: { notificationConfig?: NotificationConfig, connectionConfig?: { reset: boolean } }) {
     try {
-      
+      if(config?.connectionConfig?.reset){
+        this.retry_count = 0
+      }
       // Ensure we have a valid userMeta.uid
       if (!this.userMeta?.uid) return null;
   
@@ -91,10 +93,17 @@ export default class Connection extends EventEmitter {
       console.log('clear ref: ', this.retryRef)        
       clearTimeout(this.retryRef);
           // Create a session to retrieve token and wsURI
+          
       const res = await CREATE_SESSION<{ token: string; wsURI: string }>({
         userId: this.userMeta.uid,
         projectId: this.projectConfig.projectId,
         subId: this.projectConfig.subId,
+      });
+
+      this.emit(Events.CONNECTION_CHANGED, {
+        connecting: true,
+        isConnected: false,
+        fetchingConversations: true,
       });
 
       console.log(res)
@@ -126,7 +135,7 @@ export default class Connection extends EventEmitter {
           newConversation: true,
           recipientMeta: {},
           projectId: this.projectConfig.projectId,
-          expoPushToken: notificationConfig?.expo.expoPushToken
+          expoPushToken: config?.notificationConfig?.expo.expoPushToken
         });
   
         // Check if WebSocket is already open

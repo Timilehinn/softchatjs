@@ -7,14 +7,14 @@ import { MessageStateProvider } from "./MessageStateContext";
 
 type ChatProvider = {
   children: JSX.Element,
-  // subId: string,
-  // projectId: string,
-  theme?: ChatTheme
+  theme?: ChatTheme,
+  fontFamily: string | null
 }
 
 const ConfigContext = createContext<Omit<ChatProvider, 'children'> & { client: ChatClient | null }>({
   theme: defaultTheme,
-  client: null
+  client: null,
+  fontFamily: null
 });
 
 export function useConfig() {
@@ -23,10 +23,10 @@ export function useConfig() {
 
 export default function ChatProvider(props: ChatProvider & { client: ChatClient | null }) {
 
-  const { children, client, theme = defaultTheme } = props;
+  const { children, client, theme, fontFamily } = props;
   
   return (
-    <ConfigContext.Provider value={{ theme, client }}>
+    <ConfigContext.Provider value={{ theme, client, fontFamily }}>
       {/* <ConnectionProvider projectId={config.projectId}>
         <ChatClientProvider> */}
         <MessageStateProvider>

@@ -32,7 +32,7 @@ export const AudioWaves = ({
   audioTime: number;
   audioWaves: { [key: number]: { metering: number; height: number } };
 }) => {
-  const { theme } = useConfig();
+  const { theme, fontFamily } = useConfig();
 
   const waves = Object.values(audioWaves).flat();
 
@@ -55,6 +55,7 @@ export const AudioWaves = ({
         style={{
           color: type === "play" ? theme?.text.primary : "white",
           fontSize: 12,
+          fontFamily,
           marginEnd: 5,
         }}
       >
@@ -90,6 +91,7 @@ export const AudioWaves = ({
 
 export default function VoiceMessage(props: VoiceMessageProps) {
   const { media, textColor = theme.text.primary } = props;
+  const { fontFamily } = useConfig()
   const {
     sound,
     audioState,
@@ -180,7 +182,7 @@ export default function VoiceMessage(props: VoiceMessageProps) {
           }}
         />
       </View>
-      <Text style={{ marginStart: 5, color: textColor }}>
+      <Text style={{ marginStart: 5, color: textColor, fontFamily }}>
         {convertToMinutes(progress.timePlayed)}
       </Text>
     </View>

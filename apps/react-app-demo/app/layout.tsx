@@ -2,7 +2,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import { ChatClientProvider } from "softchatjs-react";
+import { ChatClientProvider } from "softchatjs-react/src";
 import ChatClient from "softchatjs-core";
 import { AppProvider } from "./context/AppProvider";
 

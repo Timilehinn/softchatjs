@@ -12,7 +12,7 @@ type Search = {
 };
 
 export default function Search(props: Search) {
-  const { theme } = useConfig();
+  const { theme, fontFamily } = useConfig();
   const { value, setValue, placeholder, containerStyle } = props;
   return (
     <View
@@ -31,7 +31,8 @@ export default function Search(props: Search) {
           borderColor: theme?.divider,
           borderRadius: 10,
           paddingStart: 10,
-          color: theme?.text.secondary
+          color: theme?.text.secondary,
+          fontFamily
         }}
         placeholder={placeholder}
         placeholderTextColor="grey"

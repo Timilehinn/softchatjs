@@ -34,6 +34,7 @@ type QuotedProps = {
 
 export default function Quoted(props: QuotedProps) {
   const { quotedMessage, layout, onPress, theme, position, chatUserId } = props;
+  const { fontFamily } = useConfig()
 
   if (!quotedMessage) {
     return null;
@@ -48,7 +49,7 @@ export default function Quoted(props: QuotedProps) {
               style={{
                 color: theme?.text.secondary,
                 fontSize: 10,
-                fontWeight: "bold",
+                fontFamily,
               }}
             >
               {quotedMessage.attachmentType}
@@ -62,7 +63,7 @@ export default function Quoted(props: QuotedProps) {
               style={{
                 color: theme?.text.secondary,
                 fontSize: 10,
-                fontWeight: "bold",
+                fontFamily
               }}
             >
               {quotedMessage.attachmentType}
@@ -76,7 +77,7 @@ export default function Quoted(props: QuotedProps) {
               style={{
                 color: theme?.text.secondary,
                 fontSize: 10,
-                fontWeight: "bold",
+                fontFamily
               }}
             >
               media
@@ -122,7 +123,7 @@ export default function Quoted(props: QuotedProps) {
             }}
           />
           {quotedMessage.message ? (
-            <Text style={{ flex: 1, color: theme?.text.disabled }}>
+            <Text style={{ flex: 1, color: theme?.text.disabled, fontFamily }}>
               {truncate(quotedMessage?.message, 100)}
             </Text>
           ) : (
@@ -198,7 +199,7 @@ export default function Quoted(props: QuotedProps) {
         },
       ]}
     >
-      <Text style={{ color: quotedMessage.messageOwner.color, textTransform: 'capitalize', marginBottom: 5, fontWeight: 'bold',  textShadowColor: 'rgba(0, 0, 0, 0.3)',
+      <Text style={{ color: quotedMessage.messageOwner.color, textTransform: 'capitalize', fontFamily, marginBottom: 5, textShadowColor: 'rgba(0, 0, 0, 0.3)',
   textShadowOffset: { width: .5, height: .5 },
   textShadowRadius: 5, }}>{quotedMessage.messageOwner.uid === chatUserId? "You" : quotedMessage.messageOwner.username}</Text>
       <>{renderMediaIcon()}</>
@@ -214,6 +215,7 @@ export default function Quoted(props: QuotedProps) {
       <Text
         style={{
           display: quotedMessage.message ? "flex" : "none",
+          fontFamily,
           color: "white",
           fontSize: 14,
         }}

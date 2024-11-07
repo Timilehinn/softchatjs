@@ -1,6 +1,6 @@
 {
   "name": "softchatjs-react-native",
-  "version": "3.0.5",
+  "version": "4.1.0",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -28,17 +28,21 @@
     "tsup": "^8.2.4"
   },
   "peerDependencies": {
-    "react-native": ">=0.60.0",
     "expo-av": "^14.0.7",
     "expo-camera": "^15.0.16",
     "expo-file-system": "^17.0.1",
     "expo-image": "^1.13.0",
-    "expo-image-picker": "^15.0.7"
+    "expo-image-picker": "^15.0.7",
+    "react-native": ">=0.60.0",
+    "react-native-actions-sheet": "^0.9.7"
   },
-  "private": true,
   "exports": {
     "require": "./dist/index.js",
     "import": "./dist/index.mjs",
     "types": "./dist/index.d.ts"
-  }
+  },
+  "files": [
+    "dist",
+    "package.json"
+  ]
 }

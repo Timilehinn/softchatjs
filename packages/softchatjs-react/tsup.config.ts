@@ -1,21 +1,28 @@
 import { defineConfig } from "tsup"
-import cssModulesPlugin from 'esbuild-css-modules-plugin'
+import inlineCssPlugin from 'esbuild-plugin-inline-css';
+import { copyFile } from 'node:fs/promises'
+import glob from 'tiny-glob'
+import { exec } from 'node:child_process'
+import { promisify } from 'node:util'
+
+const pexec = promisify(exec)
 
 export default defineConfig({
   clean: true,
   dts: true,
   entry: ['src/index.ts'], 
-  format: ["esm"],
+  format: ["cjs", "esm"],
   sourcemap: true,
   target: "esnext",
   outDir: "dist",
   splitting: false,
   skipNodeModulesBundle: true,
-  plugins: [cssModulesPlugin({ inject: true })],
+  plugins: [inlineCssPlugin()],
   minify: true,
   loader: {
     '.js': 'jsx',
-    '.css': 'local-css'
+    '.css': 'copy',
+    '.module.css': 'copy'
   },
-  external: ['softchatjs-core']
+  external: ['softchatjs-core'],
 })

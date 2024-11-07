@@ -25,6 +25,7 @@ import {
 } from "./utils";
 import { Events } from "./events";
 import {
+  GET_CONVERSATION,
   GET_EMOJIS,
   GET_MESSAGES,
   GET_PRESIGNED_URL,
@@ -80,11 +81,16 @@ export default class MessageClient {
 
   private getConversationType(conversationId?: string) {
     // const conversationMeta = this.connection.conversationListMeta[conversationId? conversationId : this.connection.activeConversationId];
-    const conversationMeta =
+    try {
+      const conversationMeta =
       this.connection.conversationListMeta[
         conversationId ? conversationId : this.connection.activeConversationId
       ];
-    return conversationMeta.conversation.conversationType;
+    return conversationMeta.conversation.conversationType
+    } catch (error) {
+      return "private-chat"
+    }
+   
   }
 
   // removes the last item in the list and adds a new one to the end keeping the original length
@@ -191,7 +197,7 @@ export default class MessageClient {
       }
     } catch (error) {
       if (error instanceof Error) {
-        console.error(error.message);
+        console.error(error);
         this.connection.emit(Events.NEW_MESSAGE, {
           message: {
             ...newMessage,
@@ -269,6 +275,8 @@ export default class MessageClient {
     reactions: Reaction[],
     config?: { ws: boolean; to: string }
   ) {
+    try{
+      
     this.connection.emit(Events.EDITED_MESSAGE, {
       message: { messageId, reactions },
     });
@@ -317,6 +325,12 @@ export default class MessageClient {
         conversationListMeta: this.connection.conversationListMeta,
       });
     }
+    
+  }catch(error){
+    if(error instanceof Error){
+      console.log(error.message)
+    }
+  }
   }
 
   private storeEditedMessage(data: EditedMessage) {
@@ -497,18 +511,20 @@ export default class MessageClient {
       };
 
       this.connection.socket.send(JSON.stringify(socketMessage));
-      var conversationMeta =
-        this.connection.conversationListMeta[conversationId];
-      const updatedConversationListMeta = {
-        conversation: conversationMeta.conversation,
-        lastMessage: conversationMeta.lastMessage,
-        unread: [],
-      };
-      this.connection.conversationListMeta[conversationId] =
-        updatedConversationListMeta;
-      this.connection.emit(Events.CONVERSATION_LIST_META_CHANGED, {
-        conversationListMeta: this.connection.conversationListMeta,
-      });
+      var conversationMeta = this.connection.conversationListMeta[conversationId];
+      if(conversationMeta) {
+        const updatedConversationListMeta = {
+          conversation: conversationMeta.conversation,
+          lastMessage: conversationMeta.lastMessage,
+          unread: [],
+        };
+        this.connection.conversationListMeta[conversationId] =
+          updatedConversationListMeta;
+        this.connection.emit(Events.CONVERSATION_LIST_META_CHANGED, {
+          conversationListMeta: this.connection.conversationListMeta,
+        });
+      }
+     
     }
   }
 
@@ -568,10 +584,14 @@ export default class MessageClient {
           conversationListMeta: this.connection.conversationListMeta,
         });
       } else {
-        console.warn(`Conversation with ID ${conversationId} not found.`);
+        throw new Error(`Conversation with ID ${conversationId} not found.`)
       }
       
-    } catch (error) {}
+    } catch (error) {
+      if(error instanceof Error){
+        console.log(error.message)
+      }
+    }
   }
 
   reactToMessage({
@@ -711,6 +731,27 @@ export default class MessageClient {
       }
     } else {
       return [];
+    }
+  }
+
+  
+  async getConversation(conversationId: string) {
+    if (this.connection) {
+      try {
+        const response = await GET_CONVERSATION<{ conversation: Conversation }>(
+          this.connection.wsAccessConfig.token,
+          conversationId
+        );
+        if (response.success) {
+          return response.data.conversation
+        } else {
+          return null
+        }
+      } catch (err) {
+        return null
+      }
+    } else {
+      return null;
     }
   }
 
@@ -865,6 +906,7 @@ export default class MessageClient {
     }
   }
 
+
   async uploadAttachmentV2({
     base64,
     fileKey,
@@ -925,7 +967,6 @@ export default class MessageClient {
 
   async setActiveConversation() {
     if (this.connection) {
-      // this.connection.activeConversationId = conversationId;
       this.connection.screen = Screens.CHAT;
       this.screen = Screens.CHAT;
     } else {
@@ -947,7 +988,6 @@ export default class MessageClient {
     try {
       // this.connection.socket.onmessage = (event: MessageEvent) => {
       // console.log(event, '---event')
-
       if (!event) return null;
       var wsData = JSON.parse(event.data);
       // console.log(wsData)
