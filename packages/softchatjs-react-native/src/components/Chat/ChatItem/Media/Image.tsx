@@ -1,6 +1,6 @@
 import { View, TouchableOpacity } from 'react-native'
 import React from 'react'
-import { Message } from '../../../../types'
+import { Message } from 'softchatjs-core'
 import { useModalProvider } from '../../../../contexts/ModalProvider'
 import ImagePreview from '../../../Modals/ImagePreview'
 import { Image } from 'expo-image'

@@ -12,16 +12,14 @@ import {
 } from "react-native";
 import React, { useMemo, useRef, useState } from "react";
 import {
+  generateConversationId,
+  generateFillerTimestamps,
+  generateId,
   AttachmentTypes,
   Media,
   MediaType,
   Message,
   MessageStates,
-} from "../../types";
-import {
-  generateConversationId,
-  generateFillerTimestamps,
-  generateId,
 } from "softchatjs-core";
 import {
   Gesture,

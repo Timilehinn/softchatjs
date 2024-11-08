@@ -94,14 +94,6 @@ export default class ChatClient {
     }
   }
 
-  getConversations() {
-    if (this.connection) {
-      return this.connection.conversations;
-    } else {
-      return [];
-    }
-  }
-
   getConnectionStatus() {
     if (this.connection) {
       return {
@@ -137,6 +129,15 @@ export default class ChatClient {
   unsubscribeAll(event: string) {
     if (this.connection) {
       this.connection.removeAllListeners(event);
+    }
+  }
+
+  getConversations() {
+    if(this.connection) {
+      return this.connection.conversationListMeta
+    }else{
+      console.warn("No connection available, initialize user before calling method")
+      return {}
     }
   }
 

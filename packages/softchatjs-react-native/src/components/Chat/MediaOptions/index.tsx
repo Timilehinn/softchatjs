@@ -5,7 +5,7 @@ import { forwardRef, useRef, useState, useImperativeHandle } from "react";
 import { generateId } from "../../../utils";
 import { CameraIcon, DocumentIcon, ImageIcon, LocationIcon } from "../../../assets/icons";
 import * as ImagePicker from "expo-image-picker";
-import { Media, MediaType, Message } from "../../../types";
+import { Media, MediaType, Message } from "softchatjs-core";
 import { useModalProvider } from "../../../contexts/ModalProvider";
 import ImagePreview from "../../Modals/ImagePreview";
 // import AppCamera from "../../Modals/Camera";

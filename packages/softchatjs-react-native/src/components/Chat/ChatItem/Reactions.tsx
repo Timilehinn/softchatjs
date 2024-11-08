@@ -1,6 +1,6 @@
 import React from "react";
 import { View, TouchableOpacity, Image, Text, Platform, ViewStyle } from "react-native";
-import { Reaction, ServerActions } from "../../../types";
+import { Reaction, ServerActions } from "softchatjs-core";
 import { useConfig } from "../../../contexts/ChatProvider";
 import theme from "../../../theme";
 

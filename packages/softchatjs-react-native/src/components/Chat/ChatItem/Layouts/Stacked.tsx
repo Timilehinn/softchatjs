@@ -1,10 +1,7 @@
 import { View, Text, ViewStyle, TouchableOpacity, Linking } from "react-native";
 import React, { useCallback, useMemo } from "react";
 import {
-  AttachmentTypes,
   ChatBubbleRenderProps,
-  Message,
-  MessageStates,
 } from "../../../../types";
 import MessageAvatar from "../../MessageAvatar";
 import Sticker from "../Sticker";
@@ -15,6 +12,8 @@ import Quoted from "../Quoted";
 import { useConfig } from "../../../../contexts/ChatProvider";
 import Preview from "../Preview";
 import MediaMessage from "../Media";
+import { Message, AttachmentTypes, MessageStates } from "softchatjs-core"
+
 
 type StackedProps = {
   message: Message;

@@ -22,7 +22,7 @@ import {
   AVPlaybackStatus,
   AVPlaybackStatusSuccess,
 } from "expo-av";
-import { Media, Message, generateFillerTimestamps } from "softchatjs-core";
+import { Media, Message, generateFillerTimestamps, AttachmentTypes, MediaType } from "softchatjs-core";
 import TrashIcon, {
   PauseIcon,
   PlayIcon,
@@ -32,7 +32,6 @@ import TrashIcon, {
 import { useConfig } from "../../contexts/ChatProvider";
 import { useMessageState } from "../../contexts/MessageStateContext";
 import { convertToMinutes, generateId } from "../../utils";
-import { AttachmentTypes, MediaType } from "../../types";
 import { useModalProvider } from "../../contexts/ModalProvider";
 import {
   GestureHandlerRootView,

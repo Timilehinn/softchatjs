@@ -1,9 +1,7 @@
 import ChatClient from "./ChatClient";
 
 export type {
-  AttachmentTypes,
   UserMeta,
-  MediaType,
   Media,
   Point,
   Message,
@@ -13,10 +11,16 @@ export type {
   ChatEventGenerics,
   ConversationListMeta,
   SendMessageGenerics,
-  Reaction
+  Reaction,
+  ConversationType,
+  GroupChatMeta,
+  ParticipantListInfo,
+  PrivateChatMeta,
+  Emoji,
+  ConversationListItem
 } from "./types";
 export { Emoticon } from './emoticon.type'
 export { generateFillerTimestamps, generateConversationId, generateId } from './utils'
-export { MessageStates } from "./types";
+export { MessageStates, AttachmentTypes, MediaType, ServerActions } from "./types";
 export { Events } from "./events";
 export default ChatClient;

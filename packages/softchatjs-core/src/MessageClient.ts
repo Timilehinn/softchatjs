@@ -142,9 +142,9 @@ export default class MessageClient {
               messageState: MessageStates.SENT,
             },
           });
-
           var conversationMeta =
             this.connection.conversationListMeta[newMessage.conversationId];
+
           var updatedMessages = this.rotateAndInsertMessageList(
             conversationMeta.conversation.messages,
             {
@@ -175,10 +175,6 @@ export default class MessageClient {
               messageState: MessageStates.FAILED,
             },
           });
-          // const unread = [
-          //   ...this.connection.conversationListMeta[newMessage.conversationId].unread,
-          //   newMessage.messageId,
-          // ];
           this.connection.conversationListMeta[newMessage.conversationId] = {
             conversation:
               this.connection.conversationListMeta[newMessage.conversationId]
@@ -196,8 +192,8 @@ export default class MessageClient {
       }
     } catch (error) {
       if (error instanceof Error) {
-        console.error(error);
-        this.connection.emit(Events.NEW_MESSAGE, {
+        console.error(error, '----');
+        this.connection.emit(Events.DELETED_MESSAGE, {
           message: {
             ...newMessage,
             reactions: [],

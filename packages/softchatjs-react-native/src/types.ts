@@ -2,6 +2,7 @@
 import { Dispatch, SetStateAction } from "react"
 import { TextInput } from "react-native"
 import { Image } from "react-native-svg"
+import { Message } from 'softchatjs-core'
 
 export enum ClientActions {
   INCOMING_MESSAGE = 'incomingMessage',
@@ -107,31 +108,31 @@ type ImageUploadState = {
   base64: string
 }
 
-export type Message = {
-  conversationId: string,
-  from: string,
-  to: string,
-  message: string,
-  messageState: number,
-  messageId: string,
-  attachmentType?: AttachmentTypes,
-  messageOwner: UserMeta,
-  replyTo?: string,
-  sharedLocation?: Point,
-  sharedImage?: {
-    url: string,
-    aspectRatio?: number,
-  },
-  attachedMedia: Media[]
-  token?: string,
-  quotedMessageId: string,
-  quotedMessage: QuotedMessage | null,
-  reactions: Reaction[],
-  lastEdited: Date | string | null,
-  isUploading?: boolean
-}
-& 
-Timetamps
+// export type Message = {
+//   conversationId: string,
+//   from: string,
+//   to: string,
+//   message: string,
+//   messageState: number,
+//   messageId: string,
+//   attachmentType?: AttachmentTypes,
+//   messageOwner: UserMeta,
+//   replyTo?: string,
+//   sharedLocation?: Point,
+//   sharedImage?: {
+//     url: string,
+//     aspectRatio?: number,
+//   },
+//   attachedMedia: Media[]
+//   token?: string,
+//   quotedMessageId: string,
+//   quotedMessage: QuotedMessage | null,
+//   reactions: Reaction[],
+//   lastEdited: Date | string | null,
+//   isUploading?: boolean
+// }
+// & 
+// Timetamps
 // // when an image is being uploaded, message comes with the meta below:
 // & ImageUploadState
 

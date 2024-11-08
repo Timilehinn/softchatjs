@@ -2,14 +2,13 @@ import React from "react";
 import { View, TouchableOpacity, StyleSheet, Text } from "react-native";
 import { Colors } from "../../constants/Colors";
 import { ConversationAvatar } from "../Conversations/ConversationAvatar";
-import { ChatHeaderRenderProps, Conversation } from "../../types";
+import { ChatHeaderRenderProps } from "../../types";
 import { getConversationTitle, getUserInfoWithId } from "../../utils";
 import { ConversationTitle } from "../Conversations/ConversationList";
 import { useMemo } from "react";
 import { useConfig } from "../../contexts/ChatProvider";
 import { StatusBar } from "expo-status-bar";
-import { UserMeta } from "../../../../softchatjs-core/dist/types";
-import MessageAvatar from "./MessageAvatar";
+import { Conversation } from "softchatjs-core"
 
 type ChatHeaderProps = {
   conversation: Conversation | null;

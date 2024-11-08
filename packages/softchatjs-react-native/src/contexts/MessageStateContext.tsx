@@ -4,11 +4,10 @@ import React, {
   useContext,
 } from "react";
 import {
-  Media,
   SetState,
 } from "../types";
 import { Audio, AVPlaybackStatus } from 'expo-av';
-import { Emoticon, Message, SendMessageGenerics } from "softchatjs-core";
+import { Emoticon, Message, SendMessageGenerics, Media } from "softchatjs-core";
 
 type MessageStateContext = {
   globalTextMessage: string,

@@ -19,16 +19,12 @@ import {
   RefreshControl,
 } from "react-native";
 import {
-  AttachmentTypes,
   ChatBubbleRenderProps,
   ChatHeaderRenderProps,
   ChatInputRenderProps,
   Children,
-  Conversation,
-  MediaType,
-  Message,
-  Prettify,
-  UserMeta,
+  AttachmentTypes,
+  Prettify
 } from "../../types";
 import { ChatItem } from "./ChatItem";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -48,6 +44,12 @@ import {
   Events,
   generateConversationId,
   generateId,
+  Message,
+  Conversation,
+  MediaType,
+  UserMeta,
+  ConversationListMeta,
+  ConversationListItem
 } from "softchatjs-core";
 import { BottomSheetRef } from "../BottomSheet";
 import { format, isThisWeek } from "date-fns";
@@ -57,18 +59,14 @@ import { Audio } from "expo-av";
 import { interpolate } from "react-native-reanimated";
 
 type ChatProps = {
-  conversationId?: string;
-  unread: string[];
-  conversation: Conversation | null;
+  activeConversation: ConversationListItem
   layout?: "stacked";
   chatUser: UserMeta;
   renderChatBubble?: (props: Prettify<ChatBubbleRenderProps>) => void;
   renderChatInput?: (props: Prettify<ChatInputRenderProps>) => void;
   renderChatHeader?: (props: Prettify<ChatHeaderRenderProps>) => void;
-  participantId?: string;
   placeholder?: Children;
   keyboardOffset?: number;
-  // participant?: UserMeta
 };
 
 export type SendMessage = {
@@ -88,19 +86,18 @@ export default function Chat(props: ChatProps) {
   const { client, theme, fontFamily } = useConfig();
   const {
     layout,
-    conversationId,
-    unread,
+    activeConversation,
     renderChatBubble,
     renderChatInput,
     renderChatHeader,
-    conversation,
-    // participant,
     chatUser,
     placeholder,
     keyboardOffset = Platform.OS === "ios" ? 10 : 0,
   } = props;
   const chatUserId = chatUser.uid;
-  const _conversationId = conversation?.conversationId;
+  const conversationId = activeConversation.conversation.conversationId;
+  const participantList = activeConversation.conversation.participantList
+  const participants = activeConversation.conversation.participants
   const [permissionResponse, requestPermission] = Audio.usePermissions();
   const scrollRef = useRef<FlashList<Message | string> | null>(null);
   const inputRef = useRef<TextInput>(null);
@@ -120,12 +117,8 @@ export default function Chat(props: ChatProps) {
     activeVoiceMessage,
     unload,
   } = useMessageState();
-  const [conversationMeta, setConversationMeta] = useState<Conversation | null>(
-    conversation
-  );
-  const [messages, setMessages] = useState<Array<string | Message>>(
-    conversation ? [...conversation.messages.reverse()] : []
-  );
+
+  const [messages, setMessages] = useState<Array<string | Message>>([...activeConversation.conversation.messages.reverse()]);
   const [isEditing, setIsEditing] = useState(false);
   const [refMap, setRefMap] = useState<{
     [key: string]: { ref: RefObject<View> | null; index: number };
@@ -172,7 +165,7 @@ export default function Chat(props: ChatProps) {
 
   const viewConfigRef = useRef({ viewAreaCoveragePercentThreshold: 80 });
 
-  // const _conversationId = useMemo(() => {
+  // const conversationId = useMemo(() => {
   //   try {
   //     if(!participantId && !conversationId){
   //       throw new Error('ConversationId and Participant cannot be null')
@@ -216,10 +209,9 @@ export default function Chat(props: ChatProps) {
 
   async function getMessages() {
     try {
-      if (_conversationId) {
         setLoadingMessages(true);
         const messages = (await client
-          ?.messageClient(_conversationId)
+          ?.messageClient(conversationId)
           .getMessages()) as Array<Message>;
         if (messages.length > 0) {
           var restructuredMessages: GroupedMessages = restructureMessages(
@@ -227,7 +219,6 @@ export default function Chat(props: ChatProps) {
           );
           setMessages(restructuredMessages);
         }
-      }
     } catch (error) {
       console.log(error);
     } finally {
@@ -237,10 +228,10 @@ export default function Chat(props: ChatProps) {
 
   async function getOlderMessages() {
     try {
-      if (client && messages.length > 0 && _conversationId) {
+      if (client && messages.length > 0) {
         setLoadingOlderMessages(true);
         const olderMessages = (await client
-          .messageClient(_conversationId)
+          .messageClient(conversationId)
           .getMessages(currentPage)) as Array<Message>;
         setMessages((prev) => {
           return restructureMessages([...prev, ...olderMessages.reverse()]);
@@ -260,8 +251,8 @@ export default function Chat(props: ChatProps) {
   //   try {
   //     if (client) {
   //       const conversation = (await client
-  //         ?.messageClient(_conversationId)
-  //         .getConversation(_conversationId)) as Conversation;
+  //         ?.messageClient(conversationId)
+  //         .getConversation(conversationId)) as Conversation;
   //       console.log(conversation, "---the conversation");
   //       if (conversation) {
   //         setConversationMeta(conversation);
@@ -271,23 +262,20 @@ export default function Chat(props: ChatProps) {
   // };
 
   useEffect(() => {
-    if (conversation) {
-      // getMessages();
-      const recipients = conversationMeta?.participants.filter(
+    // if (conversation) {
+      const recipients = participants.filter(
         (id) => id !== client?.userMeta.uid
       );
       if (recipients && recipients.length > 0) {
         setRecipientId(recipients[0]);
       }
-    } else {
-      // getConversation();
-      // setRecipientId(participantId)
-    }
     getMessages();
-  }, [conversation]);
+  }, []);
 
   const handleNewMessages = (event: any) => {
     try {
+      // console.log(client.)
+      // return console.log(event)
       setMessages((prev) => {
         return restructureMessages([event.message, ...prev]);
       });
@@ -297,6 +285,7 @@ export default function Chat(props: ChatProps) {
   };
 
   const handleEditedMessage = (event: any) => {
+    console.log(event)
     setMessages((prev) => {
       const newMessages = [...prev];
       return newMessages.map((message) => {
@@ -312,13 +301,13 @@ export default function Chat(props: ChatProps) {
   };
 
   const handleTypingStarted = (event: any) => {
-    if (event.conversationId === _conversationId) {
+    if (event.conversationId === conversationId) {
       showTyping(true);
     }
   };
 
   const handleStoppedStarted = (event: any) => {
-    if (event.conversationId === _conversationId) {
+    if (event.conversationId === conversationId) {
       showTyping(false);
     }
   };
@@ -342,8 +331,8 @@ export default function Chat(props: ChatProps) {
   };
 
   useEffect(() => {
-    if (client && _conversationId) {
-      client.messageClient(_conversationId).setActiveConversation();
+    if (client && conversationId) {
+      client.messageClient(conversationId).setActiveConversation();
       client.subscribe(Events.NEW_MESSAGE, handleNewMessages);
       client.subscribe(Events.EDITED_MESSAGE, handleEditedMessage);
       client.subscribe(Events.HAS_STARTED_TYPING, handleTypingStarted);
@@ -353,8 +342,8 @@ export default function Chat(props: ChatProps) {
     }
     return () => {
       if (client) {
-        if (_conversationId) {
-          client.messageClient(_conversationId).unSetActiveConversation();
+        if (conversationId) {
+          client.messageClient(conversationId).unSetActiveConversation();
         }
         client.unsubscribe(Events.NEW_MESSAGE, handleNewMessages);
         client.unsubscribe(Events.EDITED_MESSAGE, handleEditedMessage);
@@ -364,7 +353,7 @@ export default function Chat(props: ChatProps) {
         client.unsubscribe(Events.CONNECTION_CHANGED, handleConnectionChanged);
       }
     };
-  }, [client, _conversationId]);
+  }, [client, conversationId]);
 
   const openEmojis = () => {
     emojiListRef?.current?.open();
@@ -374,10 +363,10 @@ export default function Chat(props: ChatProps) {
   const sendMessage = async () => {
     try {
       if (!globalTextMessage) return null;
-      if (_conversationId) {
+      if (conversationId) {
         if (client) {
-          client.messageClient(_conversationId).sendMessage({
-            conversationId: _conversationId,
+          client.messageClient(conversationId).sendMessage({
+            conversationId: conversationId,
             to: recipientId,
             message: globalTextMessage,
             reactions: [],
@@ -441,7 +430,7 @@ export default function Chat(props: ChatProps) {
         addNewPendingMessages({
           from: client.userMeta.uid,
           messageId: generateId(),
-          conversationId: _conversationId,
+          conversationId: conversationId,
           to: recipientId,
           message: "",
           reactions: [],
@@ -536,14 +525,14 @@ export default function Chat(props: ChatProps) {
   useEffect(() => {
     let debounceTimer: NodeJS.Timeout | undefined;
     let idleTimer: NodeJS.Timeout | undefined;
-    if (_conversationId) {
+    if (conversationId) {
       if (globalTextMessage.length > 0) {
         clearTimeout(debounceTimer);
         // set a new debounce timer to send a typing notification after 350ms
         debounceTimer = setTimeout(() => {
           if (client) {
             client
-              .messageClient(_conversationId)
+              .messageClient(conversationId)
               .sendTypingNotification(recipientId);
             debounceTimer = undefined; // clear debounce timer reference after sending the typing notification
           }
@@ -554,26 +543,26 @@ export default function Chat(props: ChatProps) {
         idleTimer = setTimeout(() => {
           if (client) {
             client
-              .messageClient(_conversationId)
+              .messageClient(conversationId)
               .sendStoppedTypingNotification(recipientId);
           }
         }, 1300);
       }
     }
     return () => clearTimeout(debounceTimer);
-  }, [client, globalTextMessage, _conversationId]);
+  }, [client, globalTextMessage, conversationId]);
 
   useEffect(() => {
-    if (client && _conversationId) {
-      const msClient = client.messageClient(_conversationId);
-      msClient.readMessages(_conversationId, {
+    if (client && conversationId) {
+      const msClient = client.messageClient(conversationId);
+      msClient.readMessages(conversationId, {
         uid: client.userMeta.uid,
-        messageIds: unread,
+        messageIds: activeConversation.unread,
       });
 
       console.log("sent messageIds for read");
     }
-  }, [client, _conversationId, unread]);
+  }, [client, conversationId, activeConversation]);
 
   const onStartedScrolling = () => {
     let scrollStateRef: NodeJS.Timeout | undefined = undefined;
@@ -668,7 +657,7 @@ export default function Chat(props: ChatProps) {
     return (
       <View style={{ width: "100%" }}>
         {pendingMessages
-          .filter((message) => message.conversationId === _conversationId)
+          .filter((message) => message.conversationId === conversationId)
           .map((message, index) => (
             <ChatItem
               key={index}
@@ -680,7 +669,7 @@ export default function Chat(props: ChatProps) {
               position={chatUserId === message.from ? "right" : "left"}
               message={message as Message}
               onSelectedMessage={({ message, chatItemRef }) => {}}
-              conversation={conversationMeta}
+              conversation={activeConversation.conversation}
               chatUserId={chatUserId}
               recipientId={recipientId}
               renderChatBubble={renderChatBubble}
@@ -768,7 +757,7 @@ export default function Chat(props: ChatProps) {
           }}
           layout={layout}
           onLongPress={({ message, chatItemRef, isMessageOwner }) =>
-            conversation?.conversationType !== "admin-chat"
+            activeConversation.conversation.conversationType !== "admin-chat"
               ? onChatItemLongPress(message, chatItemRef, isMessageOwner)
               : null
           }
@@ -779,14 +768,14 @@ export default function Chat(props: ChatProps) {
             setActiveQuote({ message, ref: chatItemRef, itemIndex: index });
           }}
           threaded={threaded(item, index)}
-          conversation={conversationMeta}
+          conversation={activeConversation.conversation}
           chatUserId={chatUserId}
           recipientId={recipientId}
           renderChatBubble={renderChatBubble}
         />
       );
     },
-    [conversationMeta, renderChatBubble, refMap, theme, layout]
+    [activeConversation, renderChatBubble, refMap, theme, layout]
   );
 
   const renderPlaceholder = useCallback(() => {
@@ -846,7 +835,7 @@ export default function Chat(props: ChatProps) {
       }}
     >
       <ChatHeader
-        conversation={conversationMeta}
+        conversation={activeConversation.conversation}
         chatUserId={chatUserId}
         renderChatHeader={renderChatHeader}
         isTyping={isTyping}
@@ -920,7 +909,7 @@ export default function Chat(props: ChatProps) {
               onClear={clearSelectedMessage}
             />
           )}
-          {conversation?.conversationType === "admin-chat" ? (
+          {activeConversation.conversation.conversationType === "admin-chat" ? (
             <View
               style={{
                 height: 50,
@@ -958,7 +947,7 @@ export default function Chat(props: ChatProps) {
                       isEditing ? sendEditedMessage() : sendMessage()
                     }
                     isLoading={connectionStatus.connecting || loadingMessages}
-                    conversationId={_conversationId || ""}
+                    conversationId={conversationId || ""}
                     chatUserId={chatUserId}
                     recipientId={recipientId}
                     // selectedMessage={activeQuote}
@@ -989,7 +978,7 @@ export default function Chat(props: ChatProps) {
         recipientId={recipientId}
       />
       <MediaOptions
-        conversationId={_conversationId}
+        conversationId={conversationId}
         clearActiveQuote={clearSelectedMessage}
         activeQuote={activeQuote?.message}
         ref={mediaOptionsRef}

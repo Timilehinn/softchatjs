@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import {
   ActivityIndicator,
   Button,
@@ -18,11 +18,8 @@ import {
   useState,
 } from "react";
 import {
-  Conversation,
   ConversationListRenderProps,
   ConversationHeaderRenderProps,
-  Message,
-  UserMeta,
   Children,
 } from "../../types";
 import { ConversationItem } from "./Conversation";
@@ -38,6 +35,10 @@ import {
   ConnectionEvent,
   ConversationListMeta,
   Events,
+  Conversation, 
+  Message,
+  UserMeta,
+  ConversationListItem
 } from "softchatjs-core";
 import { ChatIcon, ChatIconPlus, XIcon } from "../../assets/icons";
 import Search from "../Search";
@@ -46,18 +47,16 @@ import { useMessageState } from "../../contexts/MessageStateContext";
 import VoiceMessage from "../Chat/ChatItem/Media/VoiceMessage";
 import { useModalProvider } from "../../contexts/ModalProvider";
 import UserList from "../../components/Modals/UserList";
-
-type OnOpen = {
-  conversation: Conversation;
-  unread: string[];
-};
+import {  } from "../../../../softchatjs-core/dist/types";
 
 type ConversationProps = {
   /**
    * Function to open a Conversation
    * @example: onOpen: () => navigation.navigate('Chat')
    */
-  onOpen: (props: OnOpen) => void;
+  onOpen: (props: {
+    activeConversation: ConversationListItem
+  }) => void;
 
   renderItem?: (props: {
     conversationDetails: ConversationListRenderProps;
@@ -66,21 +65,30 @@ type ConversationProps = {
   renderHeader?: (props: ConversationHeaderRenderProps) => void;
   renderPlaceHolder?: ({ loading }: { loading: boolean }) => Children;
   users?: UserMeta[];
-  localConversations?: {
-    conversation: Conversation;
-    lastMessage: Message;
-    unread: string[];
-}[]
-  getConversations?: (data: {
-    conversation: Conversation;
-    lastMessage: Message;
-    unread: string[];
-}[]) => void;
+  store?: ConversationListMeta
 };
 
 export type ConversationsRefs = {
   retryConnection: () => void;
 };
+
+const retrieveFromCache = (store: ConversationListMeta) => {
+  try {
+    const values = Object.values(store).flat() as {
+      conversation: Conversation;
+      lastMessage: Message;
+      unread: string[];
+    }[];
+    values.sort(
+      (a, b) =>
+        new Date(b.lastMessage?.createdAt).getTime() -
+        new Date(a.lastMessage?.createdAt).getTime()
+    );
+    return values
+  } catch (error) {
+    return []
+  }
+}
 
 const Conversations = forwardRef((props: ConversationProps, ref) => {
   const {
@@ -90,8 +98,7 @@ const Conversations = forwardRef((props: ConversationProps, ref) => {
     user,
     renderPlaceHolder,
     users = [],
-    localConversations = [],
-    getConversations
+    store = {},
   } = props;
   
   const { client, theme, fontFamily } = useConfig();
@@ -106,18 +113,21 @@ const Conversations = forwardRef((props: ConversationProps, ref) => {
       unread: string[];
     }>
   >(null);
-  const [conversationList, setConversationList] = useState<
-    { conversation: Conversation; lastMessage: Message; unread: string[] }[]
-  >(localConversations);
+  
+  const [conversationList, setConversationList] = useState<{ conversation: Conversation; lastMessage: Message; unread: string[] }[]>(store? [ ...retrieveFromCache(store) ] : []);
+
+  // useEffect(() =>{
+  //   if(store){
+  //     var cList = retrieveFromCache(store);
+  //     setConversationList(cList)
+  //   }
+  // },[store])
+
   const [connectionStatus, setConnectionStatus] = useState<ConnectionEvent>({
     isConnected: false,
     fetchingConversations: false,
     connecting: false,
   });
-  const [userId, setUserId] = useState("");
-  const [username, setUsername] = useState("");
-  const [message, setMessage] = useState("");
-  const [modal, showModal] = useState(false);
 
   const reconnect = () => {
     if (client) {
@@ -153,7 +163,6 @@ const Conversations = forwardRef((props: ConversationProps, ref) => {
           new Date(a.lastMessage?.createdAt).getTime()
       );
       setConversationList(values);
-      getConversations?.(values)
     } catch (error) {
       setConversationList(values);
     }
@@ -215,7 +224,7 @@ const Conversations = forwardRef((props: ConversationProps, ref) => {
         return (
           <TouchableOpacity
             onPress={() =>
-              onOpen({ conversation: item.conversation, unread: item.unread })
+              onOpen({ activeConversation: item })
             }
           >
             <>
@@ -234,7 +243,7 @@ const Conversations = forwardRef((props: ConversationProps, ref) => {
       return (
         <ConversationItem
           onPress={({ conversation, unread }) =>
-            onOpen({ conversation, unread: item.unread })
+            onOpen({ activeConversation: item })
           }
           chatUserId={user.uid}
           key={index}
@@ -257,23 +266,37 @@ const Conversations = forwardRef((props: ConversationProps, ref) => {
   //     }
   //   }
   // }
+  // console.log(JSON.stringify(conversationList[0]))
 
-  const filteredConversations = conversationList.filter((c) => {
-    const username =
-      c.conversation.participantList[0].participantDetails.username.toLowerCase();
-    const email =
-      c.conversation.participantList[0].participantDetails?.firstname?.toLowerCase() ||
-      "";
-    const status =
-      c.conversation.participantList[0].participantDetails?.lastname?.toLowerCase() ||
-      "";
+  const filteredConversations = useMemo(() => {
+    try {
+      const userId = user.uid
+      const data = conversationList.filter((c) => {
+        // Check if any participant in participantList meets the conditions
+        const participantMatch = c.conversation.participantList.some((participant) => {
+          const username = participant.participantDetails.username.toLowerCase();
+          const firstname = participant.participantDetails?.firstname?.toLowerCase() || "";
+          const lastname = participant.participantDetails?.lastname?.toLowerCase() || "";
+          const uid = participant.participantDetails?.uid;
+    
+          return (
+            uid !== userId && // Exclude participants with this specific userId
+            (
+              username.includes(searchVal.toLowerCase()) ||
+              firstname.includes(searchVal.toLowerCase()) ||
+              lastname.includes(searchVal.toLowerCase())
+            )
+          );
+        });
+        return participantMatch;
+      });
+    
+      return data;
+    } catch (error) {
+      return conversationList
+    }
+  }, [conversationList, searchVal]);
 
-    return (
-      username.includes(searchVal.toLowerCase()) ||
-      email.includes(searchVal.toLowerCase()) ||
-      status.includes(searchVal.toLowerCase())
-    );
-  });
 
   return (
     <>
@@ -444,7 +467,6 @@ const Conversations = forwardRef((props: ConversationProps, ref) => {
 
           <FlatList
             ref={flatListRef}
-            // data={conversationList}
             data={filteredConversations}
             renderItem={renderConversations}
             showsVerticalScrollIndicator={false}

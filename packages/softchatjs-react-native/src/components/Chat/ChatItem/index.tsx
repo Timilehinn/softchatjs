@@ -25,12 +25,11 @@ import Animated, {
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import {
   AttachmentTypes,
-  ChatBubbleRenderProps,
   Conversation,
   MediaType,
-  Message,
   MessageStates,
-} from "../../../types";
+  Message
+} from "softchatjs-core";
 import {
   ClockIcon,
   DoubleCheck,
@@ -43,8 +42,8 @@ import Haptics from "../../../helpers/haptics";
 import Stacked from "./Layouts/Stacked";
 import Default from "./Layouts/Default";
 import { useConfig } from "../../../contexts/ChatProvider";
-import { generateId } from "../../../utils";
 import { useMessageState } from "../../../contexts/MessageStateContext";
+import { ChatBubbleRenderProps } from "@/src";
 
 type OnSelectedMessage = {
   message: Message;

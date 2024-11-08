@@ -27,15 +27,11 @@ import TrashIcon, {
   StickerIcon,
   StopIcon,
 } from "../../assets/icons";
-import { Colors } from "../../constants/Colors";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { SelectedMessage, SendMessage } from ".";
 import { useConfig } from "../../contexts/ChatProvider";
 import { Audio } from "expo-av";
-import { convertToMinutes, generateId } from "../../utils";
-import * as FileSystem from "expo-file-system";
 import { AudioWaves } from "./ChatItem/Media/VoiceMessage";
-import { AttachmentTypes, Children, MediaType } from "../../types";
+import { Children } from "../../types";
 import { useMessageState } from "../../contexts/MessageStateContext";
 
 type RecordingStatus = {

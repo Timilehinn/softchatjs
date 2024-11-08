@@ -22,7 +22,8 @@ import TrashIcon, {
   EmojiIcon,
   ReplyIcon,
 } from "../../../assets/icons";
-import { ChatTheme, Emoji, Message } from "../../../types";
+import { ChatTheme } from "../../../types";
+import { Message, Emoji } from "softchatjs-core"
 import Search from "../../Search";
 import { FlashList } from "@shopify/flash-list";
 import { emojis } from "../../../assets/emoji";

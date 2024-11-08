@@ -2,13 +2,15 @@ import { View, Text, ViewStyle, Linking, TouchableOpacity } from "react-native";
 import React, { useCallback, useMemo } from "react";
 import Animated from "react-native-reanimated";
 import {
-  AttachmentTypes,
   ChatBubbleRenderProps,
+} from "../../../../types";
+import {
+  AttachmentTypes,
   ConversationType,
   Message,
   MessageStates,
   UserMeta,
-} from "../../../../types";
+} from "softchatjs-core"
 import MessageAvatar from "../../MessageAvatar";
 import Quoted from "../Quoted";
 import Sticker from "../Sticker";

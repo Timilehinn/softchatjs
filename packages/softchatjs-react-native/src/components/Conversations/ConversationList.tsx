@@ -1,6 +1,6 @@
 import React from 'react';
 import { TouchableOpacity, View, StyleSheet, Text, FlatList } from "react-native";
-import { Conversation, ConversationType, GroupChatMeta, ParticipantListInfo, PrivateChatMeta } from "../../types";
+import { Conversation, ConversationType, GroupChatMeta, ParticipantListInfo, PrivateChatMeta } from "softchatjs-core";
 import { useRef } from "react";
 import { formatMessageTime, getConversationTitle, getUserInfoWithId, truncate } from "../../utils";
 import { Colors } from "../../constants/Colors";

@@ -1,5 +1,5 @@
 import { TouchableOpacity, View, StyleSheet, Text, Image } from "react-native";
-import { Conversation, Message } from "../../types";
+import { Conversation, Message } from "softchatjs-core";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import {
   formatConversationTime,

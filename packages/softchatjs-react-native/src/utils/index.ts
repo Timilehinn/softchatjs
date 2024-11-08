@@ -1,6 +1,8 @@
 import moment from 'moment';
 
-import { Conversation, StringOrNumber, Participant, ParticipantListInfo, Message, MessageStates, UserMeta } from "../types";
+import { StringOrNumber, Participant } from "../types";
+import { Conversation, Message, MessageStates, UserMeta, ParticipantListInfo } from "softchatjs-core";
+
 import { GestureResponderEvent } from 'react-native';
 
 export function generateConversationId(str1: StringOrNumber, str2: StringOrNumber) {

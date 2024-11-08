@@ -11,11 +11,9 @@ import {
   GroupChatMeta,
   ParticipantListInfo,
   PrivateChatMeta,
-} from "../../types";
+} from "softchatjs-core";
 import React, { useMemo, useRef } from "react";
 import {
-  formatMessageTime,
-  getConversationTitle,
   getUserInfoWithId,
 } from "../../utils";
 import { Colors } from "../../constants/Colors";

@@ -1,7 +1,7 @@
 import Connection from "./Connection";
 import { Errors } from "./error";
 import { Events } from "./events";
-import { AttachmentTypes, ConversationType, GroupChatMeta, Message, MessageStates, Participant, Prettify, SendGroupMessageGenerics, SendMessageGenerics, ServerActions, UserMeta } from "./types";
+import { AttachmentTypes, ConversationListItem, ConversationType, GroupChatMeta, Message, MessageStates, Participant, Prettify, SendGroupMessageGenerics, SendMessageGenerics, ServerActions, UserMeta } from "./types";
 import { generateConversationId, generateFillerTimestamps, generateId } from "./utils";
 
 let userMetaSample = {
@@ -180,7 +180,8 @@ export default class Conversation {
         this.connection.userMeta.uid,
       ];
 
-      this.sendMessage(fullMessage, privateConversationId, [this.otherParticipant], 'private-chat');
+      var res = this.sendMessage(fullMessage, privateConversationId, [this.otherParticipant], 'private-chat');
+      return res
     }
   }
 
@@ -189,32 +190,46 @@ export default class Conversation {
       action: ServerActions.CREATE_CONVERSATION,
       message: fullMessage,
     };
-
+    var result: ConversationListItem
     if (this.connection.socket) {
       this.connection.socket.send(JSON.stringify(socketMessage));
 
-      const conversation = this.generateConversation(
-        conversationId,
-        participants,
-        fullMessage.message,
-        type
-      );
-
       if (!this.connection.conversationListMeta[conversationId]) {
+        const conversation = this.generateConversation(
+          conversationId,
+          participants,
+          fullMessage.message,
+          type
+        );
         this.connection.conversationListMeta[conversationId] = {
           conversation,
           lastMessage: fullMessage.message,
           unread: [],
         };
+        result =  {
+          conversation,
+          lastMessage: fullMessage.message,
+          unread: [],
+        };
       } else {
+        // check tthis out
         const prevConversation = this.connection.conversationListMeta[conversationId];
-        prevConversation.conversation.messages.unshift(fullMessage.message);
+        var messages = [ ...prevConversation.conversation.messages ];
+        messages.unshift(fullMessage.message);
+        var updatedConversationListMeta = {
+          conversation: { ...prevConversation.conversation, messages },
+          lastMessage: fullMessage.message,
+          unread: [],
+        };
+        this.connection.conversationListMeta[conversationId] = updatedConversationListMeta;
+        result = updatedConversationListMeta
       }
 
       this.connection.emit(Events.CONVERSATION_LIST_META_CHANGED, {
         conversationListMeta: this.connection.conversationListMeta,
       });
       this.reset();
+      return result
     }
   }
 

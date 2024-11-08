@@ -1,6 +1,6 @@
 {
   "name": "softchatjs-react-native",
-  "version": "4.1.61",
+  "version": "4.1.68",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",

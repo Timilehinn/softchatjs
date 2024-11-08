@@ -1,4 +1,4 @@
-import { Message } from "../../../types";
+import { Message } from "softchatjs-core";
 import React, { useCallback } from "react";
 import { Image } from "expo-image";
 

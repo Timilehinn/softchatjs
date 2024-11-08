@@ -21,7 +21,8 @@ export default function UserList(props: UserListProps) {
   const startChat = (data: UserMeta) => {
     if(client){
       const msClient = client.newConversation({ ...data }, null);
-      msClient.create("Hey👋");
+      const res = msClient.create("Hey👋");
+      console.log(res, '---res')
       resetModal();
       setTimeout(() => {
         goToChat()

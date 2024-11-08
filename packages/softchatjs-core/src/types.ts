@@ -252,12 +252,14 @@ export type ConversationMap = {
   [key: string]: Conversation
 }
 
+export type ConversationListItem = {
+  conversation: Conversation,
+  lastMessage: Message | null,
+  unread: string[]
+}
+
 export type ConversationListMeta = {
-  [key: string]: {
-    conversation: Conversation,
-    lastMessage: Message | null,
-    unread: string[]
-  }
+  [key: string]: ConversationListItem
 }
 
 export type ChatEventGenerics<T> = T
@@ -300,3 +302,13 @@ export type SendGroupMessageGenerics<M> = Omit<M,
 'conversationId' |
 'attachedMedia'
 >
+
+export type Emoji = {
+  emoji: string,
+  description: string,
+  category: string,
+  aliases: string[],
+  tags: string[],
+  unicode_version: string,
+  ios_version: string
+}

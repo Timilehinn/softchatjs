@@ -9,18 +9,20 @@ import {
 } from "react-native";
 import {
   AttachmentTypes,
-  ChatTheme,
   Conversation,
   MediaType,
   Message,
   UserMeta,
-} from "../../../types";
-import { useCallback, useMemo, useState } from "react";
+} from "softchatjs-core";
+import {
+  ChatTheme
+} from '../../../types'
+import { useCallback } from "react";
 import Sticker from "./Sticker";
 import MessageAvatar from "../MessageAvatar";
 import { convertToMinutes, truncate } from "../../../utils";
 import { useConfig } from "../../../contexts/ChatProvider";
-import { MicIcon, ReplyIcon } from "../../../assets/icons";
+import { MicIcon } from "../../../assets/icons";
 import Preview from "./Preview";
 
 type QuotedProps = {
@@ -40,52 +42,80 @@ export default function Quoted(props: QuotedProps) {
     return null;
   }
 
-  const RenderQuotedMessagePreview = useCallback(() => {
+  // const RenderQuotedMessagePreview = useCallback(() => {
+  //   switch (quotedMessage.attachmentType) {
+  //     case AttachmentTypes.STICKER:
+  //       return (
+  //         <View style={{ padding: 3, borderWidth: 1, borderRadius: 3 }}>
+  //           <Text
+  //             style={{
+  //               color: theme?.text.secondary,
+  //               fontSize: 10,
+  //               fontFamily,
+  //             }}
+  //           >
+  //             {quotedMessage.attachmentType}
+  //           </Text>
+  //         </View>
+  //       );
+  //     case AttachmentTypes.MEDIA:
+  //       return (
+  //         <View style={{ padding: 3, borderWidth: 1, borderRadius: 3 }}>
+  //           <Text
+  //             style={{
+  //               color: theme?.text.secondary,
+  //               fontSize: 10,
+  //               fontFamily
+  //             }}
+  //           >
+  //             {quotedMessage.attachmentType}
+  //           </Text>
+  //         </View>
+  //       );
+  //     default:
+  //       return (
+  //         <View style={{ padding: 3, borderWidth: 1, borderRadius: 3 }}>
+  //           <Text
+  //             style={{
+  //               color: theme?.text.secondary,
+  //               fontSize: 10,
+  //               fontFamily
+  //             }}
+  //           >
+  //             media
+  //           </Text>
+  //         </View>
+  //       );
+  //   }
+  // }, []);
+  const renderMediaPreview = () => {
     switch (quotedMessage.attachmentType) {
       case AttachmentTypes.STICKER:
-        return (
-          <View style={{ padding: 3, borderWidth: 1, borderRadius: 3 }}>
-            <Text
-              style={{
-                color: theme?.text.secondary,
-                fontSize: 10,
-                fontFamily,
-              }}
-            >
-              {quotedMessage.attachmentType}
-            </Text>
-          </View>
-        );
+        return <Sticker message={quotedMessage} />;
       case AttachmentTypes.MEDIA:
-        return (
-          <View style={{ padding: 3, borderWidth: 1, borderRadius: 3 }}>
-            <Text
-              style={{
-                color: theme?.text.secondary,
-                fontSize: 10,
-                fontFamily
-              }}
-            >
-              {quotedMessage.attachmentType}
-            </Text>
-          </View>
-        );
-      default:
-        return (
-          <View style={{ padding: 3, borderWidth: 1, borderRadius: 3 }}>
-            <Text
-              style={{
-                color: theme?.text.secondary,
-                fontSize: 10,
-                fontFamily
-              }}
-            >
-              media
-            </Text>
-          </View>
-        );
+        var mediaType = quotedMessage.attachedMedia[0]?.type;
+        if (mediaType === MediaType.IMAGE) {
+          return <Sticker message={quotedMessage} />;
+        } else if (mediaType === MediaType.AUDIO) {
+          return (
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <MicIcon size={20} color={'white'} />
+              <Text
+                style={{
+                  color: 'white',
+                  marginStart: 5,
+                }}
+              >
+                {convertToMinutes(
+                  quotedMessage.attachedMedia[0]?.meta?.audioDurationSec ?? 0
+                )}
+              </Text>
+            </View>
+          );
+        }
+        
     }
-  }, []);
+  }
 
   if (layout === "stacked") {
     return (
@@ -127,7 +157,7 @@ export default function Quoted(props: QuotedProps) {
               {truncate(quotedMessage?.message, 100)}
             </Text>
           ) : (
-            <RenderQuotedMessagePreview />
+           <>{renderMediaPreview()}</>
           )}
         </View>
       </TouchableOpacity>
@@ -152,33 +182,7 @@ export default function Quoted(props: QuotedProps) {
   //   return chatUserId === messageOwner.uid? `You replied to ${messageOwner.username}` : `${messageOwner.username} replied to you.`
   // }
 
-  const renderMediaIcon = useCallback(() => {
-    switch (quotedMessage.attachmentType) {
-      case AttachmentTypes.STICKER:
-        return <Sticker message={quotedMessage} />;
-      case AttachmentTypes.MEDIA:
-        var mediaType = quotedMessage.attachedMedia[0]?.type;
-        if (mediaType === MediaType.IMAGE) {
-          return <Sticker message={quotedMessage} />;
-        } else if (mediaType === MediaType.AUDIO) {
-          return (
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <MicIcon size={20} color={'white'} />
-              <Text
-                style={{
-                  color: 'white',
-                  marginStart: 5,
-                }}
-              >
-                {convertToMinutes(
-                  quotedMessage.attachedMedia[0]?.meta?.audioDurationSec ?? 0
-                )}
-              </Text>
-            </View>
-          );
-        }
-    }
-  }, [quotedMessage]);
+  
 
   return (
     <TouchableOpacity
@@ -202,7 +206,7 @@ export default function Quoted(props: QuotedProps) {
       <Text style={{ color: quotedMessage.messageOwner.color, textTransform: 'capitalize', fontFamily, marginBottom: 5, textShadowColor: 'rgba(0, 0, 0, 0.3)',
   textShadowOffset: { width: .5, height: .5 },
   textShadowRadius: 5, }}>{quotedMessage.messageOwner.uid === chatUserId? "You" : quotedMessage.messageOwner.username}</Text>
-      <>{renderMediaIcon()}</>
+      <>{renderMediaPreview()}</>
       <Preview
         message={quotedMessage.message}
         color={
@@ -211,17 +215,19 @@ export default function Quoted(props: QuotedProps) {
             : (theme?.chatBubble.right.messageColor as string)
         }
       />
-
-      <Text
-        style={{
-          display: quotedMessage.message ? "flex" : "none",
-          fontFamily,
-          color: "white",
-          fontSize: 14,
-        }}
-      >
-        {quotedMessage.message}
-      </Text>
+      {quotedMessage.message && (
+  <Text
+  style={{
+    display: quotedMessage.message ? "flex" : "none",
+    fontFamily,
+    color: "white",
+    fontSize: 14,
+  }}
+>
+  {quotedMessage.message}
+</Text>
+      )}
+    
     </TouchableOpacity>
   );
 }

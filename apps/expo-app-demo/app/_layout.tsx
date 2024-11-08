@@ -8,6 +8,7 @@ import { useColorScheme } from '@/components/useColorScheme';
 import { ChatProvider } from "softchatjs-react-native/src"
 import ChatClient from "softchatjs-core"
 import { Platform } from 'react-native';
+import ClientContextApi from '@/contexts/ClientContext';
 export {
   // Catch any errors thrown by the Layout component.
   ErrorBoundary,
@@ -104,6 +105,7 @@ function RootLayoutNav() {
   const fontFamly = processFontFamily("SpaceMono")
 
   return (
+    <ClientContextApi client={client}>
     <ChatProvider
     client={client}
     theme={beautySpaceTheme}
@@ -149,5 +151,6 @@ function RootLayoutNav() {
       </Stack>
     </ThemeProvider>
     </ChatProvider>
+    </ClientContextApi>
   );
 }

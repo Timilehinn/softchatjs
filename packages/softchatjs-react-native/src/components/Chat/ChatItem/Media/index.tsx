@@ -1,9 +1,8 @@
 import { View, Text, TouchableOpacity } from "react-native";
 import React from "react";
-import { MediaType, Message } from "../../../../types";
+import { MediaType, Message } from "softchatjs-core";
 import { useModalProvider } from "../../../../contexts/ModalProvider";
 import ImagePreview from "../../../Modals/ImagePreview";
-import AudioMessage from "./VoiceMessage";
 import VoiceMessage from "./VoiceMessage";
 import { useConfig } from "../../../../contexts/ChatProvider";
 import { Image } from "expo-image";

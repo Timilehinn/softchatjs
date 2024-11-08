@@ -6,7 +6,7 @@ import {
   Text,
   FlatList,
 } from "react-native";
-import { AttachmentTypes, Message } from "../../types";
+import { AttachmentTypes, Message } from "softchatjs-core";
 import { CloseIcon } from "../../assets/icons";
 import { Colors } from "../../constants/Colors";
 import { truncate } from "../../utils";

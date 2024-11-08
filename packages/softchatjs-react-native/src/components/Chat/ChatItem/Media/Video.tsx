@@ -4,7 +4,6 @@ import { Video, ResizeMode } from 'expo-av';
 import { Media, Message } from 'softchatjs-core';
 import { useModalProvider } from '../../../../contexts/ModalProvider';
 import VideoViewer from '../../../Modals/VideoViewer';
-import { MediaType } from '../../../../types';
 import { PlayIcon } from '../../../../assets/icons';
 import { useConfig } from '../../../../contexts/ChatProvider';
 
