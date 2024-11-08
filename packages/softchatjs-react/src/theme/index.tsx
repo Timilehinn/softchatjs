@@ -35,6 +35,6 @@ export const defaulTheme: ReactTheme = {
   input: {
     bgColor: "#1b1d21", // Light grey for input background
     textColor: "white", // Black for input text
-    emojiPickerTheme: "light", // Light theme for emoji picker
+    emojiPickerTheme: "dark", // Light theme for emoji picker
   },
 };
