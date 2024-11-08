@@ -275,6 +275,7 @@ export const Conversation = (props: ConversationProps) => {
                   client={client}
                   conversationId={conversationId}
                   closeOptionsMenu={closeOptionsMenu}
+                  setEditDetails={setEditDetails}
                 />
               </div>
             )}

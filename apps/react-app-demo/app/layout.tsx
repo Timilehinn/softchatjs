@@ -75,7 +75,7 @@ export default function RootLayout({
       <AppProvider client={client}>
         <ChatClientProvider
           client={client}
-          theme={beautySpace}
+          // theme={beautySpace}
           // theme: {
           //   background: {
           //     primary: "white",
