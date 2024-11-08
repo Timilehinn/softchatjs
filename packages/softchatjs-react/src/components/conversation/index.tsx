@@ -83,7 +83,7 @@ export const Conversation = (props: ConversationProps) => {
   const hasAttachments = message?.attachedMedia?.length;
   const { config } = useChatClient();
   const stacked = true;
-  var chatUserId = client.userMeta.uid;
+  var chatUserId = client.chatUserId
 
   const oppositBubbleBoxes = message.messageOwner.uid === chatUserId && stacked;
 
@@ -280,7 +280,7 @@ export const Conversation = (props: ConversationProps) => {
                   client={client}
                   conversationId={conversationId}
                   closeOptionsMenu={closeOptionsMenu}
-                  setEditDetails={setEditDetails}
+                  // setEditDetails={setEditDetails}
                 />
               </div>
             )}

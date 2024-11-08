@@ -311,7 +311,7 @@ const MessageList = (props: MessageListProps) => {
                       message={item}
                       onPress={(e) => handlePress(e, item.messageId)}
                       setEditDetails={setEditDetails}
-                      canEdit={item.from === client?.userMeta.uid}
+                      canEdit={item.from === client?.chatUserId}
                       openEmojiPanel={() => openEmojiPanel(item.messageId)}
                       optionsMenuRef={optionsMenuRef}
                       emojiPickerRef={emojiPickerRef}

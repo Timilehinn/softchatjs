@@ -1,6 +1,6 @@
 {
   "name": "softchatjs-react-native",
-  "version": "4.1.68",
+  "version": "4.1.70",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -13,9 +13,7 @@
   },
   "dependencies": {
     "@flyerhq/react-native-link-preview": "^1.6.0",
-    "@shopify/flash-list": "^1.6.4",
     "date-fns": "^4.0.0-beta.1",
-    "emoji-datasource": "^15.1.2",
     "expo-clipboard": "^6.0.3",
     "expo-haptics": "^13.0.1",
     "lodash": "^4.17.21",
@@ -28,6 +26,7 @@
     "tsup": "^8.2.4"
   },
   "peerDependencies": {
+    "@shopify/flash-list": "^1.7.2",
     "expo-av": "^14.0.7",
     "expo-camera": "^15.0.16",
     "expo-file-system": "^17.0.1",

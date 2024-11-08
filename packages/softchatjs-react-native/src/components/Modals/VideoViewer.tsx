@@ -177,7 +177,7 @@ export default function VideoViewer(props: VideoViewProps) {
   const sliderRef = useRef<{ reset: () => void }>(null);
   const { client, fontFamily } = useConfig();
   const { resetModal } = useModalProvider();
-  const { addNewPendingMessages } = useMessageState();
+  const { userMeta, addNewPendingMessages } = useMessageState();
   const video = useRef<Video>(null);
   const [status, setStatus] = useState<AVPlaybackStatus & AVPlaybackStatusMeta>({ isLoaded: false });
   const [loading, setLoading] = useState(false);
@@ -211,7 +211,7 @@ export default function VideoViewer(props: VideoViewProps) {
             },
           ],
           messageOwner: {
-            ...client?.userMeta,
+            ...userMeta,
             ...timeStamps,
           },
           quotedMessageId: activeQuote?.messageId || "",

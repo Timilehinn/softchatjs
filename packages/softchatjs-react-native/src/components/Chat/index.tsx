@@ -61,7 +61,7 @@ import { interpolate } from "react-native-reanimated";
 type ChatProps = {
   activeConversation: ConversationListItem
   layout?: "stacked";
-  chatUser: UserMeta;
+  // chatUser: UserMeta;
   renderChatBubble?: (props: Prettify<ChatBubbleRenderProps>) => void;
   renderChatInput?: (props: Prettify<ChatInputRenderProps>) => void;
   renderChatHeader?: (props: Prettify<ChatHeaderRenderProps>) => void;
@@ -90,11 +90,10 @@ export default function Chat(props: ChatProps) {
     renderChatBubble,
     renderChatInput,
     renderChatHeader,
-    chatUser,
     placeholder,
     keyboardOffset = Platform.OS === "ios" ? 10 : 0,
   } = props;
-  const chatUserId = chatUser.uid;
+  const chatUserId = client.chatUserId
   const conversationId = activeConversation.conversation.conversationId;
   const participantList = activeConversation.conversation.participantList
   const participants = activeConversation.conversation.participants
@@ -264,7 +263,7 @@ export default function Chat(props: ChatProps) {
   useEffect(() => {
     // if (conversation) {
       const recipients = participants.filter(
-        (id) => id !== client?.userMeta.uid
+        (id) => id !== client?.chatUserId
       );
       if (recipients && recipients.length > 0) {
         setRecipientId(recipients[0]);
@@ -285,7 +284,6 @@ export default function Chat(props: ChatProps) {
   };
 
   const handleEditedMessage = (event: any) => {
-    console.log(event)
     setMessages((prev) => {
       const newMessages = [...prev];
       return newMessages.map((message) => {
@@ -313,7 +311,6 @@ export default function Chat(props: ChatProps) {
   };
 
   const handleDeletedMessage = (event: any) => {
-    console.log("new deleted message");
     setMessages((prev) => {
       var prevMessage = prev.filter((message) => {
         if (typeof message !== "string") {
@@ -378,13 +375,12 @@ export default function Chat(props: ChatProps) {
         setGlobalTextMessage("");
         setIsEditing(false);
         clearSelectedMessage();
-        console.log("sending -2");
         if (activeQuote.message) {
           clearSelectedMessage();
         }
       }
     } catch (err) {
-      console.log(err, "--this error");
+      console.log(err);
     }
   };
 
@@ -401,7 +397,6 @@ export default function Chat(props: ChatProps) {
             shouldEdit: true,
           });
         setGlobalTextMessage("");
-        console.log("sending edited");
         clearSelectedMessage();
         setIsEditing(false);
         if (externalInputRef && externalInputRef.current) {
@@ -417,7 +412,6 @@ export default function Chat(props: ChatProps) {
 
   const sendVoiceMessage = async () => {
     try {
-      console.log("Stopping recording..");
       setRecording(undefined);
       await recording?.stopAndUnloadAsync();
       await Audio.setAudioModeAsync({
@@ -428,7 +422,7 @@ export default function Chat(props: ChatProps) {
         // remove any audio being played
         pauseVoiceMessage();
         addNewPendingMessages({
-          from: client.userMeta.uid,
+          from: client.chatUserId,
           messageId: generateId(),
           conversationId: conversationId,
           to: recipientId,
@@ -457,7 +451,7 @@ export default function Chat(props: ChatProps) {
       setAudioWaves({});
       setAudioTime(0);
       setRecording(undefined);
-      console.log(err, "--this error");
+      console.error(err);
     }
   };
 
@@ -556,11 +550,10 @@ export default function Chat(props: ChatProps) {
     if (client && conversationId) {
       const msClient = client.messageClient(conversationId);
       msClient.readMessages(conversationId, {
-        uid: client.userMeta.uid,
+        uid: client.chatUserId,
         messageIds: activeConversation.unread,
       });
 
-      console.log("sent messageIds for read");
     }
   }, [client, conversationId, activeConversation]);
 
@@ -588,7 +581,6 @@ export default function Chat(props: ChatProps) {
   async function startRecording() {
     try {
       if (permissionResponse?.status !== "granted") {
-        console.log("Requesting permission..");
         await requestPermission();
       }
       // pause any audio being played
@@ -598,13 +590,11 @@ export default function Chat(props: ChatProps) {
         playsInSilentModeIOS: true,
       });
 
-      console.log("Starting recording..");
       const { recording } = await Audio.Recording.createAsync(
         Audio.RecordingOptionsPresets.LOW_QUALITY,
         onRecordingStatusUpdate
       );
       setRecording(recording);
-      console.log("Recording started");
     } catch (err) {
       console.error("Failed to start recording", err);
     }
@@ -864,7 +854,7 @@ export default function Chat(props: ChatProps) {
               refreshControl={
                 <RefreshControl refreshing={false} onRefresh={getMessages} />
               }
-              showsHorizontalScrollIndicator={false}
+              showsVerticalScrollIndicator={false}
               ListHeaderComponent={messageListHeader}
               ListFooterComponent={() => (
                 <View
@@ -892,7 +882,6 @@ export default function Chat(props: ChatProps) {
               // onViewableItemsChanged={onViewRef.current}
               viewabilityConfig={viewConfigRef.current}
               onEndReached={() => {
-                console.log("end reached");
                 getOlderMessages();
               }}
             />
@@ -982,7 +971,7 @@ export default function Chat(props: ChatProps) {
         clearActiveQuote={clearSelectedMessage}
         activeQuote={activeQuote?.message}
         ref={mediaOptionsRef}
-        chatUserId={client?.userMeta.uid as string}
+        chatUserId={client?.chatUserId as string}
         recipientId={recipientId}
       />
       <>{renderMessageOptions()}</>

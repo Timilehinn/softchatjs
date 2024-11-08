@@ -37,8 +37,8 @@ export default function ImageAttachment(props: Props) {
                 height: 200, width: 250,
                 borderRadius: 10, 
                 marginBottom: 10,
-                resizeMode: "cover"
               }} 
+              contentFit="cover"
               cachePolicy="disk"
             />
         </TouchableOpacity>

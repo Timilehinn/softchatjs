@@ -33,7 +33,6 @@ export default function TabTwoScreen() {
       <StatusBar style="dark" />
       <Chat
         // layout='stacked'
-        chatUser={chatUser}
         activeConversation={activeConversation}
         // participant={{
         //   username: "fitness_fanatic",

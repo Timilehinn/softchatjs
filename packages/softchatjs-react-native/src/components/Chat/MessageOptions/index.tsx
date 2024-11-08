@@ -153,12 +153,12 @@ export const MessageOptions = forwardRef(
         if (client && message) {
           const newReaction = {
             emoji: emoji,
-            uid: client.userMeta.uid,
+            uid: client.chatUserId,
           };
           console.log(newReaction, '--newReaction')
 
           const existingReactionIndex = message.reactions.findIndex(
-            (reaction) => reaction.uid === client.userMeta.uid
+            (reaction) => reaction.uid === client.chatUserId
           );
 
           let updatedReactions: Array<{ uid: string; emoji: string }>;
@@ -282,7 +282,7 @@ export const MessageOptions = forwardRef(
       //   scrollRef={flatListRef}
       //   height={height}
       // >
-    <ActionSheet ref={optionsRef} onClose={close} gestureEnabled containerStyle={{ height: '40%', padding: 0 }}>
+    <ActionSheet ref={optionsRef} onClose={close} gestureEnabled snapPoints={[60, 100]} containerStyle={{ height: '70%', padding: 0 }}>
           {view === "preview" && (
             <View
               style={{

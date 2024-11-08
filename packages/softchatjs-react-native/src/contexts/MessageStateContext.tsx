@@ -7,7 +7,8 @@ import {
   SetState,
 } from "../types";
 import { Audio, AVPlaybackStatus } from 'expo-av';
-import { Emoticon, Message, SendMessageGenerics, Media } from "softchatjs-core";
+import { Emoticon, Message, SendMessageGenerics, Media, UserMeta } from "softchatjs-core";
+import defaultUser from "../constants/DefaultUser";
 
 type MessageStateContext = {
   globalTextMessage: string,
@@ -25,7 +26,9 @@ type MessageStateContext = {
   unload: () => void;
   sound: Audio.Sound | null,
   activeVoiceMessage: Media | null,
-  avPlayBackStatus: AVPlaybackStatus & { positionMillis: number } | null
+  avPlayBackStatus: AVPlaybackStatus & { positionMillis: number } | null,
+  userMeta: UserMeta,
+  setUserMeta: SetState<UserMeta>
 };
 
 const initialMessageStateContext: MessageStateContext = {
@@ -44,7 +47,9 @@ const initialMessageStateContext: MessageStateContext = {
   unload: () => {},
   sound: null,
   activeVoiceMessage: null,
-  avPlayBackStatus: null
+  avPlayBackStatus: null,
+  userMeta: defaultUser,
+  setUserMeta: () => {}
 }
 
 export default initialMessageStateContext;
@@ -63,6 +68,7 @@ export const MessageStateProvider = ({ children }: { children: JSX.Element }) =>
   const [ audioState, setAudioState ] = useState<"playing" | "paused" | "loading" | null>(null);
   const [ activeVoiceMessage, setActiveVoiceMessage ] = useState<Media | null>(null);
   const [ avPlayBackStatus, setAvPlayBackStatus ] = useState<AVPlaybackStatus & { positionMillis: number } | null>(null);
+  const [ userMeta, setUserMeta ] = useState<UserMeta>(defaultUser)
 
   const addNewPendingMessages = (message: Partial<Message>) => {
     setPendingMessages((prev) => {
@@ -163,7 +169,9 @@ export const MessageStateProvider = ({ children }: { children: JSX.Element }) =>
         unload,
         sound,
         activeVoiceMessage,
-        avPlayBackStatus
+        avPlayBackStatus,
+        userMeta,
+        setUserMeta
       }}
     >
       {children}

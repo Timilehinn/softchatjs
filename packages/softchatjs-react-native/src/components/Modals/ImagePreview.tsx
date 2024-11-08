@@ -66,7 +66,7 @@ export default function ImagePreview(props: ImagePreviewProps) {
     viewOnly = false,
     conversationId,
   } = props;
-  const { addNewPendingMessages } = useMessageState();
+  const { userMeta, addNewPendingMessages } = useMessageState();
   const { resetModal } = useModalProvider();
   const { client } = useConfig();
   const { globalTextMessage, setGlobalTextMessage } = useMessageState();
@@ -132,7 +132,7 @@ export default function ImagePreview(props: ImagePreviewProps) {
           ...timeStamps,
           messageOwner: {
             // uid: chatUserId,
-            ...client.userMeta,
+            ...userMeta,
             ...timeStamps,
           },
         };
@@ -219,7 +219,7 @@ export default function ImagePreview(props: ImagePreviewProps) {
             },
           ],
           messageOwner: {
-            ...client?.userMeta,
+            ...userMeta,
             ...timeStamps,
           },
           attachmentType: AttachmentTypes.MEDIA,
@@ -298,8 +298,8 @@ export default function ImagePreview(props: ImagePreviewProps) {
               style={{
                 height: "100%",
                 width: "100%",
-                resizeMode: "contain",
               }}
+              contentFit="cover"
             />
             {/* </Animated.View>
           </GestureDetector> */}

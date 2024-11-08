@@ -161,7 +161,7 @@ const ConversationItem = ({
   const { activeConversation } = useChatState();
 
   const user = item.conversation.participantList.filter(
-    (p) => p.participantId !== client.userMeta.uid
+    (p) => p.participantId !== client.chatUserId
   );
 
   const textColor = config?.theme?.text?.primary || "white";

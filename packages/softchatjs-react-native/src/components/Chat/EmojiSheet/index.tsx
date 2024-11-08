@@ -37,7 +37,7 @@ export const EmojiSheet = forwardRef((props: EmojiListProps, ref: any) => {
   var noOfColumns = Math.floor(width / emojiSize);
   const [height, setHeight] = useState("45%");
   const [searchValue, setSearchValue] = useState("");
-  const { stickers, setStickers, globalTextMessage, setGlobalTextMessage } = useMessageState();
+  const { userMeta, stickers, setStickers, globalTextMessage, setGlobalTextMessage } = useMessageState();
   const [ isSearching, setIsSearching ] = useState(false)
 
   const closeSheet = () => {
@@ -60,7 +60,7 @@ export const EmojiSheet = forwardRef((props: EmojiListProps, ref: any) => {
   useEffect(() => {
     (async() => {
       if(client){
-        const userId = client?.userMeta.uid
+        const userId = client?.chatUserId
         const conversationId = generateConversationId(userId as string, recipientId, client.projectId);
         const stickers = await client.messageClient(conversationId).getEmojiList();
         setStickers(stickers);
@@ -70,7 +70,7 @@ export const EmojiSheet = forwardRef((props: EmojiListProps, ref: any) => {
 
   
     const renderItem = useCallback(({ item, index }: { item: any, index: number }) => {
-      const userId = client?.userMeta.uid
+      const userId = client?.chatUserId
       const conversationId = generateConversationId(userId as string, recipientId, client?.projectId || '');
       const messageId = generateId();
       const newMessage: Partial<Message> = {
@@ -91,7 +91,7 @@ export const EmojiSheet = forwardRef((props: EmojiListProps, ref: any) => {
         createdAt: new Date(),
         updatedAt: new Date(),
         messageOwner: {
-          ...client?.userMeta as UserMeta,
+          ...userMeta,
           ...generateFillerTimestamps(),
         },
       };

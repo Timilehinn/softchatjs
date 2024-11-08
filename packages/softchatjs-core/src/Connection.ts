@@ -25,7 +25,20 @@ import WebSocket from "isomorphic-ws";
 import EventEmitter from "events";
 import { Events } from "./events";
 import { Emoticon } from "./emoticon.type";
-import moment from 'moment'
+import moment from "moment";
+
+
+let defaultUser = {
+  id: "",
+  uid: "",
+  username: "",
+  firstname: "",
+  lastname: "",
+  profileUrl: "",
+  color: "",
+  custom: {}
+}
+
 
 export default class Connection extends EventEmitter {
   private static connection: Connection;
@@ -62,12 +75,12 @@ export default class Connection extends EventEmitter {
     this.max_retry_count = 5;
     this.health_check_interval = 30000;
     this.retry_count = 0;
-    this.userMeta = client_instance.userMeta;
-    this.projectConfig = {
+    this.userMeta = defaultUser;
+    (this.projectConfig = {
       projectId: client_instance.projectId,
       subId: client_instance.subId,
-    },
-    this.activeConversationId = "";
+    }),
+      (this.activeConversationId = "");
     this.screen = Screens.CONVERSATIONS;
     this.healthCheckRef = undefined;
   }
@@ -80,19 +93,26 @@ export default class Connection extends EventEmitter {
     return Connection.connection;
   }
 
-  async _initiateConnection(config?: { notificationConfig?: NotificationConfig, connectionConfig?: { reset: boolean } }) {
+  async _initiateConnection(
+    user: UserMeta,
+    config?: {
+      notificationConfig?: NotificationConfig;
+      connectionConfig?: { reset: boolean };
+    }
+  ) {
     try {
-      if(config?.connectionConfig?.reset){
-        this.retry_count = 0
+      this.userMeta = user;
+      if (config?.connectionConfig?.reset) {
+        this.retry_count = 0;
       }
       // Ensure we have a valid userMeta.uid
       if (!this.userMeta?.uid) return null;
-  
+
       // Clear previous health check interval
       clearTimeout(this.retryRef);
       clearTimeout(this.retryRef);
-          // Create a session to retrieve token and wsURI
-          
+      // Create a session to retrieve token and wsURI
+
       const res = await CREATE_SESSION<{ token: string; wsURI: string }>({
         userId: this.userMeta.uid,
         projectId: this.projectConfig.projectId,
@@ -105,10 +125,8 @@ export default class Connection extends EventEmitter {
         fetchingConversations: true,
       });
 
-  
       // Emit connecting status
-      
-  
+
       // If session creation was successful
       if (res.success) {
         // if(this.retryRef){
@@ -118,12 +136,12 @@ export default class Connection extends EventEmitter {
           url: res.data.wsURI,
           token: res.data.token,
         };
-  
+
         // Fetch conversations after acquiring the session
         await this._getConversations({
           token: res.data.token,
         });
-  
+
         // Define the message to send on connection
         const message = JSON.stringify({
           from: this.userMeta.uid,
@@ -133,14 +151,14 @@ export default class Connection extends EventEmitter {
           newConversation: true,
           recipientMeta: {},
           projectId: this.projectConfig.projectId,
-          expoPushToken: config?.notificationConfig?.expo.expoPushToken
+          expoPushToken: config?.notificationConfig?.expo.expoPushToken,
         });
-  
+
         // Check if WebSocket is already open
         if (this.socket && this.socket.readyState === WebSocket.OPEN) {
           this.socket.send(message); // send the message
           this.wsConnected = true;
-  
+
           // Emit successful connection state
           this.emit(Events.CONNECTION_CHANGED, {
             connecting: false,
@@ -148,41 +166,41 @@ export default class Connection extends EventEmitter {
             fetchingConversations: false,
           });
         } else {
-          if(this.socket){
+          if (this.socket) {
             this.socket.close();
           }
           // If socket is not open, create a new WebSocket connection
           const ws = new WebSocket(`wss://${this.wsAccessConfig.url}`);
-  
+
           // // Handle WebSocket error
           // ws.onerror = (error: any) => {
           //   console.log(":::socket error:::", error);
-  
+
           //   // Ensure cleanup of open or connecting socket
           //   if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
           //     ws.close();
           //   }
-  
+
           //   // Retry connection after a delay
           //   setTimeout(() => {
           //     console.log("Retrying connection...");
           //     this._initiateConnection(); // Re-attempt the connection
           //   }, 3000); // Retry after 3 seconds
           // };
-  
+
           // Handle WebSocket open event
           ws.onopen = () => {
             console.log("socket opened");
             this.socket = ws; // Set the active socket
-  
+
             // Send the initial message
             ws.send(message);
             this.wsConnected = true;
-  
+
             // Setup event handlers and start health checks
             this.setupEventHandlers();
             // this.startHealthCheck();
-  
+
             // Emit connection success
             this.connecting = false;
             this.emit(Events.CONNECTION_CHANGED, {
@@ -190,7 +208,7 @@ export default class Connection extends EventEmitter {
               isConnected: true,
               fetchingConversations: false,
             });
-  
+
             // Emit updated conversation list
             this.emit(Events.CONVERSATION_LIST_CHANGED, {
               conversations: this.conversations,
@@ -219,7 +237,7 @@ export default class Connection extends EventEmitter {
 
       // Needs to be handled better
       console.warn("Connection error. Attempting to reconnect...");
-      this.retryConnection()
+      this.retryConnection();
     } finally {
     }
   }
@@ -230,7 +248,7 @@ export default class Connection extends EventEmitter {
       const dateB = new Date(b.createdAt).getTime();
       return dateB - dateA;
     });
-    return sorted
+    return sorted;
   }
 
   private sortConversationMessages(data: Conversation[]): Conversation[] {
@@ -240,18 +258,17 @@ export default class Connection extends EventEmitter {
         const dateB = moment(b.createdAt).valueOf();
         return dateA - dateB;
       });
-  
+
       return { ...conversation, messages: sortedMessages };
     });
   }
-  
 
-  private _getUreadMessageIds(messages: Array<Message>) {
+  private _getUreadMessageIds(userId: string, messages: Array<Message>) {
     var ids: string[] = [];
     messages.map((m) => {
       if (
         m.messageState === MessageStates.SENT &&
-        m.from !== this.userMeta.uid
+        m.from !== userId
       ) {
         ids.push(m.messageId);
       }
@@ -259,51 +276,56 @@ export default class Connection extends EventEmitter {
     return ids;
   }
 
-  private async _getConversations({
-    token,
-  }: {
-    token: string;
-  }) {
+  private async _getConversations({ token }: { token: string }) {
     try {
-      this.fetchingConversations = true;
-      const response = await GET_CONVERSATIONS<{
-        conversations: Conversation[];
-      }>(token);
-      if (response.success) {
-        const conversationListMeta: ConversationListMeta =
-          response.data.conversations.reduce((acc, conversation) => {
-            var sortedConversation = this.sortConversationMessages([conversation])
-            var messages = sortedConversation[0].messages
-            var lastMessage = messages[messages.length - 1]
-           
-            acc[conversation.conversationId] = {
-              conversation: sortedConversation[0],
-              lastMessage: lastMessage,
-              unread: this._getUreadMessageIds(messages),
-            };
-            return acc;
-          }, {} as ConversationListMeta);
-        var conversationMap = response.data.conversations.reduce((acc, conversation) => {
-          acc[conversation.conversationId] = conversation;
-          return acc;
-        }, {} as ConversationMap);
-        this.conversationMap = conversationMap
+      if (this.userMeta) {
+        this.fetchingConversations = true;
+        const response = await GET_CONVERSATIONS<{
+          conversations: Conversation[];
+        }>(token);
+        if (response.success) {
+          const conversationListMeta: ConversationListMeta =
+            response.data.conversations.reduce((acc, conversation) => {
+              var sortedConversation = this.sortConversationMessages([
+                conversation,
+              ]);
+              var messages = sortedConversation[0].messages;
+              var lastMessage = messages[messages.length - 1];
 
-        this.emit(Events.CONVERSATION_LIST_META_CHANGED, {
-          conversationListMeta,
-        });
-        this.conversationListMeta = conversationListMeta;
+              acc[conversation.conversationId] = {
+                conversation: sortedConversation[0],
+                lastMessage: lastMessage,
+                unread: this._getUreadMessageIds(this.userMeta.uid, messages),
+              };
+              return acc;
+            }, {} as ConversationListMeta);
+          var conversationMap = response.data.conversations.reduce(
+            (acc, conversation) => {
+              acc[conversation.conversationId] = conversation;
+              return acc;
+            },
+            {} as ConversationMap
+          );
+          this.conversationMap = conversationMap;
 
-        // this.conversations = this.sortConversationMessages(
-        //   response.data.conversations
-        // );
-        this.conversations = response.data.conversations;
+          this.emit(Events.CONVERSATION_LIST_META_CHANGED, {
+            conversationListMeta,
+          });
+          this.conversationListMeta = conversationListMeta;
+
+          // this.conversations = this.sortConversationMessages(
+          //   response.data.conversations
+          // );
+          this.conversations = response.data.conversations;
+        } else {
+          console.error("An error occurred while fetching conversations");
+        }
       } else {
-        console.error("An error occurred while fetching conversations");
+        throw new Error("User not initialized");
       }
     } catch (err) {
       if (err instanceof Error) {
-        console.error("An error occurred while fetching conversations", err);
+        console.error(err);
       }
     } finally {
       this.fetchingConversations = false;
@@ -354,18 +376,19 @@ export default class Connection extends EventEmitter {
 
   private retryConnection() {
     // Retry logic or call _initiateConnection() after delay
-   
-    if(this.retry_count >= this.max_retry_count){
-      return console.warn(`Connection attempt failed after multiple retries. Please check your network settings or try again.`)
+    if (this.retry_count >= this.max_retry_count) {
+      return console.warn(
+        `Connection attempt failed after multiple retries. Please check your network settings or try again.`
+      );
     }
     this.emit(Events.CONNECTION_CHANGED, {
       connecting: true,
       isConnected: false,
       fetchingConversations: false,
     });
-    if(!this.wsConnected){
+    if (!this.wsConnected) {
       this.retryRef = setTimeout(() => {
-        this._initiateConnection();
+        this._initiateConnection(this.userMeta);
         this.retry_count += 1;
       }, 5000);
     }

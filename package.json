@@ -24,6 +24,7 @@
     "packages/*"
   ],
   "dependencies": {
+    "@shopify/flash-list": "^1.7.2",
     "css-loader": "^7.1.2",
     "style-loader": "^4.0.0"
   }

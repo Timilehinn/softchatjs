@@ -52,9 +52,9 @@ export default function MediaMessage(props: Props) {
                   width: 250,
                   borderRadius: 5,
                   marginBottom: 10,
-                  resizeMode: "cover",
                 }}
                 cachePolicy="disk"
+                contentFit="cover"
               />
             </TouchableOpacity>
           );

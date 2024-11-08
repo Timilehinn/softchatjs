@@ -10,10 +10,12 @@ export const ChatTopNav = ({
   setMainListOpen,
   renderChatHeader,
   onClose,
+  chatUserId
 }: {
   setMainListOpen: any;
   renderChatHeader?: () => JSX.Element;
   onClose: () => void;
+  chatUserId: string
 }) => {
   const { client, config } = useChatClient();
   const { activeConversation, setActiveConversation } = useChatState();
@@ -22,7 +24,7 @@ export const ChatTopNav = ({
   const conversationTitle = () => {
     try {
       const participantList = activeConversation.conversation.participantList;
-      const data = participantList.filter(p => p.participantDetails.uid !== client.userMeta.uid)
+      const data = participantList.filter(p => p.participantDetails.uid !== chatUserId)
       return {
         profileUrl: data[0].participantDetails.profileUrl,
         title: data[0].participantDetails.firstname || data[0].participantDetails.username,

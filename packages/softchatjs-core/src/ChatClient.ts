@@ -10,17 +10,6 @@ import {
 } from "./types";
 import WebSocket from "isomorphic-ws";
 
-let defaultUser = {
-  id: "",
-  uid: "",
-  username: "",
-  firstname: "",
-  lastname: "",
-  profileUrl: "",
-  color: "",
-  custom: {}
-}
-
 export type NotificationConfig = {
   expo: {
     expoPushToken: string
@@ -39,13 +28,15 @@ export default class ChatClient {
   private connection: Connection | null;
   subId: string;
   projectId: string;
-  userMeta: UserMeta;
+  chatUserId: string;
+  // userMeta: UserMeta;
 
   constructor(subId: string, projectId: string) {
     this.subId = subId;
     this.projectId = projectId;
-    this.userMeta = defaultUser,
-    this.connection = null
+    // this.userMeta = defaultUser, 
+    this.chatUserId = '';
+    this.connection = null;
   }
 
   static getInstance({ projectId, subId }: Config) {
@@ -58,7 +49,6 @@ export default class ChatClient {
 
   initializeUser(data: UserMeta, config?: { notificationConfig?: NotificationConfig, connectionConfig?: { reset: boolean } }) {
     if (data) {
-      this.userMeta = data;
       if (ChatClient.client_instance) {
         const conn = Connection.getInstance(ChatClient.client_instance);
         this.connection = conn;
@@ -67,7 +57,8 @@ export default class ChatClient {
           isConnected: false,
           fetchingConversations: true,
         });
-        conn._initiateConnection(config);
+        conn._initiateConnection(data, config);
+        this.chatUserId = data.uid
       }
     }
   }
@@ -85,8 +76,8 @@ export default class ChatClient {
       // return this.connection._retryConnection();
       if (this.connection.socket?.readyState !== WebSocket.OPEN) {
         console.info("Retrying connection...");
-        if (this.userMeta) {
-          this.connection._initiateConnection();
+        if (this.connection.userMeta) {
+          this.connection._initiateConnection(this.connection.userMeta, { connectionConfig: { reset: true } });
         }
       }
     } else {

@@ -102,7 +102,7 @@ const Conversations = forwardRef((props: ConversationProps, ref) => {
   } = props;
   
   const { client, theme, fontFamily } = useConfig();
-  const { activeVoiceMessage, unload } = useMessageState();
+  const { activeVoiceMessage, unload, setUserMeta } = useMessageState();
   const [searchVal, setSearchVal] = useState("");
   const { displayModal } = useModalProvider();
 
@@ -170,9 +170,10 @@ const Conversations = forwardRef((props: ConversationProps, ref) => {
 
   useEffect(() => {
     if (client) {
+      setUserMeta(user);
       client.initializeUser(user);
     }
-  }, []);
+  }, [setUserMeta]);
 
   useEffect(() => {
     if (client) {

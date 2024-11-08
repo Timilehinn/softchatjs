@@ -38,7 +38,8 @@ type ChatProps = {
 };
 
 const Chat = (props: ChatProps) => {
-  const { headerHeightOffset = 0 } = props;
+  const { headerHeightOffset = 0, user } = props;
+  const chatUserId = user.uid
   const { client, config } = useChatClient();
   const {
     activeConversation,
@@ -211,7 +212,7 @@ const Chat = (props: ChatProps) => {
         activeConversation.conversation.conversationId
       );
       msClient.readMessages(activeConversation?.conversation.conversationId, {
-        uid: client.userMeta.uid,
+        uid: chatUserId,
         messageIds,
       });
     }
@@ -220,7 +221,7 @@ const Chat = (props: ChatProps) => {
   useEffect(() => {
     if (client && activeConversation) {
       const recipients = activeConversation.conversation.participants.filter(
-        (id) => id !== client?.userMeta.uid
+        (id) => id !== chatUserId
       );
       setRecipientId(recipients[0]);
       client
@@ -361,6 +362,7 @@ const Chat = (props: ChatProps) => {
           setMainListOpen={setMainListOpen}
           renderChatHeader={props.renderChatHeader}
           onClose={clearState}
+          chatUserId={chatUserId}
         />
         <MessageList
           headerHeightOffset={headerHeightOffset}
@@ -454,6 +456,7 @@ const Chat = (props: ChatProps) => {
             setMainListOpen={setMainListOpen}
             renderChatHeader={props.renderChatHeader}
             onClose={clearState}
+            chatUserId={chatUserId}
           />
           <MessageList
             headerHeightOffset={headerHeightOffset}
