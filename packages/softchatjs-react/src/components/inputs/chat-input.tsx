@@ -553,20 +553,20 @@ const ChatInput = ({
           </div>
           <div className={styles.input__button}>
             {audioBlob || message?.message || files.length ? (
-              <div style={{ marginRight: "10px" }}>
+              <div>
                 {sending ? (
                   "..."
                 ) : (
                   <VscSend
                     onClick={sendHandler}
-                    size={22}
+                    size={20}
                     color={primaryActionColor}
                   />
                 )}
               </div>
             ) : null}
 
-            {!files.length && (
+            {!message?.message?.length && (
               <button
                 onClick={recordVoiceMessage}
                 style={{

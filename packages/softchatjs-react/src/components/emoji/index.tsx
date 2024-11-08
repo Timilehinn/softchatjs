@@ -171,6 +171,8 @@ export const InputEmojis = ({
   const { config } = useChatClient();
   return (
     <EmojiPicker
+      height={350}
+      width={300}
       onEmojiClick={(e) => {
         onEmojiPick(e.emoji);
       }}

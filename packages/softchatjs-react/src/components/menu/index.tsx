@@ -1,5 +1,4 @@
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
-import EmojiPicker from "emoji-picker-react";
 import styles from "./menu.module.css";
 import { HiPhoto } from "react-icons/hi2";
 import Text from "../text/text";

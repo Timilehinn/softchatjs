@@ -43,7 +43,6 @@
 } */
 
 .input__button {
-  width: 10%;
   height: 100%;
   cursor: pointer;
   border-radius: 10px;
@@ -51,6 +50,7 @@
   display: flex;
   justify-content: flex-start;
   padding-left: 20px;
+  padding-right: 20px;
 }
 
 .input__icon {
@@ -140,9 +140,8 @@
 
 .input__emoji__picker{
   position: absolute;
-  bottom: 40;
-  right: 40;
-  right: 115px;
+  bottom: 70;
+  right: 70;
   z-index: 100;
 }
 

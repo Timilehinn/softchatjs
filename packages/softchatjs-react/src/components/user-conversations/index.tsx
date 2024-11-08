@@ -211,8 +211,8 @@ const ConversationItem = ({
       className={styles.item}
       onClick={onClick}
     >
-      <div className={styles.item__image}>
-        <Avartar initials={user[0].participantDetails?.username.substring(0,1)} url={user[0].participantDetails?.profileUrl} />
+      <div style={{ marginRight: '10px' }}>
+        <Avartar initials={user[0].participantDetails?.username.substring(0,1)} size={50} url={user[0].participantDetails?.profileUrl} />
       </div>
       <div style={{ width: "100%" }}>
         <div

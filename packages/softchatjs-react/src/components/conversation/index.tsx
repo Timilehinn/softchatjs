@@ -14,7 +14,6 @@ import dayjs from "dayjs";
 import { formatMessageTime } from "../../helpers/date";
 import OptionsPanel from "../options-panel/options-panel";
 import { EmojiPanel, ReactionPanel } from "../emoji";
-import EmojiPicker from "emoji-picker-react";
 import { Media, Reaction } from "softchatjs-core";
 import { useChatClient } from "../../providers/chatClientProvider";
 import { ThreeDots } from "react-loader-spinner";

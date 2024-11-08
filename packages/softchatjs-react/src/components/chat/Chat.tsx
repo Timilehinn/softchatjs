@@ -359,7 +359,6 @@ const Chat = (props: ChatProps) => {
       >
         <ChatTopNav
           setMainListOpen={setMainListOpen}
-          message={activeConversation?.lastMessage!}
           renderChatHeader={props.renderChatHeader}
           onClose={clearState}
         />
@@ -453,7 +452,6 @@ const Chat = (props: ChatProps) => {
         <div className={styles.chat__messages}>
           <ChatTopNav
             setMainListOpen={setMainListOpen}
-            message={activeConversation?.lastMessage!}
             renderChatHeader={props.renderChatHeader}
             onClose={clearState}
           />

@@ -1,18 +1,16 @@
 .avatar{
-    height: 35px;
-    width: 35px;
+   
     background-color: grey;
-    border-radius: 300px;
     display: flex;
     align-items: center;
     justify-content: center;
 }
-
+/* 
 .avatar img{
     height: 100%;
     border-radius: 300px;
     width: 100%;
-}
+} */
 
 @media screen and (max-width:768px) {
     .avatar{
