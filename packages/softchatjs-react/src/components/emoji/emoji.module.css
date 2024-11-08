@@ -1,10 +1,6 @@
 .emoji {
-
- 
- height: 40px;
- 
+  height: 40px;
   z-index: 1000;
-
   display: flex;
   border-radius: 30px;
   align-items: center;

@@ -8,9 +8,8 @@ import { useEffect } from "react";
 export default function Home() {
   return (
     <div style={{ height: '100vh', width: '100vw' }}>
-      <div style={{ height: '50px', width: '100%', backgroundColor: 'red' }} />
       <Chat
-      headerHeightOffset={50}
+      // headerHeightOffset={50}
         user={{
           uid: "30",
           username: "makaveli96",

@@ -12,7 +12,8 @@ import { CiFaceSmile } from "react-icons/ci";
 import { BsReply } from "react-icons/bs";
 import { AiOutlineDelete } from "react-icons/ai";
 import { useChatClient } from "../../providers/chatClientProvider";
-import { useChatState } from "../../providers/clientStateProvider";
+import { FiEdit2 } from "react-icons/fi";
+import { CiEdit } from "react-icons/ci";
 
 const emojis = ["👍", "😔", "🙂", "😮", "😃"];
 
@@ -108,6 +109,17 @@ export const ReactionPanel = ({
   const iconColor = config.theme?.icon || "#72767D";
 
   const emojiList = [
+    {
+      emoji: <FiEdit2 size={16} color={iconColor} />,
+      onPress: () => {
+        setEditDetails({
+          message,
+          isEditing: true,
+        });
+        closeOptionsMenu();
+      },
+      enabled: canEdit,
+    },
     {
       emoji: <CiFaceSmile size={16} color={iconColor} />,
       onPress: () => {
