@@ -6,7 +6,7 @@ export default defineConfig({
   entry: ['src/index.ts'], 
   format: ["esm", "cjs"],
   sourcemap: true,
-  minify: true,
+  minify: false,
   target: "esnext",
   splitting: false,
   outDir: "dist",

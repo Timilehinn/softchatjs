@@ -134,7 +134,6 @@ export default class MessageClient {
           this.connection.socket &&
           this.connection.socket?.readyState === WebSocket.OPEN
         ) {
-          console.log("has socket");
           this.connection.socket.send(JSON.stringify(socketMessage));
           this.connection.emit(Events.EDITED_MESSAGE, {
             message: {
@@ -228,7 +227,6 @@ export default class MessageClient {
               token: this.connection.wsAccessConfig.token,
             },
           };
-          console.log(message);
           this.connection.socket.send(JSON.stringify(socketMessage));
           var conversationMeta =
             this.connection.conversationListMeta[message.conversationId];
@@ -328,7 +326,6 @@ export default class MessageClient {
     
   }catch(error){
     if(error instanceof Error){
-      console.log(error.message)
     }
   }
   }
@@ -369,7 +366,6 @@ export default class MessageClient {
     } else {
       this._clearActiveTypingIndicator(conversationId);
       this.idleTimers[conversationId] = setTimeout(() => {
-        console.log("Stopped typing event fired");
         this.connection.emit(Events.HAS_STOPPED_TYPING, {
           conversationId,
         });
@@ -378,8 +374,6 @@ export default class MessageClient {
   };
   // sent to message recipient
   private _sendTypingNotification(uid: string) {
-    console.log(this.connection.activeConversationId);
-    console.log(uid, "--the uid");
     if (this.connection.socket) {
       this.connection.socket.send(
         JSON.stringify({
@@ -419,7 +413,6 @@ export default class MessageClient {
 
   private addMessageToConversation(newMessage: Message, screen: string) {
     try {
-      console.log(newMessage, ":::new mesage");
       const conversation =
         this.connection.conversationMap[newMessage.conversationId];
       if (conversation) {
@@ -473,7 +466,7 @@ export default class MessageClient {
         });
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }
 
@@ -589,7 +582,7 @@ export default class MessageClient {
       
     } catch (error) {
       if(error instanceof Error){
-        console.log(error.message)
+        console.error(error.message)
       }
     }
   }
@@ -613,27 +606,6 @@ export default class MessageClient {
       });
     }
   }
-
-  // updateReactions({
-  //   conversationId,
-  //   messageId,
-  //   reactions,
-  //   to,
-  // }: {
-  //   conversationId: string;
-  //   messageId: string;
-  //   reactions: Reaction[];
-  //   to: string;
-  // }) {
-  //   if(this.connection) {
-  //     this._updateMessageReactions(
-  //       conversationId,
-  //       messageId,
-  //       reactions,
-  //       { ws: true, to }
-  //     );
-  //   }
-  // }
 
   sendMessage(newMessage: Prettify<SendMessageGenerics<Message>>) {
     if (this.connection) {
@@ -667,7 +639,6 @@ export default class MessageClient {
   }
 
   sendTypingNotification(uid: string) {
-    console.log(this.screen, this.connection.activeConversationId);
     if (this.connection) {
       this._sendTypingNotification(uid);
     }
@@ -706,10 +677,6 @@ export default class MessageClient {
   async getMessages(page?: number) {
     if (this.connection) {
       try {
-        console.log(
-          this.connection.activeConversationId,
-          "--this.connection.activeConversationId messages"
-        );
         const response = await GET_MESSAGES<{ messages: Message[] }>(
           this.connection.wsAccessConfig.token,
           this.connection.activeConversationId,
@@ -798,31 +765,6 @@ export default class MessageClient {
     }
   }
 
-  // async uploadAttachmentV2({
-  //   base64,
-  //   fileKey,
-  //   mediaType
-  // }: {
-  //   base64: string;
-  //   fileKey: string;
-  //   mediaType: MediaType
-  // }) {
-  //   if (this.connection) {
-  //     try {
-  //       const res = await UPLOAD_ATTACHMENT<{ url: string }>(
-  //         this.connection.wsAccessConfig?.token,
-  //         { base64, conversationId: this.connection.activeConversationId, key: fileKey, mediaType }
-  //       );
-  //       return res;
-  //     } catch (error) {
-  //       if (error instanceof Error) {
-  //         console.error(error.message);
-  //       }
-  //     }
-  //   } else {
-  //     throw new Error("No connection established");
-  //   }
-  // }
   private isReadableStream(uri: any): uri is Readable {
     return uri && typeof uri.pipe === "function";
   }
@@ -846,8 +788,6 @@ export default class MessageClient {
         mediaType: meta.mimeType,
         uid: this.connection.userMeta.uid
       });
-
-      console.log(res);
 
       let body;
 
@@ -889,7 +829,6 @@ export default class MessageClient {
         },
       });
 
-      console.log("up: ", data);
       return {
         link: res.data.s3Link,
         success: res.success,
@@ -920,17 +859,6 @@ export default class MessageClient {
   }) {
     if (this.connection) {
       try {
-        //       const formData = new FormData();
-
-        //       // Convert the file at the URI to a Blob (or similar) for FormData
-        //       const file = {
-        //         uri: data.uri, // local file URI
-        //         name: data.name, // filename
-        //         type: data.type, // content type
-        //       };
-        // console.log(file)
-        //       // Append the file and other form data
-        //       formData.append('file', file as any);
         const res = await GET_PRESIGNED_URL<{
           uploadUrl: string;
           s3Link: string;
@@ -953,7 +881,6 @@ export default class MessageClient {
             "Content-Type": mimeType,
           },
         });
-        console.log("up: ", data);
         return res;
       } catch (error) {
         if (error instanceof Error) {
@@ -986,20 +913,9 @@ export default class MessageClient {
 
   messageEventHandler(event: MessageEvent) {
     try {
-      // this.connection.socket.onmessage = (event: MessageEvent) => {
-      // console.log(event, '---event')
       if (!event) return null;
       var wsData = JSON.parse(event.data);
-      // console.log(wsData)
       const action: ClientActions | ServerActions = wsData.action;
-      // console.log("action::::::", action);
-      // if(action === ClientActions.INCOMING_MESSAGE){
-      //   console.log(event.data)
-      //   console.log(this.connection.activeConversationId, '::activeConversationId');
-      //   console.log(this.connection.screen ,
-      //     this.connection.activeConversationId , wsData?.message?.conversationId)
-      // }
-
       if (
         this.screen === Screens.CHAT &&
         this.connection.activeConversationId === wsData?.message?.conversationId
@@ -1226,7 +1142,7 @@ export default class MessageClient {
           console.info("HEALTH_CHECK: ok!");
           break;
         default:
-          console.log("Unknown action recieved", JSON.parse(event.data));
+          console.log("Unknown action recieved");
       }
 
       this.connection.socket.onerror = (error: CloseEvent) => {

@@ -3,6 +3,9 @@
     width: 35px;
     background-color: grey;
     border-radius: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .avatar img{

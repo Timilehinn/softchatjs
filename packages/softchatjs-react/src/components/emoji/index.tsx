@@ -111,7 +111,6 @@ export const ReactionPanel = ({
     {
       emoji: <CiFaceSmile size={16} color={iconColor} />,
       onPress: () => {
-        console.log("react");
         openEmojiPanel();
       },
       enabled: true,

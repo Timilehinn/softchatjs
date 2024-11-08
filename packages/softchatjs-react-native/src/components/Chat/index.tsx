@@ -100,7 +100,7 @@ export default function Chat(props: ChatProps) {
     keyboardOffset = Platform.OS === "ios" ? 10 : 0,
   } = props;
   const chatUserId = chatUser.uid;
-  const _conversationId = conversation.conversationId;
+  const _conversationId = conversation?.conversationId;
   const [permissionResponse, requestPermission] = Audio.usePermissions();
   const scrollRef = useRef<FlashList<Message | string> | null>(null);
   const inputRef = useRef<TextInput>(null);
@@ -216,15 +216,17 @@ export default function Chat(props: ChatProps) {
 
   async function getMessages() {
     try {
-      setLoadingMessages(true);
-      const messages = (await client
-        ?.messageClient(_conversationId)
-        .getMessages()) as Array<Message>;
-      if (messages.length > 0) {
-        var restructuredMessages: GroupedMessages = restructureMessages(
-          messages.reverse()
-        );
-        setMessages(restructuredMessages);
+      if (_conversationId) {
+        setLoadingMessages(true);
+        const messages = (await client
+          ?.messageClient(_conversationId)
+          .getMessages()) as Array<Message>;
+        if (messages.length > 0) {
+          var restructuredMessages: GroupedMessages = restructureMessages(
+            messages.reverse()
+          );
+          setMessages(restructuredMessages);
+        }
       }
     } catch (error) {
       console.log(error);
@@ -235,7 +237,7 @@ export default function Chat(props: ChatProps) {
 
   async function getOlderMessages() {
     try {
-      if (client && messages.length > 0) {
+      if (client && messages.length > 0 && _conversationId) {
         setLoadingOlderMessages(true);
         const olderMessages = (await client
           .messageClient(_conversationId)
@@ -254,19 +256,19 @@ export default function Chat(props: ChatProps) {
     }
   }
 
-  const getConversation = async () => {
-    try {
-      if (client) {
-        const conversation = (await client
-          ?.messageClient(_conversationId)
-          .getConversation(_conversationId)) as Conversation;
-        console.log(conversation, "---the conversation");
-        if (conversation) {
-          setConversationMeta(conversation);
-        }
-      }
-    } catch (error) {}
-  };
+  // const getConversation = async () => {
+  //   try {
+  //     if (client) {
+  //       const conversation = (await client
+  //         ?.messageClient(_conversationId)
+  //         .getConversation(_conversationId)) as Conversation;
+  //       console.log(conversation, "---the conversation");
+  //       if (conversation) {
+  //         setConversationMeta(conversation);
+  //       }
+  //     }
+  //   } catch (error) {}
+  // };
 
   useEffect(() => {
     if (conversation) {
@@ -274,7 +276,9 @@ export default function Chat(props: ChatProps) {
       const recipients = conversationMeta?.participants.filter(
         (id) => id !== client?.userMeta.uid
       );
-      setRecipientId(recipients[0]);
+      if (recipients && recipients.length > 0) {
+        setRecipientId(recipients[0]);
+      }
     } else {
       // getConversation();
       // setRecipientId(participantId)
@@ -294,16 +298,15 @@ export default function Chat(props: ChatProps) {
 
   const handleEditedMessage = (event: any) => {
     setMessages((prev) => {
-      return prev.map((message) => {
-        if (typeof message !== "string") {
-          if (message.messageId === event.message.messageId) {
-            return { ...message, ...event.message };
-          } else {
-            return message;
-          }
-        } else {
-          return message;
+      const newMessages = [...prev];
+      return newMessages.map((message) => {
+        if (
+          typeof message !== "string" &&
+          message.messageId === event.message.messageId
+        ) {
+          return { ...message, ...event.message };
         }
+        return message;
       });
     });
   };
@@ -339,7 +342,7 @@ export default function Chat(props: ChatProps) {
   };
 
   useEffect(() => {
-    if (client) {
+    if (client && _conversationId) {
       client.messageClient(_conversationId).setActiveConversation();
       client.subscribe(Events.NEW_MESSAGE, handleNewMessages);
       client.subscribe(Events.EDITED_MESSAGE, handleEditedMessage);
@@ -350,7 +353,9 @@ export default function Chat(props: ChatProps) {
     }
     return () => {
       if (client) {
-        client.messageClient(_conversationId).unSetActiveConversation();
+        if (_conversationId) {
+          client.messageClient(_conversationId).unSetActiveConversation();
+        }
         client.unsubscribe(Events.NEW_MESSAGE, handleNewMessages);
         client.unsubscribe(Events.EDITED_MESSAGE, handleEditedMessage);
         client.unsubscribe(Events.HAS_STARTED_TYPING, handleTypingStarted);
@@ -359,7 +364,7 @@ export default function Chat(props: ChatProps) {
         client.unsubscribe(Events.CONNECTION_CHANGED, handleConnectionChanged);
       }
     };
-  }, [client]);
+  }, [client, _conversationId]);
 
   const openEmojis = () => {
     emojiListRef?.current?.open();
@@ -531,27 +536,29 @@ export default function Chat(props: ChatProps) {
   useEffect(() => {
     let debounceTimer: NodeJS.Timeout | undefined;
     let idleTimer: NodeJS.Timeout | undefined;
-    if (globalTextMessage.length > 0) {
-      clearTimeout(debounceTimer);
-      // set a new debounce timer to send a typing notification after 350ms
-      debounceTimer = setTimeout(() => {
-        if (client) {
-          client
-            .messageClient(_conversationId)
-            .sendTypingNotification(recipientId);
-          debounceTimer = undefined; // clear debounce timer reference after sending the typing notification
-        }
-      }, 300);
-      // clear the previous idle timer (stopped typing)
-      clearTimeout(idleTimer);
-      // set a new idle timer to send a stopped typing notification after 1300ms of inactivity
-      idleTimer = setTimeout(() => {
-        if (client) {
-          client
-            .messageClient(_conversationId)
-            .sendStoppedTypingNotification(recipientId);
-        }
-      }, 1300);
+    if (_conversationId) {
+      if (globalTextMessage.length > 0) {
+        clearTimeout(debounceTimer);
+        // set a new debounce timer to send a typing notification after 350ms
+        debounceTimer = setTimeout(() => {
+          if (client) {
+            client
+              .messageClient(_conversationId)
+              .sendTypingNotification(recipientId);
+            debounceTimer = undefined; // clear debounce timer reference after sending the typing notification
+          }
+        }, 300);
+        // clear the previous idle timer (stopped typing)
+        clearTimeout(idleTimer);
+        // set a new idle timer to send a stopped typing notification after 1300ms of inactivity
+        idleTimer = setTimeout(() => {
+          if (client) {
+            client
+              .messageClient(_conversationId)
+              .sendStoppedTypingNotification(recipientId);
+          }
+        }, 1300);
+      }
     }
     return () => clearTimeout(debounceTimer);
   }, [client, globalTextMessage, _conversationId]);
@@ -680,18 +687,6 @@ export default function Chat(props: ChatProps) {
               isPending={true}
             />
           ))}
-        {/* <View
-          style={{
-            display: loadingMessages ? "flex" : "none",
-            paddingVertical: 5,
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Text style={{ color: theme?.text.disabled, fontStyle: "italic" }}>
-            Loading new messages...
-          </Text>
-        </View> */}
       </View>
     );
   }, [loadingMessages, pendingMessages, theme]);
@@ -717,7 +712,7 @@ export default function Chat(props: ChatProps) {
                   paddingHorizontal: 5,
                   color: theme?.text.secondary,
                   fontSize: 11,
-                  fontFamily,
+                  fontFamily: fontFamily || undefined,
                 }}
               >
                 {item}
@@ -748,7 +743,7 @@ export default function Chat(props: ChatProps) {
                 paddingHorizontal: 15,
                 color: theme?.text.secondary,
                 fontSize: 11,
-                fontFamily,
+                fontFamily: fontFamily || undefined,
               }}
             >
               {item}
@@ -773,7 +768,9 @@ export default function Chat(props: ChatProps) {
           }}
           layout={layout}
           onLongPress={({ message, chatItemRef, isMessageOwner }) =>
-          conversation.conversationType !== "admin-chat"? onChatItemLongPress(message, chatItemRef, isMessageOwner) : null
+            conversation?.conversationType !== "admin-chat"
+              ? onChatItemLongPress(message, chatItemRef, isMessageOwner)
+              : null
           }
           inputRef={inputRef}
           position={chatUserId === item.from ? "right" : "left"}
@@ -805,7 +802,11 @@ export default function Chat(props: ChatProps) {
       >
         <MessagePlus size={100} color={theme?.icon} />
         <Text
-          style={{ color: theme?.text.disabled, marginTop: 20, fontFamily }}
+          style={{
+            color: theme?.text.disabled,
+            marginTop: 20,
+            fontFamily: fontFamily || undefined,
+          }}
         >
           Start by sending a message.
         </Text>
@@ -885,7 +886,12 @@ export default function Chat(props: ChatProps) {
                     justifyContent: "center",
                   }}
                 >
-                  <Text style={{ color: theme?.text.disabled, fontFamily }}>
+                  <Text
+                    style={{
+                      color: theme?.text.disabled,
+                      fontFamily: fontFamily || undefined,
+                    }}
+                  >
                     Loading older messages...
                   </Text>
                 </View>
@@ -914,23 +920,28 @@ export default function Chat(props: ChatProps) {
               onClear={clearSelectedMessage}
             />
           )}
-          {conversation.conversationType === "admin-chat" ? (
+          {conversation?.conversationType === "admin-chat" ? (
             <View
               style={{
                 height: 50,
                 width: "100%",
                 borderTopWidth: 1,
-                borderTopColor: theme.divider,
+                borderTopColor: theme?.divider,
                 alignItems: "center",
-                flexDirection: 'row',
+                flexDirection: "row",
                 justifyContent: "center",
               }}
             >
-              <LockIcon size={15} />
+              <LockIcon size={15} color={theme?.icon} />
               <Text
-                style={{ marginStart: 5, fontFamily, fontSize: 14, color: theme.text.disabled }}
+                style={{
+                  marginStart: 5,
+                  fontFamily: fontFamily || undefined,
+                  fontSize: 14,
+                  color: theme?.text.disabled,
+                }}
               >
-               Only the Admin can send messages.
+                Only the Admin can send messages.
               </Text>
             </View>
           ) : (
@@ -947,7 +958,7 @@ export default function Chat(props: ChatProps) {
                       isEditing ? sendEditedMessage() : sendMessage()
                     }
                     isLoading={connectionStatus.connecting || loadingMessages}
-                    conversationId={_conversationId}
+                    conversationId={_conversationId || ""}
                     chatUserId={chatUserId}
                     recipientId={recipientId}
                     // selectedMessage={activeQuote}

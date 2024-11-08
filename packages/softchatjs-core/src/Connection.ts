@@ -90,7 +90,6 @@ export default class Connection extends EventEmitter {
   
       // Clear previous health check interval
       clearTimeout(this.retryRef);
-      console.log('clear ref: ', this.retryRef)        
       clearTimeout(this.retryRef);
           // Create a session to retrieve token and wsURI
           
@@ -106,7 +105,6 @@ export default class Connection extends EventEmitter {
         fetchingConversations: true,
       });
 
-      console.log(res)
   
       // Emit connecting status
       
@@ -140,7 +138,6 @@ export default class Connection extends EventEmitter {
   
         // Check if WebSocket is already open
         if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-          console.log("already socket opened");
           this.socket.send(message); // send the message
           this.wsConnected = true;
   
@@ -203,7 +200,6 @@ export default class Connection extends EventEmitter {
         }
       } else {
         // Handle unsuccessful session creation
-        console.log("Session creation failed.");
         this.wsConnected = false;
         this.emit(Events.CONNECTION_CHANGED, {
           connecting: false,
@@ -273,7 +269,6 @@ export default class Connection extends EventEmitter {
       const response = await GET_CONVERSATIONS<{
         conversations: Conversation[];
       }>(token);
-      console.log(response,":::response")
       if (response.success) {
         const conversationListMeta: ConversationListMeta =
           response.data.conversations.reduce((acc, conversation) => {
@@ -334,14 +329,12 @@ export default class Connection extends EventEmitter {
     if (this.socket) {
       if (this.healthCheckRef) {
         clearInterval(this.healthCheckRef);
-        console.log(this.healthCheckRef, "---ref");
       }
 
       // Set the new interval
       this.healthCheckRef = setInterval(() => {
         // Check WebSocket connection status
         if (this.socket?.readyState === WebSocket.OPEN) {
-          console.log("--Sending health check...");
           const data = JSON.stringify({
             action: ServerActions.HEALTH_CHECK,
             message: {

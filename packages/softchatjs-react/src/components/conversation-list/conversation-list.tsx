@@ -8,7 +8,7 @@ import React, {
   useRef,
   useState,
   useLayoutEffect,
-  forwardRef
+  forwardRef,
 } from "react";
 import styles from "./conversation-list.module.css";
 import ChatClient, { Message } from "softchatjs-core";
@@ -46,9 +46,11 @@ type MessageListProps = {
   messagesEndRef: any;
   renderChatBubble?: (message: Message) => JSX.Element;
   renderChatHeader?: () => JSX.Element;
+  headerHeightOffset: number;
+  getOlderMessages: (func: () => void) => void;
 };
 
-const MessageList = forwardRef((props: MessageListProps, ref: any) => {
+const MessageList = (props: MessageListProps) => {
   const {
     messages = [],
     setEditDetails,
@@ -65,8 +67,11 @@ const MessageList = forwardRef((props: MessageListProps, ref: any) => {
     messagesEndRef,
     renderChatBubble,
     renderChatHeader,
+    headerHeightOffset,
+    getOlderMessages
   } = props;
 
+  const ref = useRef<HTMLDivElement>()
   const [showOptions, setShowOPtions] = useState(false);
   const [showEmojiPanel, setShowEmojiPanel] = useState(false);
   const [activeIndex, setActiveIndex] = useState("");
@@ -82,6 +87,21 @@ const MessageList = forwardRef((props: MessageListProps, ref: any) => {
   const itemRefs = useRef<Record<string, HTMLDivElement>>({});
   const theme = config.theme;
   const textColor = config?.theme?.text?.primary || "white";
+  var scrollDebounce: NodeJS.Timeout | null = null
+
+  function calculateHeight() {
+    // Get the viewport height in pixels
+    const viewportHeight = window.innerHeight;
+  
+    // Fixed pixel values in the calculation
+    const fixedOffset1 = 80;
+    const fixedOffset2 = 60;
+  
+    // Perform the calculation: (100vh - 80px - 60px - headerHeightOffset)
+    const result = viewportHeight - fixedOffset1 - fixedOffset2 - headerHeightOffset;
+  
+    return result; // This gives you the pixel value of the calculation
+  }
 
   const handlePress = (event: any, id: string) => {
     event.preventDefault();
@@ -173,40 +193,51 @@ const MessageList = forwardRef((props: MessageListProps, ref: any) => {
     []
   );
 
-  console.log(sectionedMessages, "sce");
-
-  // const handleScroll = () => {
-  //   if (ref.current.scrollTop === 0) {
-  //     const scrollHeightBeforeFetch = ref.current.scrollHeight;
-  //     setPresentPage((prevPage) => prevPage + 1); // Increment page number
-  //     const scrollHeightAfterFetch = ref.current.scrollHeight;
-  //     ref.current.scrollTop =
-  //       scrollHeightAfterFetch - scrollHeightBeforeFetch;
-  //   }
-  // };
-
-  const onScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
-    const { scrollTop } = e.target as HTMLDivElement;
-    if (scrollTop <= 0) {
+  const handleScroll = () => {
+    if (ref.current.scrollTop === 0) {
+      const scrollHeightBeforeFetch = ref.current.scrollHeight;
       setPresentPage((prevPage) => prevPage + 1); // Increment page number
+      const scrollHeightAfterFetch = ref.current.scrollHeight;
+      ref.current.scrollTop = scrollHeightAfterFetch - scrollHeightBeforeFetch;
     }
-  }, []);
+  };
 
+  const onScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    try {
+      const scrollContainer = ref.current;
+      const previousScrollHeight = scrollContainer.scrollHeight;
+      const previousScrollTop = scrollContainer.scrollTop;
+      const { scrollTop } = e.target as HTMLDivElement;
+      const containerHeigh = calculateHeight();
+      if (scrollTop <= 0) {
+        getOlderMessages(() => {});
+      }
+    } catch (error) {
+      console.error(error.message)
+    }
+  }
+  
 
-  // // Get's position of last message before pagination
-  // useLayoutEffect(() => {
-  //   if (
-  //     !scrollToKey ||
-  //     (ref.current as HTMLDivElement).scrollTop !== 0
-  //   )
-  //     return;
-  //   if (itemRefs.current[scrollToKey]) {
-  //     itemRefs.current[scrollToKey].scrollIntoView();
-  //   }
-  // }, [scrollToKey]);
+  // Get's position of last message before pagination
+  useLayoutEffect(() => {
+    try {
+      if (!scrollToKey || (ref.current as HTMLDivElement).scrollTop !== 0) return;
+      if (itemRefs.current[scrollToKey]) {
+        itemRefs.current[scrollToKey].scrollIntoView();
+      }
+    } catch (error) {
+      console.error(error.message)
+    }
+   
+  }, [scrollToKey]);
 
   return (
-    <div ref={ref} onScroll={onScroll} className={styles.wrapper}>
+    <div
+      ref={ref}
+      onScroll={onScroll}
+      className={styles.wrapper}
+      style={{ height: `calc(100vh - 80px - 60px - ${headerHeightOffset}px)` }}
+    >
       {fetchingMore && (
         <div className={styles.loading}>
           <Text styles={{ color: "white" }} size="sm" text="Loading more..." />
@@ -214,22 +245,28 @@ const MessageList = forwardRef((props: MessageListProps, ref: any) => {
       )}
       {sectionedMessages.map((_item, i) => {
         return (
-          <div
-            key={i}
-            style={{
-              borderTop: `${config?.theme?.hideDivider ? "0" : "1"}px solid ${
-                theme?.divider || "rgba(128, 128, 128, 0.136)"
-              }`,
-            }}
-            className={styles.wrapper__sec}
-          >
+          <div key={i} className={styles.wrapper__sec}>
             <div
-              style={{ justifyContent: "center", display: "flex" }}
+              style={{
+                justifyContent: "center",
+                display: "flex",
+                width: "100%",
+                alignItems: "center",
+              }}
               key={`${i}-sec`}
             >
               <div
                 style={{
-                  background: config?.theme?.background?.secondary || "#1b1d21",
+                  flex: 1,
+                  height: ".5px",
+                  width: "100%",
+                  backgroundColor: theme?.divider,
+                }}
+              />
+              <div
+                style={{
+                  backgroundColor:
+                    config?.theme?.background?.secondary || "#1b1d21",
                 }}
                 className={styles.wrapper__date}
               >
@@ -239,6 +276,14 @@ const MessageList = forwardRef((props: MessageListProps, ref: any) => {
                   text={formatSectionTime(_item.date)}
                 />
               </div>
+              <div
+                style={{
+                  flex: 1,
+                  height: ".5px",
+                  width: "100%",
+                  backgroundColor: theme?.divider,
+                }}
+              />
             </div>
 
             {_item.messages.map((item, index) => (
@@ -291,7 +336,6 @@ const MessageList = forwardRef((props: MessageListProps, ref: any) => {
       <div ref={messagesEndRef} style={{ height: "1px", width: "100%" }} />
     </div>
   );
-})
-
+}
 
 export default MessageList;

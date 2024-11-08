@@ -29,7 +29,7 @@ import "./input.module.css";
 import { useChatClient } from "../../providers/chatClientProvider";
 import { convertToMinutes } from "../../helpers/date";
 import AudioPlayer from "../audio/audio-player";
-import TrashIcon from "../assets/icons";
+import TrashIcon, { LockIcon } from "../assets/icons";
 // import { AudioRecorder } from "react-audio-voice-recorder";
 import { IoStopCircleOutline } from "react-icons/io5";
 import { useChatState } from "../../providers/clientStateProvider";
@@ -116,33 +116,26 @@ const ChatInput = ({
 
   useEffect(() => {
     if (navigator.mediaDevices) {
-      console.log("getUserMedia supported.");
 
       const constraints = { audio: true };
       navigator.mediaDevices
         .getUserMedia(constraints)
         .then((stream) => {
           const mediaRecorder = new MediaRecorder(stream);
-          console.log(mediaRecorder, ":::mediarecorder");
           setAudioRecorder(mediaRecorder);
 
           var chunks = [];
 
           mediaRecorder.onstop = (e) => {
             const blob = new Blob(chunks, { type: "audio/ogg; codecs=opus" });
-            console.log(blob, ":audio blob");
-            // const audioURL = URL.createObjectURL(blob);
             setAudioBlob(blob);
-            // setVoiceMessageDuration(0)
             chunks = [];
           };
 
           mediaRecorder.onstart = () => {
-            console.log("recording started");
           };
 
           mediaRecorder.ondataavailable = (e) => {
-            console.log(e.data, "--audio data");
             chunks.push(e.data);
             if (voiceMessageDuration >= 300) {
               mediaRecorder.stop();
@@ -209,7 +202,6 @@ const ChatInput = ({
     try {
       let imageResData: any = [];
       let mediaData: Media[];
-      console.log(files[0], "uploda");
       if (files.length) {
         // Wait for all uploads to complete using Promise.all
 
@@ -219,7 +211,6 @@ const ChatInput = ({
         });
 
         const type = files[0].type.split("/")[0];
-        console.log(type, "type");
         mediaData = [
           {
             type: type as any,
@@ -295,7 +286,6 @@ const ChatInput = ({
         quotedMessage: null,
         ...attachmentType,
       });
-      console.log("message sent");
       close();
     } catch (err) {
       console.log(err);
@@ -319,7 +309,6 @@ const ChatInput = ({
     audio.src = url;
     audio.controls = true;
     document.body.appendChild(audio);
-    console.log(url);
   };
 
   // if (1)
@@ -354,8 +343,9 @@ const ChatInput = ({
     activeConversation.conversation.conversationType === ("admin-chat" as any)
   ) {
     return (
-      <div style={{padding:"20px"}}>
-        <Text size="xs"  text="Sending messages is not allowed in this chat." />
+      <div style={{ padding:"20px", flex: 1, display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+        <LockIcon color="white" size={20} />
+        <Text size="xs" styles={{ marginLeft: '5px' }} text={"Only the Admin can send messages."} />
       </div>
     );
   }
@@ -639,7 +629,7 @@ const ChatAttachments = ({
   const { config } = useChatClient();
 
   const { theme } = config;
-  console.log(files, "vid");
+  
   return (
     <div className={styles.chatPhotos} style={{ width, paddingBottom: "10px" }}>
       {audioBlob ? (

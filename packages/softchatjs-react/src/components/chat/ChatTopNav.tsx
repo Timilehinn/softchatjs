@@ -10,10 +10,12 @@ export const ChatTopNav = ({
   message,
   setMainListOpen,
   renderChatHeader,
+  onClose
 }: {
   message: Message;
   setMainListOpen: any;
   renderChatHeader?: () => JSX.Element;
+  onClose: () => void;
 }) => {
   const { client, config } = useChatClient();
   const { setActiveConversation } = useChatState();
@@ -30,13 +32,14 @@ export const ChatTopNav = ({
         <div
           style={{ paddingLeft: "10px", display: "flex", justifyContent: 'space-between', width: "100%", padding: '15px', alignItems: "center" }}
         >
-          <Avartar message={message} />
+          <Avartar initials={message.messageOwner.username.substring(0,1)} url={message.messageOwner.profileUrl} />
           <div className={styles.topnav__menu} style={{  }}>
             <MdOutlineClose
               color={theme?.icon}
               onClick={() => {
                 setMainListOpen(true);
-                setActiveConversation(null)
+                setActiveConversation(null);
+                onClose()
               }}
               size={22}
             />

@@ -79,12 +79,15 @@ export const MessageStateProvider = ({ children }: { children: JSX.Element }) =>
   }
 
   const updatePendingMessage = (messageId: string, updatedMessage: Message) => {
-      setPendingMessages((prev) =>
-        prev.map((message) =>
-          message.messageId === messageId ? { ...message, ...updatedMessage } : message
-        )
-      );
-  }
+    const clonedMessage = JSON.parse(JSON.stringify(updatedMessage));
+  
+    setPendingMessages((prev) =>
+      prev.map((message) =>
+        message.messageId === messageId ? { ...message, ...clonedMessage } : message
+      )
+    );
+  };
+  
   
   const onPlaybackStatusUpdate = (data: AVPlaybackStatus & { didJustFinish: boolean , positionMillis: number}) => {
     setAvPlayBackStatus(data)

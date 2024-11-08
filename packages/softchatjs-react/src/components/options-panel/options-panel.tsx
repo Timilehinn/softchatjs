@@ -68,7 +68,6 @@ const OptionsPanel = (props: ConversationListProps) => {
     {
       title: "Add reaction",
       onPress: () => {
-        console.log("react");
         openEmojiPanel();
       },
       enabled: true,

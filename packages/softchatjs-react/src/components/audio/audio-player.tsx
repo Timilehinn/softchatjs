@@ -59,7 +59,6 @@ export default function AudioPlayer(props: AudioPlayerProps) {
       const url = URL.createObjectURL(blob);
       setAudioUrl(url);
       setIsLoading(true);
-      console.log("blob changd");
     }
   }, [blob, url]);
 

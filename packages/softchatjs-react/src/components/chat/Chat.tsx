@@ -17,6 +17,7 @@ import {
 import { useChatClient } from "../../providers/chatClientProvider";
 import { ImageViewer } from "../modals";
 import { ChatTopNav } from "./ChatTopNav";
+import { ChatIcon } from "../assets/icons";
 
 type ChatProps = {
   renderChatBubble?: (message: Message) => JSX.Element;
@@ -28,9 +29,16 @@ type ChatProps = {
   renderAddConversationIcon?: () => JSX.Element;
   renderChatInput?: (props: { onChange: (e: string) => void }) => JSX.Element;
   user: UserMeta;
+
+  /**@note
+   * This value calculates the the height off the container incase of an external header
+   * Value should be in px i.e 300
+   */
+  headerHeightOffset?: number;
 };
 
 const Chat = (props: ChatProps) => {
+  const { headerHeightOffset = 0 } = props;
   const { client, config } = useChatClient();
   const {
     activeConversation,
@@ -38,6 +46,8 @@ const Chat = (props: ChatProps) => {
     setActiveConversation,
     setConversations,
     conversations,
+    connectionStatus,
+    setConnectionStatus,
   } = useChatState();
   const [isConnected, setIsConnected] = useState(false);
   const [loadingMessages, setLoadingMessages] = useState(false);
@@ -59,6 +69,7 @@ const Chat = (props: ChatProps) => {
   const [recipientId, setRecipientId] = useState("");
   const conversationId = activeConversation?.conversation.conversationId!;
   const [isSmallScreen, setIsSmallScreen] = useState(false);
+  const [inputContainerWidth, setInputContainerWidth] = useState(0);
 
   const { theme } = config;
 
@@ -72,6 +83,10 @@ const Chat = (props: ChatProps) => {
   const generalMenuRef: any = useRef(null);
   const textInputRef: any = useRef(null);
   const userListRef: any = useRef(null);
+
+  const clearState = () => {
+    setpresentPage(1);
+  }
 
   const closeGeneralMenu = (e: any) => {
     if (menuDetails.element && !generalMenuRef.current?.contains(e.target)) {
@@ -114,7 +129,6 @@ const Chat = (props: ChatProps) => {
   }, [generalMenuRef, closeGeneralMenu]);
 
   const handleMessage = (event?: any) => {
-    console.log("fuckinglogthis");
     if (activeConversation) {
       if (
         event.message.conversationId ===
@@ -136,10 +150,7 @@ const Chat = (props: ChatProps) => {
 
   const handleTypingStarted = (event: any) => {
     if (activeConversation) {
-      console.log(
-        activeConversation.conversation.conversationId,
-        event.conversationId
-      );
+   
       if (
         activeConversation.conversation.conversationId === event.conversationId
       ) {
@@ -162,23 +173,21 @@ const Chat = (props: ChatProps) => {
 
   const handleEditedMessage = (event: any) => {
     setMessages((prev: any) => {
-      return prev.map((item: Message) => {
+      const newMessages = prev.map((item: Message) => {
         if (item?.messageId === event?.message?.messageId) {
-          return {
-            ...item,
-            ...event.message,
-          };
-        } else {
-          return item;
+          return { ...item, ...event.message };
         }
+        return item;
       });
+      return [...newMessages];
     });
   };
+  
 
   const handleConnectionChanged = (
     event: ChatEventGenerics<ConnectionEvent>
   ) => {
-    setIsConnected(event.isConnected);
+    setConnectionStatus(event);
   };
 
   const handleConversationsListChanged = (e: {
@@ -187,7 +196,11 @@ const Chat = (props: ChatProps) => {
     const conversationList = Object.values(
       e.conversationListMeta
     ).flat() as ConversationItem[];
-    console.log(conversationList, "::conversationList");
+    conversationList.sort(
+      (a, b) =>
+        new Date(b.lastMessage?.createdAt).getTime() -
+        new Date(a.lastMessage?.createdAt).getTime()
+    );
     setConversations(conversationList);
   };
 
@@ -219,6 +232,7 @@ const Chat = (props: ChatProps) => {
 
   useEffect(() => {
     if (client) {
+      clearState();
       return () => {
         client.unsubscribe("new_message" as any, handleMessage);
       };
@@ -278,32 +292,57 @@ const Chat = (props: ChatProps) => {
     }
   }, [forceScrollCount]);
 
-  useEffect(() => {
-    if (presentPage < 2) {
-      return;
+  const getMessages = async () => {
+    try {
+      if(client){
+        const messageList = (await client
+          .messageClient(activeConversation?.conversation?.conversationId!)
+          .getMessages(1)) as Array<Message>;
+        setMessages(messageList);
+        setpresentPage(2)
+        if (messages[0]) {
+          setScrollToKey(messages[0].messageId);
+        }
+      }
+    } catch (error) {
+      console.error(error.message)
     }
+  };
+
+  const getOlderMessages = async (func: () => void) => {
+    try {
+      if(client){
+        setFetchingMore(true);
+        const messageList = (await client
+          .messageClient(activeConversation?.conversation?.conversationId!)
+          .getMessages(presentPage)) as Array<Message>;
+        setMessages((prev) => {
+          return [ ...messageList, ...prev ]
+        });
+        setpresentPage(p => p + 1);
+        if (messages[0]) {
+          setScrollToKey(messages[0].messageId);
+        }
+        func();
+      }
+    } catch (error) {
+      console.error(error.message)
+    } finally {
+      setFetchingMore(false);
+    }
+  }
+
+  useEffect(() => {
     try {
       if (client) {
-        const getMoreMessages = async () => {
-          setFetchingMore(true);
-          const messageList = (await client
-            .messageClient(activeConversation?.conversation?.conversationId!)
-            .getMessages(presentPage)) as Array<Message>;
-          setMessages((prev) => {
-            return [...messageList, ...prev];
-          });
-          if (messages[0]) {
-            setScrollToKey(messages[0].messageId);
-          }
-        };
-        getMoreMessages();
+        getMessages();
       }
     } catch (err) {
       console.error(err);
     } finally {
       setFetchingMore(false);
     }
-  }, [presentPage]);
+  }, []);
 
   const showMainList = useMemo(() => {
     if (isSmallScreen) {
@@ -314,13 +353,18 @@ const Chat = (props: ChatProps) => {
 
   if (isSmallScreen && activeConversation) {
     return (
-      <div className={styles.chat__messages} style={{ width: "100%" }}>
+      <div
+        className={styles.chat__messages}
+        style={{ width: "100%", backgroundColor: theme?.background?.primary }}
+      >
         <ChatTopNav
           setMainListOpen={setMainListOpen}
           message={activeConversation?.lastMessage!}
           renderChatHeader={props.renderChatHeader}
+          onClose={clearState}
         />
         <MessageList
+          headerHeightOffset={headerHeightOffset}
           setEditDetails={setEditDetails}
           messages={messages}
           mousePosition={position}
@@ -337,6 +381,7 @@ const Chat = (props: ChatProps) => {
           messagesEndRef={messagesEndRef}
           renderChatBubble={props.renderChatBubble}
           renderChatHeader={props.renderChatHeader}
+          getOlderMessages={(func) => getOlderMessages(func)}
         />
         <ChatInput
           closeGeneralMenu={() => setMenuDetails({ element: null })}
@@ -351,6 +396,7 @@ const Chat = (props: ChatProps) => {
           recipientTyping={recipientTyping}
           textInputRef={textInputRef}
           renderChatInput={props.renderChatInput}
+          
         />
         {showImageModal.length > 0 && <ImageViewer />}
       </div>
@@ -359,7 +405,10 @@ const Chat = (props: ChatProps) => {
 
   return (
     <div
-      style={{ background: theme?.background?.primary }}
+      style={{
+        background: theme?.background?.primary,
+        height: `calc(100vh - ${headerHeightOffset}px)`,
+      }}
       className={styles.chat}
     >
       <div className={`${styles.chat__conversations}`}>
@@ -388,7 +437,9 @@ const Chat = (props: ChatProps) => {
             ) : null}
           </div>
         ) : ( */}
+
         <MainList
+          connectionStatus={connectionStatus}
           setShowUserList={setShowUserList}
           showUserList={showUserList}
           setMainListOpen={setMainListOpen}
@@ -398,14 +449,16 @@ const Chat = (props: ChatProps) => {
         />
         {/* )} */}
       </div>
-      {activeConversation && (
+      {activeConversation ? (
         <div className={styles.chat__messages}>
           <ChatTopNav
             setMainListOpen={setMainListOpen}
             message={activeConversation?.lastMessage!}
             renderChatHeader={props.renderChatHeader}
+            onClose={clearState}
           />
           <MessageList
+            headerHeightOffset={headerHeightOffset}
             setEditDetails={setEditDetails}
             messages={messages}
             mousePosition={position}
@@ -422,6 +475,8 @@ const Chat = (props: ChatProps) => {
             messagesEndRef={messagesEndRef}
             renderChatBubble={props.renderChatBubble}
             renderChatHeader={props.renderChatHeader}
+            getOlderMessages={(func) => getOlderMessages(func)}
+
           />
           <ChatInput
             closeGeneralMenu={() => setMenuDetails({ element: null })}
@@ -437,6 +492,21 @@ const Chat = (props: ChatProps) => {
             textInputRef={textInputRef}
             renderChatInput={props.renderChatInput}
           />
+        </div>
+      ) : (
+        <div
+          style={{
+            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            flexDirection: "column",
+            justifyContent: "center",
+          }}
+        >
+          <ChatIcon color={theme.icon} size={100} />
+          <p style={{ marginTop: "30px", color: theme.text.secondary }}>
+            Select a conversation to get started
+          </p>
         </div>
       )}
       {showImageModal.length > 0 && <ImageViewer />}

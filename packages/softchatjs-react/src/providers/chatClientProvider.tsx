@@ -28,7 +28,7 @@ export const ChatClientProvider = ({
 }) => {
 
   return (
-    <ChatClientContext.Provider value={{ config: { theme: defaulTheme }, client }}>
+    <ChatClientContext.Provider value={{ config: { theme: theme? theme : defaulTheme }, client }}>
       <ChatStateProvider>
         {children}
       </ChatStateProvider>

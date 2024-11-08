@@ -138,7 +138,7 @@ export const Conversation = (props: ConversationProps) => {
       >
         {!oppositBubbleBoxes && (
           <div className={styles.conversation__image}>
-            {hideAvartar ? null : <Avartar message={message} />}
+            {hideAvartar ? null : <Avartar initials={message.messageOwner.username.substring(0,1)} url={message.messageOwner.profileUrl} />}
           </div>
         )}
 
@@ -468,7 +468,7 @@ export const TypingIndicator = ({ message }: { message: Message }) => {
   return (
     <div className={styles.typing__wrap}>
       <div style={{ marginRight: "10px" }}>
-        <Avartar message={message} />
+        <Avartar initials={message.messageOwner.username.substring(0,1)} url={message.messageOwner.profileUrl} />
       </div>
 
       <ThreeDots

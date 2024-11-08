@@ -7,14 +7,16 @@ import React, {
   useCallback,
 } from "react";
 import styles from "./index.module.css";
-import { ChatEventGenerics, Conversation, Message } from "softchatjs-core";
+import { ChatEventGenerics, Conversation, MediaType, Message } from "softchatjs-core";
 import Text from "../text/text";
 import { formatConversationTime, formatWhatsAppDate } from "../../helpers/date";
-import { useChatState } from "../../providers/clientStateProvider";
+import { ConnectionStatus, useChatState } from "../../providers/clientStateProvider";
 import { useChatClient } from "../../providers/chatClientProvider";
 import Avartar from "../avartar/avartar";
 import { MdMessage } from "react-icons/md";
 import { FaCheck } from "react-icons/fa6";
+import ConversationHeader from './ConversationHeader'
+import { VerifiedIcon } from "../assets/icons";
 
 type ConversationItem = {
   conversation: Conversation;
@@ -29,6 +31,7 @@ export const ConversationList = ({
   userListRef,
   renderAddConversationIcon,
   renderConversationList,
+  connectionStatus
 }: {
   setMainListOpen: any;
   setShowUserList: Dispatch<SetStateAction<boolean>>;
@@ -39,6 +42,7 @@ export const ConversationList = ({
     conversations: ConversationItem[];
     onCoversationItemClick: (conversationItem: ConversationItem) => void;
   }) => JSX.Element;
+  connectionStatus: ConnectionStatus
 }) => {
   const { client, config } = useChatClient();
   const { setActiveConversation, conversations } = useChatState();
@@ -57,24 +61,13 @@ export const ConversationList = ({
         {renderAddConversationIcon ? (
           renderAddConversationIcon()
         ) : (
-          <MdMessage size={40} color="#015EFF" />
+          <MdMessage size={40} color={config.theme.icon}/>
         )}
       </div>
     );
   };
 
-  if (conversations.length === 0) {
-    return (
-      <div className={styles.list__empty}>
-        <Text
-          styles={{ textAlign: "center" }}
-          text="Start a new conversation."
-        />
-        {renderAddMessage()}
-        {showUserList && <UserList userListRef={userListRef} />}
-      </div>
-    );
-  }
+
 
   if (renderConversationList) {
     return (
@@ -99,11 +92,33 @@ export const ConversationList = ({
     );
   }
 
+  // if (conversations.length === 0) {
+  //   return (
+  //     <div className={styles.list__empty}>
+  //       <Text
+  //         styles={{ textAlign: "center" }}
+  //         text="Start a new conversation."
+  //       />
+  //       {renderAddMessage()}
+  //       {showUserList && <UserList userListRef={userListRef} />}
+  //     </div>
+  //   );
+  // }
+
   return (
     <div
-      style={{ background: config?.theme?.background?.secondary }}
+      style={{ background: config?.theme?.background?.secondary, borderRight: `1px solid ${config.theme.divider}` }}
       className={styles.list}
     >
+      <ConversationHeader connectionStatus={connectionStatus}theme={config.theme} />
+      {conversations.length === 0 && (
+        <div className={styles.list__empty}>
+        <Text
+          styles={{ textAlign: "center", color: config.theme.text.primary }}
+          text="Start a new conversation."
+        />
+      </div>
+      )}
       {conversations.map((item, index) => (
         <ConversationItem
           item={item}
@@ -122,7 +137,7 @@ export const ConversationList = ({
         {renderAddConversationIcon ? (
           renderAddConversationIcon()
         ) : (
-          <MdMessage size={40} color="#015EFF" />
+          <MdMessage size={40} color={config.theme.icon} />
         )}
       </div>
 
@@ -155,6 +170,7 @@ const ConversationItem = ({
     if (item.lastMessage?.attachmentType === "media") {
       return (
         <div className={styles.media}>
+         
           <img
             src={
               item.lastMessage.attachedMedia.find((i) => i.type === "image")
@@ -168,7 +184,7 @@ const ConversationItem = ({
               color: textColor,
             }}
             size="sm"
-            text={"Photo"}
+            text={"Media"}
           />
         </div>
       );
@@ -196,8 +212,7 @@ const ConversationItem = ({
       onClick={onClick}
     >
       <div className={styles.item__image}>
-        <Avartar url={user[0].participantDetails?.profileUrl} />
-        {/* <Avartar url={user[0].participantDetails.profileUrl} /> */}
+        <Avartar initials={user[0].participantDetails?.username.substring(0,1)} url={user[0].participantDetails?.profileUrl} />
       </div>
       <div style={{ width: "100%" }}>
         <div
@@ -208,11 +223,17 @@ const ConversationItem = ({
             justifyContent: "space-between",
           }}
         >
+          <div style={{ display: 'flex', alignItems: 'center' }}>
           <Text
-            styles={{ textAlign: "left", color: textColor }}
+            styles={{ textAlign: "left", color: textColor, textTransform: "capitalize", marginRight: '5px' }}
             weight="bold"
             text={user[0].participantDetails?.username}
           />
+          {item.conversation.conversationType === "admin-chat" as any && (
+            <VerifiedIcon size={15} color={config.theme.icon} />
+          )}
+          </div>
+         
           <Text
             size="sm"
             styles={{ color: textColor }}

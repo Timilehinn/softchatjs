@@ -41,7 +41,6 @@ export default class Conversation {
       }));
       this.groupMeta = groupMeta;
     } else {
-      console.log(participantDetails, '::incoming details')
       this.otherParticipant = { ...userMetaSample, ...participantDetails };
       this.conversationType = 'private-chat';
       this.groupMeta = null
@@ -173,11 +172,6 @@ export default class Conversation {
         this.connection.projectConfig.projectId
       );
 
-      console.log([this.connection.userMeta.uid,
-        this.otherParticipant.uid], "---ids")
-
-      console.log(privateConversationId, '--private conversation di')
-
       fullMessage.message.conversationId = privateConversationId;
       fullMessage.message.to = this.otherParticipant.uid;
       fullMessage.to = [this.otherParticipant];
@@ -205,8 +199,6 @@ export default class Conversation {
         fullMessage.message,
         type
       );
-
-      console.log(conversation)
 
       if (!this.connection.conversationListMeta[conversationId]) {
         this.connection.conversationListMeta[conversationId] = {

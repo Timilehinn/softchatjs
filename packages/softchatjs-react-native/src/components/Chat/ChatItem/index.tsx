@@ -98,10 +98,11 @@ export const ChatItem = forwardRef((props: ChatItemProps, ref: any) => {
   const isDragging = useSharedValue(false);
   const maxThreshHold = -90;
   const TOUCH_SLOP = Platform.OS === "android" ? 40 : 10;
-  const DISTANCE_TO_ACTIVATE_PAN = conversation.conversationType !== "admin-chat"? 70 : 100000;
+  const DISTANCE_TO_ACTIVATE_PAN = 70
   const deviceWidth = Dimensions.get("window").width;
 
   const pan = Gesture.Pan()
+  .enabled(conversation.conversationType !== "admin-chat")
     .minDistance(DISTANCE_TO_ACTIVATE_PAN)
     .onTouchesDown((e, state) => {
       touchStart.value = {

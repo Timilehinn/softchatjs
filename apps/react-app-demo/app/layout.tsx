@@ -21,6 +21,46 @@ const client = ChatClient.getInstance({
   subId: "ef066542-6e13-4f25-a6c3-d3e3671e4662",
 });
 
+const beautySpace = {
+  background: {
+    primary: '#FFFFFF', // White background for light mode
+    secondary: '#F0F0F0', // Light grey for secondary background
+    disabled: '#E0E0E0', // Lighter grey for disabled background
+  },
+  text: {
+    primary: '#000000', // Black text for high contrast
+    secondary: '#555555', // Dark grey for secondary text
+    disabled: '#B0B0B0', // Light grey for disabled text
+  },
+  action: {
+    primary: '#4F9ED0', // Dark teal for primary action buttons (accent color)
+    secondary: '#B3D8F0', // Light teal for secondary action buttons
+  },
+  chatBubble: {
+    left: {
+      bgColor: '#F0F0F0', // Light grey for incoming message background
+      messageColor: '#333333', // Dark grey for incoming message text
+      messageTimeColor: '#777777', // Medium grey for message time
+      replyBorderColor: '#D0D0D0', // Light border color for replies
+    },
+    right: {
+      bgColor: '#B3D8F0', // Light teal for outgoing message background
+      messageColor: '#000000', // Black for outgoing message text
+      messageTimeColor: '#777777', // Medium grey for message time
+      replyBorderColor: '#4F9ED0', // Accent color for reply border
+    },
+  },
+  icon: '#555555', // Dark grey for icons
+  divider: '#E0E0E0', // Light grey for dividers
+  hideDivider: false,
+  input: {
+    bgColor: '#FFFFFF', // White background for input
+    textColor: '#000000', // Black text for input
+    emojiPickerTheme: 'light', // Light theme for emoji picker
+  }
+};
+
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -35,6 +75,7 @@ export default function RootLayout({
       <AppProvider client={client}>
         <ChatClientProvider
           client={client}
+          theme={beautySpace}
           // theme: {
           //   background: {
           //     primary: "white",
