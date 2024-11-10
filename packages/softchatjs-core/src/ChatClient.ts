@@ -65,7 +65,7 @@ export default class ChatClient {
 
   disconnect() {
     if (this.connection) {
-      return this.connection._wsDisconnect();
+      return this.connection._wsDisconnect({ shouldReconnect: false });
     } else {
       throw new Error(buildError("USER_NOT_INITIATED", "disconnect"));
     }

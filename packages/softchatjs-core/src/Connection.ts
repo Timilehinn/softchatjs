@@ -27,7 +27,6 @@ import { Events } from "./events";
 import { Emoticon } from "./emoticon.type";
 import moment from "moment";
 
-
 let defaultUser = {
   id: "",
   uid: "",
@@ -36,9 +35,8 @@ let defaultUser = {
   lastname: "",
   profileUrl: "",
   color: "",
-  custom: {}
-}
-
+  custom: {},
+};
 
 export default class Connection extends EventEmitter {
   private static connection: Connection;
@@ -60,6 +58,7 @@ export default class Connection extends EventEmitter {
   conversationListMeta: ConversationListMeta; // lastMessage field should be changed to use the last message in the conversation
   private healthCheckRef: NodeJS.Timeout | undefined;
   private retryRef: NodeJS.Timeout | undefined;
+  shouldReconnect: boolean;
 
   constructor(client_instance: ChatClient) {
     super();
@@ -83,6 +82,7 @@ export default class Connection extends EventEmitter {
       (this.activeConversationId = "");
     this.screen = Screens.CONVERSATIONS;
     this.healthCheckRef = undefined;
+    this.shouldReconnect = true;
   }
 
   static getInstance(client_instance: ChatClient) {
@@ -101,6 +101,7 @@ export default class Connection extends EventEmitter {
     }
   ) {
     try {
+      this.shouldReconnect = true;
       this.userMeta = user;
       if (config?.connectionConfig?.reset) {
         this.retry_count = 0;
@@ -146,7 +147,10 @@ export default class Connection extends EventEmitter {
           from: this.userMeta.uid,
           to: "",
           action: ServerActions.INITIALIZE,
-          userMeta: { ...this.userMeta, expoPushToken: config?.notificationConfig?.expo.expoPushToken },
+          userMeta: {
+            ...this.userMeta,
+            expoPushToken: config?.notificationConfig?.expo.expoPushToken,
+          },
           newConversation: true,
           recipientMeta: {},
           projectId: this.projectConfig.projectId,
@@ -170,23 +174,6 @@ export default class Connection extends EventEmitter {
           }
           // If socket is not open, create a new WebSocket connection
           const ws = new WebSocket(`wss://${this.wsAccessConfig.url}`);
-
-          // // Handle WebSocket error
-          // ws.onerror = (error: any) => {
-          //   console.log(":::socket error:::", error);
-
-          //   // Ensure cleanup of open or connecting socket
-          //   if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
-          //     ws.close();
-          //   }
-
-          //   // Retry connection after a delay
-          //   setTimeout(() => {
-          //     console.log("Retrying connection...");
-          //     this._initiateConnection(); // Re-attempt the connection
-          //   }, 3000); // Retry after 3 seconds
-          // };
-
           // Handle WebSocket open event
           ws.onopen = () => {
             console.log("socket opened");
@@ -265,10 +252,7 @@ export default class Connection extends EventEmitter {
   private _getUreadMessageIds(userId: string, messages: Array<Message>) {
     var ids: string[] = [];
     messages.map((m) => {
-      if (
-        m.messageState === MessageStates.SENT &&
-        m.from !== userId
-      ) {
+      if (m.messageState === MessageStates.SENT && m.from !== userId) {
         ids.push(m.messageId);
       }
     });
@@ -331,18 +315,30 @@ export default class Connection extends EventEmitter {
     }
   }
 
-  _wsDisconnect() {
-    if (this.socket) {
-      this.wsConnected = false;
-      const data = JSON.stringify({
-        action: ServerActions.CONNECTION_CLOSED,
-        message: {
-          projectId: this.projectConfig.projectId,
-          from: this.userMeta.uid,
-        },
-      });
-      this.socket.send(data); // send a message
-      this.socket.close();
+  _wsDisconnect(config?: { shouldReconnect: boolean }) {
+    try {
+      if (this.socket) {
+        this.shouldReconnect = config?.shouldReconnect ?? true;
+        this.wsConnected = false;
+        const data = JSON.stringify({
+          action: ServerActions.CONNECTION_CLOSED,
+          message: {
+            projectId: this.projectConfig.projectId,
+            from: this.userMeta.uid,
+          },
+        });
+        this.socket.send(data);
+        this.socket.close();
+        this.emit(Events.CONNECTION_CHANGED, {
+          connecting: false,
+          isConnected: false,
+          fetchingConversations: false,
+        });
+      }
+    } catch (error) {
+      if(error instanceof Error){
+        console.error(error.message)
+      }
     }
   }
 
@@ -402,16 +398,20 @@ export default class Connection extends EventEmitter {
 
       // Handle errors
       this.socket.onerror = (event: ErrorEvent) => {
-        console.error("Socket error: ", event);
         this.wsConnected = false;
-        this.retryConnection();
+        if (this.shouldReconnect) {
+          console.error("Socket error. Attempting to reconnect... Event: ", event);
+          this.retryConnection();
+        }
       };
 
       // Handle disconnection (socket closes)
       this.socket.onclose = () => {
-        console.warn("Socket closed. Attempting to reconnect...");
         this.wsConnected = false;
-        this.retryConnection();
+        if (this.shouldReconnect) {
+          console.warn("Socket closed. Attempting to reconnect...");
+          this.retryConnection();
+        }
       };
 
       this.startHealthCheck();

@@ -9,6 +9,7 @@ import { Conversations } from "softchatjs-react-native/src";
 import { useNavigation, router } from "expo-router";
 import { useRef } from "react";
 import { ConversationsRefs } from "softchatjs-react-native/src/components/Conversations";
+import { useClient } from "@/contexts/ClientContext";
 
 const users = [
   {
@@ -95,6 +96,7 @@ const users = [
 
 export default function TabOneScreen() {
   const navigation = useNavigation();
+  const { client } = useClient();
   const conversationRef = useRef<ConversationsRefs>();
 
   const chatUser =
@@ -123,10 +125,9 @@ export default function TabOneScreen() {
             },
           });
         }}
-        renderPlaceHolder={(loading) => {
-          console.log(loading,"::::loding")
+        renderPlaceHolder={({loading}) => {
           return (
-            <Text>{ loading? 'Loading....' : "...not loading" }</Text>
+            <Text>{ loading? 'Loading...' : "...not loading" }</Text>
           )
         }}
         // renderHeader={(props) => <View style={{ height: 60, width: '100%', backgroundColor: 'red' }}>
@@ -146,6 +147,9 @@ export default function TabOneScreen() {
       {/* <TouchableOpacity style={{ padding: 15, backgroundColor: 'red' }} onPress={() => conversationRef.current?.retryConnection()}>
         <Text>Retry</Text>
       </TouchableOpacity> */}
+      <TouchableOpacity style={{ backgroundColor: 'red', padding: 10 }} onPress={() => client?.disconnect()}>
+        <Text>Discounncc</Text>
+      </TouchableOpacity>
     </View>
   );
 }
