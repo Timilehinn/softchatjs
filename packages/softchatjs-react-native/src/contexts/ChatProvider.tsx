@@ -23,7 +23,7 @@ export function useConfig() {
 
 export default function ChatProvider(props: ChatProvider & { client: ChatClient | null }) {
 
-  const { children, client, theme, fontFamily } = props;
+  const { children, client, theme = defaultTheme, fontFamily } = props;
   
   return (
     <ConfigContext.Provider value={{ theme, client, fontFamily }}>

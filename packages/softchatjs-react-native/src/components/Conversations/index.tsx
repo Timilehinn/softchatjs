@@ -114,7 +114,7 @@ const Conversations = forwardRef((props: ConversationProps, ref) => {
     }>
   >(null);
   
-  const [conversationList, setConversationList] = useState<{ conversation: Conversation; lastMessage: Message; unread: string[] }[]>(store? [ ...retrieveFromCache(store) ] : []);
+  const [conversationList, setConversationList] = useState<{ conversation: Conversation; lastMessage: Message; unread: string[] }[]>([ ...retrieveFromCache(store) ]);
 
   // useEffect(() =>{
   //   if(store){

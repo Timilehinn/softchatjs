@@ -192,7 +192,7 @@ export default class MessageClient {
       }
     } catch (error) {
       if (error instanceof Error) {
-        console.error(error, '----');
+        console.error(error);
         this.connection.emit(Events.DELETED_MESSAGE, {
           message: {
             ...newMessage,

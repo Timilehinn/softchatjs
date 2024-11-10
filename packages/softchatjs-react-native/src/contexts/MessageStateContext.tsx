@@ -7,8 +7,8 @@ import {
   SetState,
 } from "../types";
 import { Audio, AVPlaybackStatus } from 'expo-av';
-import { Emoticon, Message, SendMessageGenerics, Media, UserMeta } from "softchatjs-core";
-import defaultUser from "../constants/DefaultUser";
+import { Emoticon, Message, SendMessageGenerics, Media, UserMeta, Conversation, ConversationListItem } from "softchatjs-core";
+import defaultUser from "../constants/defaultUser";
 
 type MessageStateContext = {
   globalTextMessage: string,
@@ -28,7 +28,9 @@ type MessageStateContext = {
   activeVoiceMessage: Media | null,
   avPlayBackStatus: AVPlaybackStatus & { positionMillis: number } | null,
   userMeta: UserMeta,
-  setUserMeta: SetState<UserMeta>
+  setUserMeta: SetState<UserMeta>,
+  conversationList: Array<ConversationListItem>,
+  setConversationList: SetState<Array<ConversationListItem>>
 };
 
 const initialMessageStateContext: MessageStateContext = {
@@ -49,7 +51,9 @@ const initialMessageStateContext: MessageStateContext = {
   activeVoiceMessage: null,
   avPlayBackStatus: null,
   userMeta: defaultUser,
-  setUserMeta: () => {}
+  setUserMeta: () => {},
+  conversationList: [],
+  setConversationList: () => {}
 }
 
 export default initialMessageStateContext;
@@ -61,6 +65,7 @@ export const useMessageState = () => useContext(MessageStateContext);
 
 export const MessageStateProvider = ({ children }: { children: JSX.Element }) => {
  
+  const [conversationList, setConversationList] = useState<Array<ConversationListItem>>([]);
   const [ globalTextMessage, setGlobalTextMessage ] = useState('');
   const [ stickers, setStickers ] = useState<Emoticon[]>([]);
   const [ pendingMessages, setPendingMessages ] = useState<Array<Partial<Message>>>([]);
@@ -68,7 +73,7 @@ export const MessageStateProvider = ({ children }: { children: JSX.Element }) =>
   const [ audioState, setAudioState ] = useState<"playing" | "paused" | "loading" | null>(null);
   const [ activeVoiceMessage, setActiveVoiceMessage ] = useState<Media | null>(null);
   const [ avPlayBackStatus, setAvPlayBackStatus ] = useState<AVPlaybackStatus & { positionMillis: number } | null>(null);
-  const [ userMeta, setUserMeta ] = useState<UserMeta>(defaultUser)
+  const [ userMeta, setUserMeta ] = useState<UserMeta>(defaultUser);
 
   const addNewPendingMessages = (message: Partial<Message>) => {
     setPendingMessages((prev) => {
@@ -171,7 +176,9 @@ export const MessageStateProvider = ({ children }: { children: JSX.Element }) =>
         activeVoiceMessage,
         avPlayBackStatus,
         userMeta,
-        setUserMeta
+        setUserMeta,
+        conversationList,
+        setConversationList
       }}
     >
       {children}

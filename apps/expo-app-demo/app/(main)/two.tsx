@@ -123,6 +123,12 @@ export default function TabOneScreen() {
             },
           });
         }}
+        renderPlaceHolder={(loading) => {
+          console.log(loading,"::::loding")
+          return (
+            <Text>{ loading? 'Loading....' : "...not loading" }</Text>
+          )
+        }}
         // renderHeader={(props) => <View style={{ height: 60, width: '100%', backgroundColor: 'red' }}>
         //   <Text>{props.isConnecting? 'Connecting' : 'Connected'}</Text>
         // </View>}

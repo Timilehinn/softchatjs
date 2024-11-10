@@ -119,12 +119,6 @@ export default class Connection extends EventEmitter {
         subId: this.projectConfig.subId,
       });
 
-      this.emit(Events.CONNECTION_CHANGED, {
-        connecting: true,
-        isConnected: false,
-        fetchingConversations: true,
-      });
-
       // Emit connecting status
 
       // If session creation was successful
@@ -141,13 +135,18 @@ export default class Connection extends EventEmitter {
         await this._getConversations({
           token: res.data.token,
         });
+        this.emit(Events.CONNECTION_CHANGED, {
+          connecting: true,
+          isConnected: false,
+          fetchingConversations: false,
+        });
 
         // Define the message to send on connection
         const message = JSON.stringify({
           from: this.userMeta.uid,
           to: "",
           action: ServerActions.INITIALIZE,
-          userMeta: { ...this.userMeta, expoPushToken: "" },
+          userMeta: { ...this.userMeta, expoPushToken: config?.notificationConfig?.expo.expoPushToken },
           newConversation: true,
           recipientMeta: {},
           projectId: this.projectConfig.projectId,
