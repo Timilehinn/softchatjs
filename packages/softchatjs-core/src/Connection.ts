@@ -2,12 +2,14 @@ import ChatClient, { NotificationConfig } from "./ChatClient";
 import MessageClient from "./MessageClient";
 import {
   CREATE_SESSION,
+  GET_BROADCASTLISTS,
   GET_CONVERSATIONS,
   GET_EMOJIS,
   GET_MESSAGES,
   UPLOAD_MEDIA,
 } from "./fetch";
 import {
+  BroadcastListMeta,
   Config,
   Conversation,
   ConversationListMeta,
@@ -55,6 +57,7 @@ export default class Connection extends EventEmitter {
   projectConfig: Config;
   activeConversationId: string;
   screen: Screens;
+  broadcastListMeta: ConversationListMeta;
   conversationListMeta: ConversationListMeta; // lastMessage field should be changed to use the last message in the conversation
   private healthCheckRef: NodeJS.Timeout | undefined;
   private retryRef: NodeJS.Timeout | undefined;
@@ -67,6 +70,7 @@ export default class Connection extends EventEmitter {
     this.conversations = [];
     this.conversationMap = {};
     this.conversationListMeta = {};
+    this.broadcastListMeta = {};
     this.wsConnected = false;
     this.wsAccessConfig = { url: "", token: "" };
     this.fetchingConversations = false;
@@ -92,6 +96,108 @@ export default class Connection extends EventEmitter {
     Connection.connection = new Connection(client_instance);
     return Connection.connection;
   }
+
+  
+  private async _getConversations({ token }: { token: string }) {
+    try {
+      if (this.userMeta) {
+        this.fetchingConversations = true;
+        const response = await GET_CONVERSATIONS<{
+          conversations: Conversation[];
+        }>(token);
+        if (response.success) {
+          const conversationListMeta: ConversationListMeta =
+            response.data.conversations.reduce((acc, conversation) => {
+              var sortedConversation = this.sortConversationMessages([
+                conversation,
+              ]);
+              var messages = sortedConversation[0].messages;
+              var lastMessage = messages[messages.length - 1];
+
+              acc[conversation.conversationId] = {
+                conversation: sortedConversation[0],
+                lastMessage: lastMessage,
+                unread: this._getUreadMessageIds(this.userMeta.uid, messages),
+              };
+              return acc;
+            }, {} as ConversationListMeta);
+          var conversationMap = response.data.conversations.reduce(
+            (acc, conversation) => {
+              acc[conversation.conversationId] = conversation;
+              return acc;
+            },
+            {} as ConversationMap
+          );
+          this.conversationMap = conversationMap;
+
+          this.emit(Events.CONVERSATION_LIST_META_CHANGED, {
+            conversationListMeta,
+          });
+          this.conversationListMeta = conversationListMeta;
+
+          // this.conversations = this.sortConversationMessages(
+          //   response.data.conversations
+          // );
+          this.conversations = response.data.conversations;
+        } else {
+          console.error("An error occurred while fetching conversations");
+        }
+      } else {
+        throw new Error("User not initialized");
+      }
+    } catch (err) {
+      if (err instanceof Error) {
+        console.error(err);
+      }
+    } finally {
+      this.fetchingConversations = false;
+    }
+  }
+
+  
+  private async _getBroadcastLists({ token }: { token: string }) {
+    try {
+      if (this.userMeta) {
+        this.fetchingConversations = true;
+        const response = await GET_BROADCASTLISTS<{
+          conversations: Conversation[];
+        }>(token);
+        if (response.success) {
+          const broadcastListMeta: ConversationListMeta =
+            response.data.conversations.reduce((acc, conversation) => {
+              var sortedConversation = this.sortConversationMessages([
+                conversation,
+              ]);
+              var messages = sortedConversation[0].messages;
+              var lastMessage = messages[messages.length - 1];
+
+              acc[conversation.conversationId] = {
+                conversation: sortedConversation[0],
+                lastMessage: lastMessage,
+                unread: []
+              };
+              return acc;
+            }, {} as ConversationListMeta);
+          
+          this.emit(Events.BROADCAST_LIST_META_CHANGED, {
+            broadcastListMeta,
+          });
+          this.broadcastListMeta = broadcastListMeta;
+        } else {
+          console.error("An error occurred while fetching broadcast lists");
+        }
+      } else {
+        throw new Error("User not initialized");
+      }
+    } catch (err) {
+      if (err instanceof Error) {
+        console.error(err);
+      }
+    } finally {
+      this.fetchingConversations = false;
+    }
+  }
+
 
   async _initiateConnection(
     user: UserMeta,
@@ -119,9 +225,6 @@ export default class Connection extends EventEmitter {
         projectId: this.projectConfig.projectId,
         subId: this.projectConfig.subId,
       });
-
-      // Emit connecting status
-
       // If session creation was successful
       if (res.success) {
         // if(this.retryRef){
@@ -131,11 +234,11 @@ export default class Connection extends EventEmitter {
           url: res.data.wsURI,
           token: res.data.token,
         };
-
         // Fetch conversations after acquiring the session
-        await this._getConversations({
+        await Promise.all([ await this._getConversations({
           token: res.data.token,
-        });
+        }), await this._getBroadcastLists({ token: res.data.token })])
+       
         this.emit(Events.CONNECTION_CHANGED, {
           connecting: true,
           isConnected: false,
@@ -257,62 +360,6 @@ export default class Connection extends EventEmitter {
       }
     });
     return ids;
-  }
-
-  private async _getConversations({ token }: { token: string }) {
-    try {
-      if (this.userMeta) {
-        this.fetchingConversations = true;
-        const response = await GET_CONVERSATIONS<{
-          conversations: Conversation[];
-        }>(token);
-        if (response.success) {
-          const conversationListMeta: ConversationListMeta =
-            response.data.conversations.reduce((acc, conversation) => {
-              var sortedConversation = this.sortConversationMessages([
-                conversation,
-              ]);
-              var messages = sortedConversation[0].messages;
-              var lastMessage = messages[messages.length - 1];
-
-              acc[conversation.conversationId] = {
-                conversation: sortedConversation[0],
-                lastMessage: lastMessage,
-                unread: this._getUreadMessageIds(this.userMeta.uid, messages),
-              };
-              return acc;
-            }, {} as ConversationListMeta);
-          var conversationMap = response.data.conversations.reduce(
-            (acc, conversation) => {
-              acc[conversation.conversationId] = conversation;
-              return acc;
-            },
-            {} as ConversationMap
-          );
-          this.conversationMap = conversationMap;
-
-          this.emit(Events.CONVERSATION_LIST_META_CHANGED, {
-            conversationListMeta,
-          });
-          this.conversationListMeta = conversationListMeta;
-
-          // this.conversations = this.sortConversationMessages(
-          //   response.data.conversations
-          // );
-          this.conversations = response.data.conversations;
-        } else {
-          console.error("An error occurred while fetching conversations");
-        }
-      } else {
-        throw new Error("User not initialized");
-      }
-    } catch (err) {
-      if (err instanceof Error) {
-        console.error(err);
-      }
-    } finally {
-      this.fetchingConversations = false;
-    }
   }
 
   _wsDisconnect(config?: { shouldReconnect: boolean }) {

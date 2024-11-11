@@ -12,6 +12,8 @@ enum ENDPOINTS {
   CREATE_SESSION = "/auth/session",
   EMOJIS = "/gifs/trending",
   GET_PRESIGNED_URL = "/presigned-url",
+  BROADCAST_LIST = "/broadcastlist",
+  BROADCAST_LISTS = "/broadcastlists",
 }
 
 type Payload = {
@@ -96,6 +98,17 @@ export async function GET_CONVERSATION<Response>(
   });
 }
 
+export async function GET_BROADCASTLISTS<Response>(
+  token: string | undefined
+): Promise<APIResponse<Response>> {
+  return await chatApi<Response>({
+    endpoint: `${API}${ENDPOINTS.BROADCAST_LISTS}`,
+    body: {},
+    method: "GET",
+    token,
+  });
+}
+
 export async function GET_MESSAGES<Response>(
   token: string | undefined,
   conversationId: string,
@@ -103,6 +116,19 @@ export async function GET_MESSAGES<Response>(
 ): Promise<APIResponse<Response>> {
   return await chatApi<Response>({
     endpoint: `${API}${ENDPOINTS.MESSAGES}/${conversationId}${page ? "?page=" + page : ""}`,
+    body: {},
+    method: "GET",
+    token,
+  });
+}
+
+export async function GET_BROADCAST_LIST_MESSAGES<Response>(
+  token: string | undefined,
+  broadcastListId: string,
+  page?: number
+): Promise<APIResponse<Response>> {
+  return await chatApi<Response>({
+    endpoint: `${API}${ENDPOINTS.BROADCAST_LIST}/messages/${broadcastListId}${page ? "?page=" + page : ""}`,
     body: {},
     method: "GET",
     token,

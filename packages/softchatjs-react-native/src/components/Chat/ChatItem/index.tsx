@@ -202,16 +202,34 @@ export const ChatItem = forwardRef((props: ChatItemProps, ref: any) => {
         console.log(res);
         if(res.success){
           removePendingMessage(message.messageId);
-          client.messageClient(conversation?.conversationId).sendMessage({
-            ...message,
-            attachedMedia: [
-              {
-                ...media,
-                uploading: false,
-                mediaUrl: res.link,
+          if(conversation.conversationType !== "broadcast-chat"){
+            client.messageClient(conversation?.conversationId).sendMessage({
+              ...message,
+              attachedMedia: [
+                {
+                  ...media,
+                  uploading: false,
+                  mediaUrl: res.link,
+                }
+              ],
+            });
+          }else{
+            client.messageClient(conversation?.conversationId).broadcastMessage({
+              broadcastListId: conversation?.conversationId,
+              participantsIds: conversation.participants,
+              newMessage: {
+                ...message,
+                attachedMedia: [
+                  {
+                    ...media,
+                    uploading: false,
+                    mediaUrl: res.link,
+                  }
+                ],
               }
-            ],
-          });
+            });
+          }
+        
         }else{
           throw new Error('upload failed');
         }

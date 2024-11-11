@@ -225,6 +225,25 @@ export default function Chat(props: ChatProps) {
     }
   }
 
+  async function getBroadcastListMessages() {
+    try {
+        setLoadingMessages(true);
+        const messages = (await client
+          ?.messageClient(conversationId)
+          .getBroadcastListMessages()) as Array<Message>;
+        if (messages.length > 0) {
+          var restructuredMessages: GroupedMessages = restructureMessages(
+            messages.reverse()
+          );
+          setMessages(restructuredMessages);
+        }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoadingMessages(false);
+    }
+  }
+
   async function getOlderMessages() {
     try {
       if (client && messages.length > 0) {
@@ -261,27 +280,45 @@ export default function Chat(props: ChatProps) {
   // };
 
   useEffect(() => {
-    // if (conversation) {
+    if (activeConversation) {
       const recipients = participants.filter(
         (id) => id !== client?.chatUserId
       );
       if (recipients && recipients.length > 0) {
         setRecipientId(recipients[0]);
       }
-    getMessages();
-  }, []);
+      if(activeConversation.conversation.conversationType === "broadcast-chat"){
+        getBroadcastListMessages();
+      }else{
+        getMessages();
+      }
+    }
+  }, [activeConversation]);
 
   const handleNewMessages = (event: any) => {
     try {
-      // console.log(client.)
-      // return console.log(event)
-      setMessages((prev) => {
-        return restructureMessages([event.message, ...prev]);
-      });
+      console.log(event, ':::event')
+      if(event.message.conversationId === conversationId){
+        setMessages((prev) => {
+          return restructureMessages([event.message, ...prev]);
+        });
+      }
     } catch (error) {
       console.log(error);
     }
   };
+
+  // const handleNewBroadcastMessages = (event: any) => {
+  //   try {
+  //     console.log(event, ':::event');
+  //       setMessages((prev) => {
+  //         return restructureMessages([event.message, ...prev]);
+  //       });
+  //     }
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
 
   const handleEditedMessage = (event: any) => {
     setMessages((prev) => {
@@ -342,6 +379,7 @@ export default function Chat(props: ChatProps) {
         if (conversationId) {
           client.messageClient(conversationId).unSetActiveConversation();
         }
+        // client.unsubscribe("new_broadcast_message", handleNewBroadcastMessages);
         client.unsubscribe(Events.NEW_MESSAGE, handleNewMessages);
         client.unsubscribe(Events.EDITED_MESSAGE, handleEditedMessage);
         client.unsubscribe(Events.HAS_STARTED_TYPING, handleTypingStarted);
@@ -410,6 +448,35 @@ export default function Chat(props: ChatProps) {
     }
   };
 
+  
+  const broadcastMessage = async (externalInputRef?: RefObject<TextInput>) => {
+    try {
+      if (!globalTextMessage) return null;
+        if (client && conversationId) {
+          client.messageClient(conversationId).broadcastMessage(
+            { broadcastListId: conversationId, participantsIds: activeConversation.conversation.participants, newMessage:  {
+              conversationId: conversationId,
+              to: recipientId,
+              message: globalTextMessage,
+              reactions: [],
+              attachedMedia: [],
+              attachmentType: AttachmentTypes.NONE,
+              quotedMessage: activeQuote.message,
+            } }
+           );
+        }
+        setGlobalTextMessage("");
+        setIsEditing(false);
+        clearSelectedMessage();
+        if (activeQuote.message) {
+          clearSelectedMessage();
+        }
+      console.log(activeConversation.conversation.conversationType)
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   const sendVoiceMessage = async () => {
     try {
       setRecording(undefined);
@@ -454,6 +521,16 @@ export default function Chat(props: ChatProps) {
       console.error(err);
     }
   };
+
+  const send = (externalInputRef: RefObject<TextInput>) => {
+    if(activeConversation.conversation.conversationType === "broadcast-chat"){
+      return broadcastMessage();
+    }
+    if(isEditing){
+      return sendEditedMessage(externalInputRef);
+    }
+    sendMessage();
+  }
 
   const onChatItemLongPress = (
     selectedMessage: Message,
@@ -794,8 +871,9 @@ export default function Chat(props: ChatProps) {
   }, [placeholder]);
 
   const chatInputProps: ChatInputRenderProps = {
-    sendMessage: (externalInputRef: RefObject<TextInput>) =>
-      isEditing ? sendEditedMessage(externalInputRef) : sendMessage(),
+    // sendMessage: (externalInputRef: RefObject<TextInput>) =>
+    //   isEditing ? sendEditedMessage(externalInputRef) : sendMessage(),
+    sendMessage: (externalInputRef: RefObject<TextInput>) => send(externalInputRef),
     value: globalTextMessage,
     onValueChange: setGlobalTextMessage,
     openMediaOptions: (externalInputRef: RefObject<TextInput>) => {
@@ -932,9 +1010,14 @@ export default function Chat(props: ChatProps) {
                     openEmojis={openEmojis}
                     inputRef={inputRef}
                     mediaOptionsRef={mediaOptionsRef}
-                    sendMessage={() =>
-                      isEditing ? sendEditedMessage() : sendMessage()
-                    }
+                    sendMessage={() => {
+                      if(isEditing){
+                        return sendEditedMessage()
+                      }else if(activeConversation.conversation.conversationType === "broadcast-chat"){
+                        return broadcastMessage()
+                      }
+                      sendMessage()
+                    }}
                     isLoading={connectionStatus.connecting || loadingMessages}
                     conversationId={conversationId || ""}
                     chatUserId={chatUserId}

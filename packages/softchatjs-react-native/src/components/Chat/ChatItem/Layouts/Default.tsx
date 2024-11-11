@@ -19,6 +19,7 @@ import Reactions from "../Reactions";
 import { useConfig } from "../../../../contexts/ChatProvider";
 import Preview from "../Preview";
 import MediaMessage from "../Media";
+import { BroadcastIcon } from "../../../../assets/icons";
 
 type DefaultProps = {
   message: Message;
@@ -226,6 +227,9 @@ export default function Default(props: DefaultProps) {
               }
             ]}
           >
+            {message.broadcastListId && (
+              <BroadcastIcon color={theme.chatBubble.right.messageColor} size={13} />
+            )}
             <Text
               style={{
                 fontFamily,
@@ -241,6 +245,7 @@ export default function Default(props: DefaultProps) {
               </Text>
               {formatMessageTime(message.createdAt)}
             </Text>
+            
             {position === "right" && (
               <>{renderStateIcon(theme?.chatBubble.right.messageTimeColor as string)}</>
             )}

@@ -86,22 +86,7 @@ const client = ChatClient.getInstance({ subId: 'ef066542-6e13-4f25-a6c3-d3e3671e
 function RootLayoutNav() {
 
   const colorScheme = useColorScheme();
-  // const chatUser = Platform.OS === 'android'? { id: '69', username: 'oscar' } : { id: '19', username: 'timi' }
-  // client.initializeUser(chatUser);
-
-  // useEffect(() => {
-  //   if(client.connection){
-  //     client.connection.on(Events.CONNECTION_CHANGED, (event) => {
-  //       console.log(event, '---CONNECTION_CHANGED')
-  //     })
-  
-  //     client.connection.on(Events.CONVERSATION_LIST_CHANGED, (event) => {
-  //       console.log(event, '---CONVERSATION_LIST_CHANGED')
-  //     })
-  //   }
-  
-  //   },[client])
-
+ 
   const fontFamly = processFontFamily("SpaceMono")
 
   return (

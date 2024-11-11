@@ -19,13 +19,7 @@ export type ConversationItemProps = {
   conversation: Conversation;
   chatUserId: string;
   isLastItem: boolean;
-  onPress: ({
-    conversation,
-    unread,
-  }: {
-    conversation: Conversation;
-    unread: string[];
-  }) => void;
+  onPress: () => void;
   lastMessage: Message;
   unread: string[];
 };
@@ -105,7 +99,7 @@ export const ConversationItem = (props: ConversationItemProps) => {
     // }>
     <TouchableOpacity
       style={styles.listItemContainer}
-      onPress={() => onPress({ unread: unread, conversation })}
+      onPress={() => onPress()}
     >
       <ConversationAvatar
         chatUserId={chatUserId}

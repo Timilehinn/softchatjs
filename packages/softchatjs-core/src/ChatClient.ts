@@ -1,3 +1,4 @@
+import BroadcastList from "./Broadcast";
 import Connection from "./Connection";
 import Conversation from "./Conversation";
 import MessageClient from "./MessageClient";
@@ -132,10 +133,28 @@ export default class ChatClient {
     }
   }
 
+  getBroadcastLists() {
+    if(this.connection) {
+      return this.connection.broadcastListMeta
+    }else{
+      console.warn("No connection available, initialize user before calling method")
+      return {}
+    }
+  }
+
   newConversation(participantDetails: UserMeta[] | UserMeta, groupMeta: GroupChatMeta | null): Conversation {
     if(this.connection) {
       const conversation = Conversation.getInstance(this.connection, participantDetails, groupMeta);
       return conversation
+    }else{
+      throw new Error("No connection available")
+    }
+  }
+
+  newBroadcastList(participantDetails: UserMeta[]): BroadcastList {
+    if(this.connection) {
+      const broadcast = BroadcastList.getInstance(this.connection, participantDetails);
+      return broadcast
     }else{
       throw new Error("No connection available")
     }
@@ -146,8 +165,10 @@ export default class ChatClient {
       const msClient = MessageClient.getInstace(this.connection, conversationId);
       return {
         getMessages: msClient.getMessages.bind(msClient),
+        getBroadcastListMessages: msClient.getBroadcastListMessages.bind(msClient),
         getConversation: msClient.getConversation.bind(msClient),
         sendMessage: msClient.sendMessage.bind(msClient),
+        broadcastMessage: msClient.broadcastMessage.bind(msClient),
         editMessage: msClient.editMessage.bind(msClient),
         sendTypingNotification: msClient.sendTypingNotification.bind(msClient),
         sendStoppedTypingNotification: msClient.sendStoppedTypingNotification.bind(msClient),

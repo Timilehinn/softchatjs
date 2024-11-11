@@ -148,23 +148,26 @@ const Conversations = forwardRef((props: ConversationProps, ref) => {
     setConnectionStatus(event);
   };
 
+  var sortConversations = (data: ConversationListMeta) => {
+    const values = Object.values(data).flat();
+    try {
+        values.sort(
+          (a, b) =>
+            new Date(b.lastMessage?.createdAt).getTime() -
+            new Date(a.lastMessage?.createdAt).getTime()
+        );
+        return values
+    } catch (error) {
+      return values
+    }
+  }
+
   const handleConversationListChanged = (
     event: ChatEventGenerics<{ conversationListMeta: ConversationListMeta }>
   ) => {
-    const values = Object.values(event.conversationListMeta).flat() as {
-      conversation: Conversation;
-      lastMessage: Message;
-      unread: string[];
-    }[];
     try {
-      values.sort(
-        (a, b) =>
-          new Date(b.lastMessage?.createdAt).getTime() -
-          new Date(a.lastMessage?.createdAt).getTime()
-      );
-      setConversationList(values);
+      setConversationList(sortConversations(event.conversationListMeta));
     } catch (error) {
-      setConversationList(values);
     }
   };
 
@@ -173,10 +176,12 @@ const Conversations = forwardRef((props: ConversationProps, ref) => {
       setUserMeta(user);
       client.initializeUser(user);
     }
-  }, [setUserMeta]);
+  }, [user]);
 
   useEffect(() => {
     if (client) {
+      const res = client.getConversations();
+      setConversationList(sortConversations(res))
       client.subscribe(Events.CONNECTION_CHANGED, handleConnectionChanged);
       client.subscribe(
         Events.CONVERSATION_LIST_META_CHANGED,
@@ -243,7 +248,7 @@ const Conversations = forwardRef((props: ConversationProps, ref) => {
 
       return (
         <ConversationItem
-          onPress={({ conversation, unread }) =>
+          onPress={() =>
             onOpen({ activeConversation: item })
           }
           chatUserId={user.uid}
@@ -251,7 +256,7 @@ const Conversations = forwardRef((props: ConversationProps, ref) => {
           conversation={{ ...item.conversation }}
           lastMessage={item.lastMessage}
           unread={item.unread}
-          isLastItem={conversationList.length - 1 === index}
+          isLastItem={conversationList.length === index + 1}
         />
       );
     },

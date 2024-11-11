@@ -2,6 +2,7 @@ import Connection from "./Connection";
 import {
   ClientActions,
   Conversation,
+  ConversationListItem,
   ConversationType,
   ConversationWithTypingIndicator,
   DeletedMessage,
@@ -25,6 +26,7 @@ import {
 } from "./utils";
 import { Events } from "./events";
 import {
+  GET_BROADCAST_LIST_MESSAGES,
   GET_CONVERSATION,
   GET_EMOJIS,
   GET_MESSAGES,
@@ -83,14 +85,13 @@ export default class MessageClient {
     // const conversationMeta = this.connection.conversationListMeta[conversationId? conversationId : this.connection.activeConversationId];
     try {
       const conversationMeta =
-      this.connection.conversationListMeta[
-        conversationId ? conversationId : this.connection.activeConversationId
-      ];
-    return conversationMeta.conversation.conversationType
+        this.connection.conversationListMeta[
+          conversationId ? conversationId : this.connection.activeConversationId
+        ];
+      return conversationMeta.conversation.conversationType;
     } catch (error) {
-      return "private-chat"
+      return "private-chat";
     }
-   
   }
 
   // removes the last item in the list and adds a new one to the end keeping the original length
@@ -116,7 +117,7 @@ export default class MessageClient {
           action: ServerActions.SEND_MESSAGE,
           message: {
             messageId: newMessage.messageId,
-            from: newMessage.from,
+            from: this.connection.userMeta.uid,
             to: newMessage.to,
             conversationType: this.getConversationType(),
             message: { ...newMessage, messageState: MessageStates.SENT },
@@ -269,61 +270,60 @@ export default class MessageClient {
     reactions: Reaction[],
     config?: { ws: boolean; to: string }
   ) {
-    try{
-      
-    this.connection.emit(Events.EDITED_MESSAGE, {
-      message: { messageId, reactions },
-    });
-    // should also send to the lastMessage in conversations meta.
-    if (config?.ws) {
-      const reactionPayload = {
-        action: ServerActions.SEND_MESSAGE_REACTION,
-        message: {
-          conversationId,
-          messageId: messageId,
-          from: this.connection.userMeta.uid,
-          to: config.to,
-          reactions,
-          token: this.connection.wsAccessConfig.token,
-        },
-      };
-      this.connection.socket.send(JSON.stringify(reactionPayload));
-    }
-
-    var conversationMeta = this.connection.conversationListMeta[conversationId];
-    var prevLastMessage = conversationMeta?.lastMessage;
-
-    if (prevLastMessage && prevLastMessage.messageId === messageId) {
-      var updatedMessage = {
-        ...prevLastMessage,
-        reactions,
-      };
-      var updatedMessages = this.rotateAndInsertMessageList(
-        conversationMeta.conversation.messages,
-        updatedMessage
-      );
-
-      var updatedConversationListMeta = {
-        conversation: {
-          ...conversationMeta.conversation,
-          messages: updatedMessages,
-        },
-        unread: conversationMeta.unread,
-        lastMessage: {
-          ...updatedMessage,
-        },
-      };
-      this.connection.conversationListMeta[conversationId] =
-        updatedConversationListMeta;
-      this.connection.emit(Events.CONVERSATION_LIST_META_CHANGED, {
-        conversationListMeta: this.connection.conversationListMeta,
+    try {
+      this.connection.emit(Events.EDITED_MESSAGE, {
+        message: { messageId, reactions },
       });
+      // should also send to the lastMessage in conversations meta.
+      if (config?.ws) {
+        const reactionPayload = {
+          action: ServerActions.SEND_MESSAGE_REACTION,
+          message: {
+            conversationId,
+            messageId: messageId,
+            from: this.connection.userMeta.uid,
+            to: config.to,
+            reactions,
+            token: this.connection.wsAccessConfig.token,
+          },
+        };
+        this.connection.socket.send(JSON.stringify(reactionPayload));
+      }
+
+      var conversationMeta =
+        this.connection.conversationListMeta[conversationId];
+      var prevLastMessage = conversationMeta?.lastMessage;
+
+      if (prevLastMessage && prevLastMessage.messageId === messageId) {
+        var updatedMessage = {
+          ...prevLastMessage,
+          reactions,
+        };
+        var updatedMessages = this.rotateAndInsertMessageList(
+          conversationMeta.conversation.messages,
+          updatedMessage
+        );
+
+        var updatedConversationListMeta = {
+          conversation: {
+            ...conversationMeta.conversation,
+            messages: updatedMessages,
+          },
+          unread: conversationMeta.unread,
+          lastMessage: {
+            ...updatedMessage,
+          },
+        };
+        this.connection.conversationListMeta[conversationId] =
+          updatedConversationListMeta;
+        this.connection.emit(Events.CONVERSATION_LIST_META_CHANGED, {
+          conversationListMeta: this.connection.conversationListMeta,
+        });
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+      }
     }
-    
-  }catch(error){
-    if(error instanceof Error){
-    }
-  }
   }
 
   private storeEditedMessage(data: EditedMessage) {
@@ -500,8 +500,9 @@ export default class MessageClient {
       };
 
       this.connection.socket.send(JSON.stringify(socketMessage));
-      var conversationMeta = this.connection.conversationListMeta[conversationId];
-      if(conversationMeta) {
+      var conversationMeta =
+        this.connection.conversationListMeta[conversationId];
+      if (conversationMeta) {
         const updatedConversationListMeta = {
           conversation: conversationMeta.conversation,
           lastMessage: conversationMeta.lastMessage,
@@ -513,7 +514,6 @@ export default class MessageClient {
           conversationListMeta: this.connection.conversationListMeta,
         });
       }
-     
     }
   }
 
@@ -543,7 +543,8 @@ export default class MessageClient {
     messageId: string
   ) {
     try {
-      const conversationMeta = this.connection.conversationListMeta[conversationId];
+      const conversationMeta =
+        this.connection.conversationListMeta[conversationId];
 
       // check if the message being deleted is the last message
       var isLastMessage = messageId === conversationMeta.lastMessage?.messageId;
@@ -560,25 +561,27 @@ export default class MessageClient {
           conversation: {
             ...conversationMeta.conversation,
             messages: filteredMessages,
-          }
+          },
         };
 
-        if(isLastMessage){
-          updatedConversationListMeta.lastMessage = newLastMessage? newLastMessage : null
+        if (isLastMessage) {
+          updatedConversationListMeta.lastMessage = newLastMessage
+            ? newLastMessage
+            : null;
         }
-      
-        this.connection.conversationListMeta[conversationId] = updatedConversationListMeta;
-      
+
+        this.connection.conversationListMeta[conversationId] =
+          updatedConversationListMeta;
+
         this.connection.emit(Events.CONVERSATION_LIST_META_CHANGED, {
           conversationListMeta: this.connection.conversationListMeta,
         });
       } else {
-        throw new Error(`Conversation with ID ${conversationId} not found.`)
+        throw new Error(`Conversation with ID ${conversationId} not found.`);
       }
-      
     } catch (error) {
-      if(error instanceof Error){
-        console.error(error.message)
+      if (error instanceof Error) {
+        console.error(error.message);
       }
     }
   }
@@ -595,7 +598,6 @@ export default class MessageClient {
     to: string;
   }) {
     if (this.connection) {
-      // this.connection._reactToMessage({ conversationId, messageId, reactions, to });
       this._updateMessageReactions(conversationId, messageId, reactions, {
         ws: true,
         to,
@@ -622,6 +624,175 @@ export default class MessageClient {
         ...timeStamps,
       };
       this._createMessage(messageStruct);
+    }
+  }
+
+  updateBroadcastList(payload: { broadcastListId: string, participants: string[], name: string }) {
+    try {
+      if (
+        this.connection.socket &&
+        this.connection.socket?.readyState === WebSocket.OPEN
+      ) {
+        const socketMessage = {
+          action: ServerActions.DELETE_BROADCAST_LIST,
+          message: {
+            broadcastListId: payload.broadcastListId,
+            participants: payload.participants,
+            name: payload.name,
+            token: this.connection.wsAccessConfig.token,
+          },
+        };
+        this.connection.socket.send(JSON.stringify(socketMessage));
+      }else{
+        console.error("Failed to send broadcast");
+      }
+    } catch (error) {
+      if(error instanceof Error){
+        console.error(error.message)
+      }
+    }
+  }
+
+  deleteBroadcastList(payload: { broadcastListId: string, participants: string[], name: string }) {
+    try {
+      if (
+        this.connection.socket &&
+        this.connection.socket?.readyState === WebSocket.OPEN
+      ) {
+        const socketMessage = {
+          action: ServerActions.UPDATE_BROADCAST_LIST,
+          message: {
+            broadcastListId: payload.broadcastListId,
+            participants: payload.participants,
+            name: payload.name,
+            token: this.connection.wsAccessConfig.token,
+          },
+        };
+        this.connection.socket.send(JSON.stringify(socketMessage));
+        if(this.connection.broadcastListMeta[payload.broadcastListId]){{
+          delete this.connection.broadcastListMeta[payload.broadcastListId]
+          this.connection.emit(Events.BROADCAST_LIST_META_CHANGED, {
+            broadcastListMeta: this.connection.broadcastListMeta,
+          });
+        }}
+      }else{
+        console.error("Failed to send broadcast");
+      }
+    } catch (error) {
+      if(error instanceof Error){
+        console.error(error.message)
+      }
+    }
+  }
+
+  broadcastMessage(
+    { broadcastListId, participantsIds, newMessage }:  { broadcastListId: string, participantsIds: string[], newMessage: Prettify<SendMessageGenerics<Message>> }) {
+    try {
+      if (
+        this.connection.socket &&
+        this.connection.socket?.readyState === WebSocket.OPEN
+      ) {
+        const messageId = generateId();
+        var timeStamps = generateFillerTimestamps();
+        var messageOwner = {
+          ...this.connection.userMeta,
+          ...timeStamps,
+        };
+        const messageStruct: Message = {
+          ...newMessage,
+          quotedMessageId: newMessage?.quotedMessage?.messageId,
+          from: messageOwner.uid,
+          lastEdited: null,
+          messageState: MessageStates.SENT,
+          messageOwner,
+          messageId,
+          broadcastListId,
+          ...timeStamps,
+        };
+
+        const socketMessage = {
+          action: ServerActions.BROADCAST_MESSAGE,
+          message: {
+            broadcastListId,
+            messageId,
+            from: messageOwner.uid,
+            to: participantsIds,
+            shouldEdit: false,
+            conversationType: "broadcast-chat",
+            message: messageStruct,
+            token: this.connection.wsAccessConfig.token,
+          },
+        };
+
+        var broadcastItem = this.connection.broadcastListMeta[broadcastListId];
+        var messages = [...broadcastItem.conversation.messages];
+
+        messages.push(messageStruct);
+
+        var updatedBroadCastItem = { 
+          conversation: { ...broadcastItem.conversation, messages },
+          lastMessage: null,
+          unread: []
+         };
+        this.connection.broadcastListMeta[broadcastListId] = updatedBroadCastItem;
+
+        this.connection.socket.send(JSON.stringify(socketMessage));
+
+        participantsIds.map(p => {
+          // send out new message events for any active listeners
+          const conversationId = generateConversationId(p, messageOwner.uid, this.connection.projectConfig.projectId);
+          this.connection.emit(Events.NEW_MESSAGE, {
+            message: {
+              ...messageStruct,
+              conversationId,
+              reactions: [],
+            },
+          });
+          var prevConversation = this.connection.conversationListMeta[conversationId]
+          // if a conversation exists, update all user conversations in conversationListMeta
+          if(prevConversation){
+            this.connection.conversationListMeta[conversationId] = {
+              conversation: {
+                ...prevConversation.conversation,
+                messages: [ ...prevConversation.conversation.messages, {
+                  ...messageStruct,
+                  conversationId,
+                  reactions: [],
+                } ],
+              },
+              lastMessage: {
+                ...messageStruct,
+                conversationId,
+                reactions: [],
+              },
+              unread: prevConversation.unread,
+            };
+          }
+        });
+        // send the updated conversationListMeta to active listeners
+        this.connection.emit(Events.CONVERSATION_LIST_META_CHANGED, {
+          conversationListMeta: this.connection.conversationListMeta,
+        });
+
+        // send a new message event for the current broadcast chat
+        this.connection.emit(Events.NEW_MESSAGE, {
+          message: {
+            ...messageStruct,
+            conversationId: broadcastListId,
+            reactions: [],
+          },
+        });
+
+        this.connection.emit(Events.BROADCAST_LIST_META_CHANGED, {
+          broadcastListMeta: this.connection.broadcastListMeta,
+        });
+      } else {
+        console.error("Failed to send broadcast");
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error(error.message);
+      }
     }
   }
 
@@ -666,7 +837,7 @@ export default class MessageClient {
           messageId,
         },
       });
-      this.deleteMessageFromConversationMeta(conversationId, messageId)
+      this.deleteMessageFromConversationMeta(conversationId, messageId);
     }
   }
 
@@ -697,7 +868,35 @@ export default class MessageClient {
     }
   }
 
-  
+  async getBroadcastListMessages(page?: number) {
+    if (this.connection) {
+      try {
+        const response = await GET_BROADCAST_LIST_MESSAGES<{
+          messages: Message[];
+        }>(
+          this.connection.wsAccessConfig.token,
+          this.connection.activeConversationId,
+          page
+        );
+        if (response.success) {
+          const sortedMessages = [...response.data.messages].sort((a, b) => {
+            const dateA = moment(a.createdAt).valueOf();
+            const dateB = moment(b.createdAt).valueOf();
+            return dateA - dateB;
+          });
+          return sortedMessages;
+        } else {
+          return [];
+        }
+      } catch (err) {
+        console.error(err);
+        return [];
+      }
+    } else {
+      return [];
+    }
+  }
+
   async getConversation(conversationId: string) {
     if (this.connection) {
       try {
@@ -706,12 +905,12 @@ export default class MessageClient {
           conversationId
         );
         if (response.success) {
-          return response.data.conversation
+          return response.data.conversation;
         } else {
-          return null
+          return null;
         }
       } catch (err) {
-        return null
+        return null;
       }
     } else {
       return null;
@@ -782,7 +981,7 @@ export default class MessageClient {
         conversationId: this.connection.activeConversationId,
         key: generateId(),
         mediaType: meta.mimeType,
-        uid: this.connection.userMeta.uid
+        uid: this.connection.userMeta.uid,
       });
 
       let body;
@@ -831,16 +1030,15 @@ export default class MessageClient {
         fileSize,
       };
     } catch (error) {
-      console.log(error)
+      console.log(error);
       console.error("Error uploading file: ", error);
       return {
-        link: '',
+        link: "",
         success: false,
-        fileSize: '',
+        fileSize: "",
       };
     }
   }
-
 
   async uploadAttachmentV2({
     base64,
@@ -863,8 +1061,7 @@ export default class MessageClient {
           conversationId: this.connection.activeConversationId,
           key: generateId(),
           mediaType,
-        uid: this.connection.userMeta.uid
-
+          uid: this.connection.userMeta.uid,
         });
         const data = await fetch(res.data.uploadUrl, {
           method: "PUT",
@@ -1132,7 +1329,10 @@ export default class MessageClient {
           this.connection.emit(Events.DELETED_MESSAGE, {
             message: deletedMessage,
           });
-          this.deleteMessageFromConversationMeta(deletedMessage.conversationId, deletedMessage.messageId)
+          this.deleteMessageFromConversationMeta(
+            deletedMessage.conversationId,
+            deletedMessage.messageId
+          );
           break;
         case ClientActions.ACK_HEALTH_CHECK:
           console.info("HEALTH_CHECK: ok!");

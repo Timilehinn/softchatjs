@@ -26,7 +26,6 @@ export default function TabTwoScreen() {
   var activeConversation = JSON.parse(
     item.activeConversation as string
   ) as ConversationListItem;
-  console.log(activeConversation);
 
   return (
     <View style={styles.container}>

@@ -154,44 +154,7 @@ export default function ImagePreview(props: ImagePreviewProps) {
   };
 
   const uploadImage = async () => {
-    // try {
-    //   if(image?.base64 && wsAccessConfig.token){
-    //     showUploading(true)
-    //     const res = await UPLOAD_MEDIA<{ url: string }>(wsAccessConfig.token, { base64: image.base64, key: generateId(), conversationId: generateConversationId(chatUserId, recipientId) });
-    //    console.log(res)
-    //     if(res.success && res.data.url){
-    //       sendMessage(res.data.url)
-    //       resetModal()
-    //     }else{
-    //       throw new Error('Unable to upload image, please retry')
-    //     }
-    //   }else{
-    //     throw new Error('Unable to upload image, please retry')
-    //   }
-    // } catch (error) {
-    //   if(error instanceof Error){
-    //     console.error(error.message)
-    //   }
-    // } finally {
-    //   showUploading(false)
-    // }
     try {
-      // if(client){
-      //   if(image?.base64){
-      //     showUploading(true);
-      //     let conversationId = generateConversationId(chatUserId, recipientId)
-      //     const res = await client.messageClient(conversationId).uploadAttachment({ base64: image.base64, fileKey: generateId() })
-      //     console.log(res)
-      //     if(res && res.data.url){
-      //       sendMessage(res.data.url)
-      //       resetModal()
-      //     }else{
-      //       throw new Error('Unable to upload image, please retry')
-      //     }
-      //   }else{
-      //     throw new Error('Unable to upload image, please retry')
-      //   }
-      // }
       if (client && image?.base64) {
         var timeStamps = generateFillerTimestamps();
 

@@ -282,7 +282,7 @@ export const MessageOptions = forwardRef(
       //   scrollRef={flatListRef}
       //   height={height}
       // >
-    <ActionSheet ref={optionsRef} onClose={close} gestureEnabled snapPoints={[60, 100]} containerStyle={{ height: '70%', padding: 0 }}>
+    <ActionSheet ref={optionsRef} onClose={close} gestureEnabled snapPoints={[70, 100]} containerStyle={{ height: '70%', padding: 0 }}>
           {view === "preview" && (
             <View
               style={{

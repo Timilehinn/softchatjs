@@ -33,7 +33,8 @@ import { Audio } from "expo-av";
 import { AudioWaves } from "./ChatItem/Media/VoiceMessage";
 import { Children } from "../../types";
 import { useMessageState } from "../../contexts/MessageStateContext";
-
+import { ConversationType } from 'softchatjs-core'
+ 
 type RecordingStatus = {
   canRecord: boolean;
   durationMillis: number;
@@ -65,6 +66,7 @@ type ChatInputProps = {
   onDeleteRecording?: () => void;
   isRecording?: boolean;
   audioTime?: number;
+  // conversationType: ConversationType
 };
 
 const ActionContainer = ({

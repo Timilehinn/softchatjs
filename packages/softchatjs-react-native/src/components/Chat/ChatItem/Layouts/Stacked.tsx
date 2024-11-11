@@ -13,6 +13,7 @@ import { useConfig } from "../../../../contexts/ChatProvider";
 import Preview from "../Preview";
 import MediaMessage from "../Media";
 import { Message, AttachmentTypes, MessageStates } from "softchatjs-core"
+import { BroadcastIcon } from "../../../../assets/icons";
 
 
 type StackedProps = {
@@ -140,6 +141,9 @@ export default function Stacked(props: StackedProps) {
                   marginBottom: 5,
                 }}
               >
+                {message.broadcastListId && (
+                  <BroadcastIcon color={theme.chatBubble.right.messageColor} size={13} />
+                )}
                 <Text style={[{ color: theme?.text.secondary, fontFamily }]}>
                   {message.messageOwner?.username}
                 </Text>

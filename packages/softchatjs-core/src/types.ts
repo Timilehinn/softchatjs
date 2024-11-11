@@ -24,6 +24,10 @@ export enum ServerActions {
   EDIT_MESSAGE = 'editMessage',
   SEND_MESSAGE_REACTION = 'sendMessageReaction',
   CONNECTION_CLOSED = 'clearUserSession',
+  CREATE_BROADCAST_LIST = 'createBroadcastList',
+  BROADCAST_MESSAGE = 'sendMessageToBroadcastList',
+  UPDATE_BROADCAST_LIST = 'updateUserBroadcastList',
+  DELETE_BROADCAST_LIST = 'deleteBroadcastList'
 }
 
 type Timetamps = {
@@ -116,6 +120,7 @@ export type Message = {
   quotedMessageId?: string,
   reactions: Reaction[],
   lastEdited: Date | string | null,
+  broadcastListId?: string
 } & Timetamps
 
 export type ParticipantListInfo = {
@@ -127,7 +132,7 @@ export type ParticipantListInfo = {
   participantDetails: UserMeta
 } & Timetamps
 
-export type ConversationType = 'private-chat' | 'group-chat' | "admin-chat"
+export type ConversationType = 'private-chat' | 'group-chat' | "admin-chat" | "broadcast-chat"
 
 export type GroupChatMeta = {
   groupName: string,
@@ -149,6 +154,7 @@ export type Conversation = {
   participantList: ParticipantListInfo[],
   meta: PrivateChatMeta | null,
   groupMeta: GroupChatMeta | null
+  name?: string
 } & Timetamps
 
 export type UploadContent = {
@@ -260,6 +266,10 @@ export type ConversationListItem = {
 
 export type ConversationListMeta = {
   [key: string]: ConversationListItem
+}
+
+export type BroadcastListMeta = {
+  [key: string]: Conversation
 }
 
 export type ChatEventGenerics<T> = T

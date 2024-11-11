@@ -1903,6 +1903,7 @@ export default function TabOneScreen() {
 
   useEffect(() => {
     if (client) {
+      console.log('should initialize')
         client?.initializeUser(chatUser);
     }
   }, [client]);
@@ -1933,6 +1934,20 @@ export default function TabOneScreen() {
         style={{ backgroundColor: "red", padding: 20 }}
       >
         <Text>Go to chat</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={() => {
+          router.navigate({
+            pathname: "/(main)/four",
+            params: {
+              chatUser: JSON.stringify(chatUser),
+              activeConversation: JSON.stringify(store),
+            },
+          });
+        }}
+        style={{ backgroundColor: "indigo", padding: 20 }}
+      >
+        <Text style={{ color: 'white' }}>Go to broadcastlists</Text>
       </TouchableOpacity>
       {/* <SlateRenderer
         document={[

@@ -9,6 +9,7 @@ import { useMemo } from "react";
 import { useConfig } from "../../contexts/ChatProvider";
 import { StatusBar } from "expo-status-bar";
 import { Conversation } from "softchatjs-core"
+import { BroadcastIcon } from "../../assets/icons";
 
 type ChatHeaderProps = {
   conversation: Conversation | null;
@@ -46,6 +47,15 @@ export default function ChatHeader(props: ChatHeaderProps) {
         })}
       </>
     );
+  }
+
+  if(conversation.conversationType === "broadcast-chat"){
+    return (
+      <View style={{ height: 'auto', paddingVertical: 10, width: '100%', alignItems: 'center', justifyContent: 'center', borderBottomColor: theme?.divider, borderBottomWidth: 1 }}>
+        <BroadcastIcon size={50} />
+        <Text style={{ fontFamily, color: theme?.text.secondary }}>{conversation.name?? 'Broadcast List'}</Text>
+      </View>
+    )
   }
 
   return (
