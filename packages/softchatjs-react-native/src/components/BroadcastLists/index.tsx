@@ -6,13 +6,12 @@ import {
   FlatList,
 } from "react-native";
 import React, { useState, useEffect, useCallback } from "react";
-import ChatClient, { Events, ConversationListMeta } from "softchatjs-core";
-import { useNavigation, router } from "expo-router";
+import ChatClient, { Events, ConversationListMeta, ConversationListItem } from "softchatjs-core";
 import { useConfig } from "../../contexts/ChatProvider";
 import { ArrowRight } from "../../assets/icons";
 
-export default function BroadcastLists(props: { client: ChatClient | null, renderItem: (data: ConversationListMeta) => JSX.Element }) {
-  const { client } = props;
+export default function BroadcastLists(props: { client: ChatClient | null, onOpen: (item: ConversationListItem) => void; renderPlaceholder?: () => JSX.Element, renderItem?: (data: ConversationListItem, index: number) => JSX.Element,  }) {
+  const { client, onOpen, renderPlaceholder } = props;
   const { fontFamily, theme } = useConfig();
 
   const [broadcastLists, setBroadcastLists] = useState([]);
@@ -44,7 +43,6 @@ export default function BroadcastLists(props: { client: ChatClient | null, rende
   };
 
   useEffect(() => {
-    if (client) {
       const res = client.getBroadcastLists();
       const list = Object.values(res).flat();
       setBroadcastLists(list);
@@ -52,14 +50,13 @@ export default function BroadcastLists(props: { client: ChatClient | null, rende
         Events.BROADCAST_LIST_META_CHANGED,
         handleBroadcastListMetaChanged
       );
-    }
     return () => {
       client.unsubscribe(
         Events.BROADCAST_LIST_META_CHANGED,
         handleBroadcastListMetaChanged
       );
     };
-  }, [client]);
+  }, []);
 
   const chatUser = {
     uid: "30",
@@ -68,10 +65,14 @@ export default function BroadcastLists(props: { client: ChatClient | null, rende
     profileUrl: "https://gravatar.com/avatar/582f9168aca439f2d795206bd5ba49ae",
   };
 
-  const renderBroadcastItem = useCallback(({ item, index }: { item: ConversationListMeta, index: number }) => {
+  const renderBroadcastItem = useCallback(({ item, index }: { item: ConversationListItem, index: number }) => {
 
     if(props.renderItem){
-      return props.renderItem(item)
+      return (
+        <TouchableOpacity key={index} onPress={() => onOpen(item)}>
+          {props.renderItem(item, index)}
+        </TouchableOpacity>
+      )
     }
 
     return (
@@ -86,15 +87,7 @@ export default function BroadcastLists(props: { client: ChatClient | null, rende
           borderColor: theme.divider,
         },
       ]}
-      onPress={() => {
-        router.navigate({
-          pathname: "/(main)/three",
-          params: {
-            chatUser: JSON.stringify(chatUser),
-            activeConversation: JSON.stringify(item),
-          },
-        });
-      }}
+      onPress={() => onOpen(item)}
     >
       <View>
         <Text style={{ fontSize: 20, fontFamily }}>
@@ -105,26 +98,18 @@ export default function BroadcastLists(props: { client: ChatClient | null, rende
       <ArrowRight size={12} color={theme.icon} />
     </TouchableOpacity>
     )
-  },[])
+  },[props.renderItem, broadcastLists]);
 
   return (
-    <>
-      <View style={styles.main}>
-        <FlatList
-          data={broadcastLists}
-          renderItem={renderBroadcastItem}
-        />
-      </View>
-      {/* <View style={{ justifyContent: 'center', flex: 1, alignItems: 'center', height: 20 }}>
-      <TouchableOpacity
-        onPress={createNewBroadcastList}
-        style={{ padding: 20, marginBottom: 30, backgroundColor: "black" }}
-      >
-        <Text style={{ color: "white" }}>Create broadcast</Text>
-      </TouchableOpacity>
-      </View> */}
-     
-    </>
+    <View style={styles.main}>
+      <FlatList
+        data={broadcastLists}
+        renderItem={renderBroadcastItem}
+        ListEmptyComponent={
+          renderPlaceholder? renderPlaceholder() : null
+        }
+      />
+    </View>
   );
 }
 

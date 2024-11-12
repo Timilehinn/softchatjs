@@ -153,7 +153,7 @@ export const ReactionPanel = ({
       {emojiList.map((item, index) => {
         if (item.enabled) {
           return (
-            <div onClick={item.onPress} className={styles.reaction__emoji}>
+            <div key={index} onClick={item.onPress} className={styles.reaction__emoji}>
               {item.emoji}
             </div>
           );

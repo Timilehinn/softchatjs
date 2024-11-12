@@ -10,9 +10,9 @@ import React, {
   useLayoutEffect,
   forwardRef,
 } from "react";
-import styles from "./conversation-list.module.css";
+import styles from "./message-list.module.css";
 import ChatClient, { Message } from "softchatjs-core";
-import { Conversation, TypingIndicator } from "../conversation";
+import { MessageItem, TypingIndicator } from "../message-item";
 import Text from "../text/text";
 import { formatSectionTime } from "../../helpers/date";
 import { useChatState } from "../../providers/clientStateProvider";
@@ -296,7 +296,7 @@ const MessageList = (props: MessageListProps) => {
                   {props.renderChatBubble ? (
                     props.renderChatBubble(item)
                   ) : (
-                    <Conversation
+                    <MessageItem
                       hideAvartar={
                         item.messageOwner.uid ===
                         _item.messages[index + 1]?.messageOwner.uid

@@ -42,7 +42,7 @@ export const AttachmentMenu = ({
   return (
     <div className={styles.attachment}>
       {options.map((item, index) => (
-        <label htmlFor="upload">
+        <label htmlFor="upload" key={index}>
           <div className={styles.attachment__item}>
             <div style={{ marginRight: "10px" }}> {item.icon}</div>
             <input

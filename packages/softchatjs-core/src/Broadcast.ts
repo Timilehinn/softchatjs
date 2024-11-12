@@ -55,7 +55,7 @@ export default class BroadcastList {
     return BroadcastList.conversation;
   }
 
-  private generateConversation(conversationId: string): Conversation & { name: string } {
+  private generateConversation(name: string, conversationId: string): Conversation & { name: string } {
     const timeStamps = generateFillerTimestamps();
     const participantIds = this.participants.map((p) => p.uid);
     const senderObject = {
@@ -83,7 +83,7 @@ export default class BroadcastList {
     const participantList = [senderObject, ...updatedParticipantList];
 
     return {
-      name: 'Broadcastlist',
+      name,
       participants: [this.connection.userMeta.uid, ...participantIds],
       admins: [this.connection.userMeta.uid],
       conversationId,
@@ -96,17 +96,17 @@ export default class BroadcastList {
     };
   }
 
-  create() {
+  create(name: string = `${this.participants.length} Recipients`) {
     if(!this.connection){
       throw new Error('Inialize uesr before calling method')
     }
       const conversationId = generateId();
-      const newConveration = this.generateConversation(conversationId);
+      const newConveration = this.generateConversation(name, conversationId);
       const socketMessage = {
         action: ServerActions.CREATE_BROADCAST_LIST,
         message: {
           conversationId,
-          name: "Broadcast list",
+          name: name,
           participants: this.participants,
           token: this.connection.wsAccessConfig.token,
         },

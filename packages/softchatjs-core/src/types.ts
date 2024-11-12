@@ -120,7 +120,8 @@ export type Message = {
   quotedMessageId?: string,
   reactions: Reaction[],
   lastEdited: Date | string | null,
-  broadcastListId?: string
+  broadcastListId?: string,
+  isBroadcast?: boolean
 } & Timetamps
 
 export type ParticipantListInfo = {

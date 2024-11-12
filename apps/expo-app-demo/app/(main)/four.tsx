@@ -17,7 +17,18 @@ export default function TabOneScreen() {
 
   return (
     <View style={styles.container}>
-      <BroadcastLists client={client} />
+      <BroadcastLists
+        onOpen={(item) => {
+          router.navigate({
+            pathname: "/(main)/three",
+            params: {
+              chatUser: JSON.stringify({}),
+              activeConversation: JSON.stringify(item),
+            },
+          });
+        }}
+        client={client}
+      />
     </View>
   );
 }

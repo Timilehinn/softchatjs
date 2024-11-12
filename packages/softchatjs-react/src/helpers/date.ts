@@ -46,6 +46,7 @@ export function formatWhatsAppDate(dateInput: Date): string {
 }
 
 export function formatConversationTime(time: Date | string) {
+  if(!time) return ''
   const now = moment();
   const then = moment(time);
   const duration = moment.duration(now.diff(then));

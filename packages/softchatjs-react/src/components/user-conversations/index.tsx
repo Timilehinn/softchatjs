@@ -5,9 +5,10 @@ import React, {
   useEffect,
   useState,
   useCallback,
+  useMemo
 } from "react";
 import styles from "./index.module.css";
-import { ChatEventGenerics, Conversation, MediaType, Message } from "softchatjs-core";
+import { ChatEventGenerics, Conversation, MediaType, Message, UserMeta } from "softchatjs-core";
 import Text from "../text/text";
 import { formatConversationTime, formatWhatsAppDate } from "../../helpers/date";
 import { ConnectionStatus, useChatState } from "../../providers/clientStateProvider";
@@ -29,45 +30,25 @@ export const ConversationList = ({
   setShowUserList,
   showUserList,
   userListRef,
-  renderAddConversationIcon,
   renderConversationList,
-  connectionStatus
+  connectionStatus,
+  resetState
 }: {
   setMainListOpen: any;
   setShowUserList: Dispatch<SetStateAction<boolean>>;
   showUserList: boolean;
   userListRef: any;
-  renderAddConversationIcon?: () => JSX.Element;
   renderConversationList?: (props: {
     conversations: ConversationItem[];
     onCoversationItemClick: (conversationItem: ConversationItem) => void;
   }) => JSX.Element;
-  connectionStatus: ConnectionStatus
+  connectionStatus: ConnectionStatus,
+  resetState: () => void;
 }) => {
   const { client, config } = useChatClient();
   const { setActiveConversation, conversations } = useChatState();
-  // const [conversations, setConversations] = useState<
-  //   { conversation: Conversation; lastMessage: Message; unread: string[] }[]
-  // >([]);
-
-  const renderAddMessage = () => {
-    return (
-      <div
-        onClick={() => {
-          setShowUserList(true);
-        }}
-        className={styles.newMessage}
-      >
-        {renderAddConversationIcon ? (
-          renderAddConversationIcon()
-        ) : (
-          <MdMessage size={40} color={config.theme.icon}/>
-        )}
-      </div>
-    );
-  };
-
-
+  const [ searchVal, setSearchVal ] = useState('')
+  
 
   if (renderConversationList) {
     return (
@@ -86,32 +67,50 @@ export const ConversationList = ({
             setMainListOpen(false);
           },
         })}
-        {renderAddMessage()}
-        {showUserList && <UserList userListRef={userListRef} />}
       </div>
     );
   }
 
-  // if (conversations.length === 0) {
-  //   return (
-  //     <div className={styles.list__empty}>
-  //       <Text
-  //         styles={{ textAlign: "center" }}
-  //         text="Start a new conversation."
-  //       />
-  //       {renderAddMessage()}
-  //       {showUserList && <UserList userListRef={userListRef} />}
-  //     </div>
-  //   );
-  // }
+  const filteredConversations = useMemo(() => {
+    try {
+      const userId = client.chatUserId;
+      const data = conversations.filter((c) => {
+
+        const participantMatch = c.conversation.participantList.some((participant) => {
+          const username = participant.participantDetails.username.toLowerCase();
+          const firstname = participant.participantDetails?.firstname?.toLowerCase() || "";
+          const lastname = participant.participantDetails?.lastname?.toLowerCase() || "";
+          const uid = participant.participantDetails?.uid;
+    
+          return (
+            uid !== userId && 
+            (
+              username.includes(searchVal.toLowerCase()) ||
+              firstname.includes(searchVal.toLowerCase()) ||
+              lastname.includes(searchVal.toLowerCase())
+            )
+          );
+        });
+        return participantMatch;
+      });
+    
+      return data;
+    } catch (error) {
+      return conversations
+    }
+  }, [conversations, searchVal]);
 
   return (
     <div
       style={{ background: config?.theme?.background?.secondary, borderRight: `1px solid ${config.theme.divider}` }}
       className={styles.list}
     >
-      <ConversationHeader connectionStatus={connectionStatus}theme={config.theme} />
-      {conversations.length === 0 && (
+      <ConversationHeader 
+        connectionStatus={connectionStatus}
+        theme={config.theme} 
+        onTextChange={(val) => setSearchVal(val)}
+      />
+      {filteredConversations.length === 0 && (
         <div className={styles.list__empty}>
         <Text
           styles={{ textAlign: "center", color: config.theme.text.primary }}
@@ -119,29 +118,17 @@ export const ConversationList = ({
         />
       </div>
       )}
-      {conversations.map((item, index) => (
+      {filteredConversations.map((item, index) => (
         <ConversationItem
           item={item}
           onClick={() => {
             setActiveConversation(item);
             setMainListOpen(false);
+            resetState();
           }}
+          borderBottom={''}
         />
       ))}
-      <div
-        onClick={() => {
-          setShowUserList(true);
-        }}
-        className={styles.newMessage}
-      >
-        {renderAddConversationIcon ? (
-          renderAddConversationIcon()
-        ) : (
-          <MdMessage size={40} color={config.theme.icon} />
-        )}
-      </div>
-
-      {showUserList && <UserList userListRef={userListRef} />}
     </div>
   );
 };
@@ -149,6 +136,7 @@ export const ConversationList = ({
 const ConversationItem = ({
   item,
   onClick,
+  borderBottom
 }: {
   item: {
     conversation: Conversation;
@@ -156,6 +144,7 @@ const ConversationItem = ({
     unread: string[];
   };
   onClick: () => void;
+  borderBottom: string
 }) => {
   const { client, config } = useChatClient();
   const { activeConversation } = useChatState();
@@ -193,28 +182,21 @@ const ConversationItem = ({
       <Text
         styles={{ textAlign: "left", color: textColor }}
         size="sm"
-        text={item.lastMessage?.message}
+        text={item.lastMessage?.message?.length > 75? item.lastMessage?.message?.substring(0, 75)+'...' : item.lastMessage?.message}
       />
     );
   };
   return (
     <div
-      style={
-        {
-          // backgroundColor:
-          //   activeConversation?.conversation.conversationId ===
-          //   item.conversation.conversationId
-          //     ? "#4a515a"
-          //     : "transparent",
-        }
-      }
       className={styles.item}
       onClick={onClick}
     >
       <div style={{ marginRight: '10px' }}>
-        <Avartar initials={user[0].participantDetails?.username.substring(0,1)} size={50} url={user[0].participantDetails?.profileUrl} />
+        {user[0] && (
+          <Avartar initials={user[0]?.participantDetails?.username?.substring(0,1)} size={50} url={user[0]?.participantDetails?.profileUrl} />
+        )}
       </div>
-      <div style={{ width: "100%" }}>
+      <div style={{ width: "100%", padding: '20px 0px 20px 0px', borderBottom }}>
         <div
           style={{
             width: "100%",
@@ -227,7 +209,7 @@ const ConversationItem = ({
           <Text
             styles={{ textAlign: "left", color: textColor, textTransform: "capitalize", marginRight: '5px' }}
             weight="bold"
-            text={user[0].participantDetails?.username}
+            text={user[0]?.participantDetails?.username}
           />
           {item.conversation.conversationType === "admin-chat" as any && (
             <VerifiedIcon size={15} color={config.theme.icon} />
@@ -264,32 +246,13 @@ const ConversationItem = ({
   );
 };
 
-const UserList = ({ userListRef }: { userListRef: any }) => {
-  const [selectedUsers, setSelectedUsers] = useState<{
-    id: string;
-    name: string;
-  } | null>(null);
+export const UserList = ({ users = [], userListRef }: { users?: UserMeta[], userListRef?: any }) => {
   const { client, config } = useChatClient();
 
-  const dummyUserList = [
-    {
-      id: "20",
-      name: "Romanreins",
-    },
-  ];
-
-  const startConvo = useCallback(() => {
-    if (selectedUsers) {
-      const conn = client.newConversation(
-        {
-          uid: selectedUsers.id,
-          username: selectedUsers.name,
-        },
-        null
-      );
-      conn.create("Hey there");
-    }
-  }, [selectedUsers]);
+  const startConversation = (item: UserMeta) => {
+    const conn = client.newConversation(item, null);
+    conn.create("Hey there 👋");
+  }
 
   return (
     <div
@@ -297,10 +260,11 @@ const UserList = ({ userListRef }: { userListRef: any }) => {
       style={{ background: config?.theme?.background?.secondary || "#202326" }}
       className={styles.userList}
     >
-      {dummyUserList.map((item, index) => (
-        <div
+      {users.map((item, index) => (
+        <button
+          key={index}
           onClick={() => {
-            setSelectedUsers(item);
+            startConversation(item);
           }}
           className={styles.userList__wrap}
         >
@@ -308,25 +272,17 @@ const UserList = ({ userListRef }: { userListRef: any }) => {
             <div className={styles.userList__avartar}>
               <Text
                 styles={{ color: config?.theme?.text?.primary || "white" }}
-                text={item.name[0]}
+                text={item.username}
               />
             </div>
             <Text
               size="sm"
-              text={item.name}
+              text={item.username}
               styles={{ color: config?.theme?.text?.primary || "white" }}
             />
           </div>
-          {selectedUsers?.id === item.id && (
-            <FaCheck color="#015EFF" size={14} />
-          )}
-        </div>
+        </button>
       ))}
-      {selectedUsers ? (
-        <div className={styles.userList__button}>
-          <button onClick={startConvo}>Start</button>
-        </div>
-      ) : null}
     </div>
   );
 };

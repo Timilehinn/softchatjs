@@ -227,8 +227,8 @@ export default function Default(props: DefaultProps) {
               }
             ]}
           >
-            {message.broadcastListId && (
-              <BroadcastIcon color={theme.chatBubble.right.messageColor} size={13} />
+            {message.isBroadcast && (
+              <BroadcastIcon color={position === "right"? theme.chatBubble.right.messageColor : theme.chatBubble.left.messageColor} size={13} />
             )}
             <Text
               style={{

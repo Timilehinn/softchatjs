@@ -491,31 +491,36 @@ export default class MessageClient {
 
   readMessages(conversationId: string, data: ReadMessages) {
     if (this.connection.socket) {
-      var socketMessage = {
+      const socketMessage = {
         action: ServerActions.READ_MESSAGES,
         message: {
           ...data,
           token: this.connection.wsAccessConfig.token,
         },
       };
-
+  
       this.connection.socket.send(JSON.stringify(socketMessage));
-      var conversationMeta =
-        this.connection.conversationListMeta[conversationId];
+  
+      // Create an updated conversation list meta immutably
+      const conversationMeta = this.connection.conversationListMeta[conversationId];
       if (conversationMeta) {
         const updatedConversationListMeta = {
-          conversation: conversationMeta.conversation,
-          lastMessage: conversationMeta.lastMessage,
-          unread: [],
+          ...this.connection.conversationListMeta,
+          [conversationId]: {
+            ...conversationMeta,
+            unread: [],  // Clears unread without direct mutation
+          },
         };
-        this.connection.conversationListMeta[conversationId] =
-          updatedConversationListMeta;
+  
+        this.connection.conversationListMeta = updatedConversationListMeta;
+        
         this.connection.emit(Events.CONVERSATION_LIST_META_CHANGED, {
-          conversationListMeta: this.connection.conversationListMeta,
+          conversationListMeta: updatedConversationListMeta,
         });
       }
     }
   }
+  
 
   //this is to clear notifications for user who hasn't opened chat
   clearUserUnreadNotifications(conversationId: string, ids: string[]) {
@@ -706,6 +711,7 @@ export default class MessageClient {
           messageState: MessageStates.SENT,
           messageOwner,
           messageId,
+          isBroadcast: true,
           broadcastListId,
           ...timeStamps,
         };

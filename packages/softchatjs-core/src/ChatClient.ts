@@ -6,6 +6,7 @@ import { buildError } from "./error";
 import { Events } from "./events";
 import {
   Config,
+  ConversationListMeta,
   GroupChatMeta,
   UserMeta,
 } from "./types";
@@ -52,12 +53,12 @@ export default class ChatClient {
     if (data) {
       if (ChatClient.client_instance) {
         const conn = Connection.getInstance(ChatClient.client_instance);
-        this.connection = conn;
-        this.connection.emit(Events.CONNECTION_CHANGED, {
+        conn.emit(Events.CONNECTION_CHANGED, {
           connecting: true,
           isConnected: false,
           fetchingConversations: true,
         });
+        this.connection = conn;
         conn._initiateConnection(data, config);
         this.chatUserId = data.uid
       }
@@ -124,18 +125,18 @@ export default class ChatClient {
     }
   }
 
-  getConversations() {
+  getConversations(): ConversationListMeta {
     if(this.connection) {
-      return this.connection.conversationListMeta
+      return JSON.parse(JSON.stringify(this.connection.conversationListMeta))
     }else{
       console.warn("No connection available, initialize user before calling method")
       return {}
     }
   }
 
-  getBroadcastLists() {
+  getBroadcastLists(): ConversationListMeta {
     if(this.connection) {
-      return this.connection.broadcastListMeta
+      return JSON.parse(JSON.stringify(this.connection.broadcastListMeta))
     }else{
       console.warn("No connection available, initialize user before calling method")
       return {}

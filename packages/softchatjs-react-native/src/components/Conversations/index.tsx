@@ -179,26 +179,21 @@ const Conversations = forwardRef((props: ConversationProps, ref) => {
   }, [user]);
 
   useEffect(() => {
-    if (client) {
-      const res = client.getConversations();
-      setConversationList(sortConversations(res))
-      client.subscribe(Events.CONNECTION_CHANGED, handleConnectionChanged);
-      client.subscribe(
+    const res = client.getConversations();
+    setConversationList(sortConversations(res))
+    client.subscribe(Events.CONNECTION_CHANGED, handleConnectionChanged);
+    client.subscribe(
+      Events.CONVERSATION_LIST_META_CHANGED,
+      handleConversationListChanged
+    );
+    return () => {
+      client.unsubscribe(Events.CONNECTION_CHANGED, handleConnectionChanged);
+      client.unsubscribe(
         Events.CONVERSATION_LIST_META_CHANGED,
         handleConversationListChanged
       );
-    }
-
-    return () => {
-      if (client) {
-        client.unsubscribe(Events.CONNECTION_CHANGED, handleConnectionChanged);
-        client.unsubscribe(
-          Events.CONVERSATION_LIST_META_CHANGED,
-          handleConversationListChanged
-        );
-      }
     };
-  }, [client]);
+  }, []);
 
   const renderConversations = useCallback(
     ({

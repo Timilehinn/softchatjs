@@ -1,0 +1,12 @@
+.nav-btn {
+  background-color: transparent;
+  margin-bottom: 20px;
+  cursor: pointer;
+  transition: .3s;
+  width: 100%;
+  width: 50px;
+}
+
+.nav-btn:hover {
+  transition: .3s;
+}

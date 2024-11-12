@@ -141,7 +141,7 @@ export default function Stacked(props: StackedProps) {
                   marginBottom: 5,
                 }}
               >
-                {message.broadcastListId && (
+                {message.isBroadcast && (
                   <BroadcastIcon color={theme.chatBubble.right.messageColor} size={13} />
                 )}
                 <Text style={[{ color: theme?.text.secondary, fontFamily }]}>

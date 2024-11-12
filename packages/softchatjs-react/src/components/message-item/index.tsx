@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import Avartar from "../avartar/avartar";
 
-import styles from "./conversation.module.css";
+import styles from "./message-item.module.css";
 import ChatClient, { Message } from "softchatjs-core";
 import Text from "../text/text";
 import dayjs from "dayjs";
@@ -58,7 +58,7 @@ type ConversationProps = {
   setShowEmojiPanel: Dispatch<SetStateAction<boolean>>;
 };
 
-export const Conversation = (props: ConversationProps) => {
+export const MessageItem = (props: ConversationProps) => {
   const {
     message,
     index,
@@ -433,7 +433,7 @@ export const FormattedText = ({ content }: { content: string }) => {
     <>
       {lines?.map((line, lineIndex) => {
         return (
-          <div style={{ display: "flex" }}>
+          <div style={{ display: "flex" }} key={lineIndex}>
             {line.split(" ")?.map((word, index) => {
               if (word.match(regex.URL_REGEX)) {
                 return (

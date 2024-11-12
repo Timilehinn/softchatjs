@@ -219,7 +219,6 @@ export default class Connection extends EventEmitter {
       clearTimeout(this.retryRef);
       clearTimeout(this.retryRef);
       // Create a session to retrieve token and wsURI
-
       const res = await CREATE_SESSION<{ token: string; wsURI: string }>({
         userId: this.userMeta.uid,
         projectId: this.projectConfig.projectId,

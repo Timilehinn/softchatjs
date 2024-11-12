@@ -33,6 +33,7 @@ import TrashIcon, { LockIcon } from "../assets/icons";
 // import { AudioRecorder } from "react-audio-voice-recorder";
 import { IoStopCircleOutline } from "react-icons/io5";
 import { useChatState } from "../../providers/clientStateProvider";
+import { LinearLoader } from '../Loaders/index'
 
 const ChatInput = ({
   client,
@@ -71,7 +72,7 @@ const ChatInput = ({
   renderChatInput?: (props: { onChange: (e: string) => void }) => JSX.Element;
 }) => {
   const [message, setMessage] = useState<Partial<Message>>();
-  const [files, setFiles] = useState<any[]>([]);
+  const [files, setFiles] = useState<File[]>([]);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [sending, setSending] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
@@ -91,7 +92,7 @@ const ChatInput = ({
   const { config } = useChatClient();
   const { theme } = config;
   const { activeConversation } = useChatState();
-
+  const [ uploading, showUploading ] = useState(false)
   const primaryActionColor = theme?.icon || "white";
   const inputBg = config?.theme?.input.bgColor || "#222529";
 
@@ -204,7 +205,7 @@ const ChatInput = ({
       let mediaData: Media[];
       if (files.length) {
         // Wait for all uploads to complete using Promise.all
-
+        showUploading(true)
         const res = await msClient.uploadFile(files[0], {
           filename: files[0].name,
           mimeType: files[0].type,
@@ -293,6 +294,7 @@ const ChatInput = ({
       setSending(false);
       setFiles([]);
       setAudioBlob(null);
+      showUploading(false)
     }
   };
 
@@ -468,6 +470,9 @@ const ChatInput = ({
 
   return (
     <div ref={inputContainerRef} style={{ height: "auto", width: "100%" }}>
+      {uploading && (
+        <LinearLoader />
+      )}
       <EditPanel
         width={inputContainerWidth}
         message={editProps?.message}
@@ -489,6 +494,7 @@ const ChatInput = ({
         style={{ backgroundColor: theme?.background?.secondary }}
         className={styles.input}
       >
+
         <div className={styles.input__wrap}>
           <div className={styles.input__icon}>
             {!audioBlob && (
@@ -552,7 +558,7 @@ const ChatInput = ({
             )}
           </div>
           <div className={styles.input__button}>
-            {audioBlob || message?.message || files.length ? (
+            {/* {audioBlob || message?.message || files.length > 0 ? (
               <div>
                 {sending ? (
                   "..."
@@ -564,9 +570,9 @@ const ChatInput = ({
                   />
                 )}
               </div>
-            ) : null}
+            ) : null} */}
 
-            {!message?.message?.length && (
+            {!message?.message ? (
               <button
                 onClick={recordVoiceMessage}
                 style={{
@@ -577,6 +583,12 @@ const ChatInput = ({
               >
                 <AiOutlineAudio color={primaryActionColor} size={20} />
               </button>
+            ):(
+              <VscSend
+                    onClick={sendHandler}
+                    size={20}
+                    color={primaryActionColor}
+                  />
             )}
           </div>
           {menuDetails.element ? (
@@ -660,10 +672,10 @@ const ChatAttachments = ({
         </div>
       ) : null}
       {files.length
-        ? files.map((item) => {
+        ? files.map((item, i) => {
             const url = URL.createObjectURL(item);
             return (
-              <div className={styles.chatPhotos__item}>
+              <div key={i} className={styles.chatPhotos__item}>
                 {item.type === "video/quicktime" ? (
                   <video style={{}} src={url} />
                 ) : (

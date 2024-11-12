@@ -181,27 +181,22 @@ export default function Chat(props: ChatProps) {
 
   useEffect(() => {
     setRefMap((prevMap) => {
-      const newMap: {
-        [key: string]: { ref: RefObject<View> | null; index: number };
-      } = { ...prevMap };
+      const newMap = { ...prevMap };
+  
       messages.forEach((message, index) => {
-        if (typeof message === "string") {
-          if (!newMap[message]) {
-            newMap[message] = { ref: createRef<View>(), index };
-          } else {
-            newMap[message].index = index;
-          }
+        const messageKey = typeof message === "string" ? message : message.messageId;
+  
+        if (!newMap[messageKey]) {
+          newMap[messageKey] = { ref: createRef<View>(), index };
         } else {
-          if (!newMap[message.messageId]) {
-            newMap[message.messageId] = { ref: createRef<View>(), index };
-          } else {
-            newMap[message.messageId].index = index;
-          }
+          newMap[messageKey] = { ...newMap[messageKey], index };
         }
       });
+  
       return newMap;
     });
   }, [messages]);
+  
 
   const clearSelectedMessage = () =>
     setActiveQuote({ message: null, ref: null, itemIndex: 0 });
