@@ -24,7 +24,7 @@ import {
   ChatInputRenderProps,
   Children,
   AttachmentTypes,
-  Prettify
+  Prettify,
 } from "../../types";
 import { ChatItem } from "./ChatItem";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -49,7 +49,7 @@ import {
   MediaType,
   UserMeta,
   ConversationListMeta,
-  ConversationListItem
+  ConversationListItem,
 } from "softchatjs-core";
 import { BottomSheetRef } from "../BottomSheet";
 import { format, isThisWeek } from "date-fns";
@@ -59,7 +59,7 @@ import { Audio } from "expo-av";
 import { interpolate } from "react-native-reanimated";
 
 type ChatProps = {
-  activeConversation: ConversationListItem
+  activeConversation: ConversationListItem;
   layout?: "stacked";
   // chatUser: UserMeta;
   renderChatBubble?: (props: Prettify<ChatBubbleRenderProps>) => void;
@@ -93,10 +93,10 @@ export default function Chat(props: ChatProps) {
     placeholder,
     keyboardOffset = Platform.OS === "ios" ? 10 : 0,
   } = props;
-  const chatUserId = client.chatUserId
+  const chatUserId = client.chatUserId;
   const conversationId = activeConversation.conversation.conversationId;
-  const participantList = activeConversation.conversation.participantList
-  const participants = activeConversation.conversation.participants
+  const participantList = activeConversation.conversation.participantList;
+  const participants = activeConversation.conversation.participants;
   const [permissionResponse, requestPermission] = Audio.usePermissions();
   const scrollRef = useRef<FlashList<Message | string> | null>(null);
   const inputRef = useRef<TextInput>(null);
@@ -117,7 +117,9 @@ export default function Chat(props: ChatProps) {
     unload,
   } = useMessageState();
 
-  const [messages, setMessages] = useState<Array<string | Message>>([...activeConversation.conversation.messages.reverse()]);
+  const [messages, setMessages] = useState<Array<string | Message>>([
+    ...activeConversation.conversation.messages.reverse(),
+  ]);
   const [isEditing, setIsEditing] = useState(false);
   const [refMap, setRefMap] = useState<{
     [key: string]: { ref: RefObject<View> | null; index: number };
@@ -182,37 +184,37 @@ export default function Chat(props: ChatProps) {
   useEffect(() => {
     setRefMap((prevMap) => {
       const newMap = { ...prevMap };
-  
+
       messages.forEach((message, index) => {
-        const messageKey = typeof message === "string" ? message : message.messageId;
-  
+        const messageKey =
+          typeof message === "string" ? message : message.messageId;
+
         if (!newMap[messageKey]) {
           newMap[messageKey] = { ref: createRef<View>(), index };
         } else {
           newMap[messageKey] = { ...newMap[messageKey], index };
         }
       });
-  
+
       return newMap;
     });
   }, [messages]);
-  
 
   const clearSelectedMessage = () =>
     setActiveQuote({ message: null, ref: null, itemIndex: 0 });
 
   async function getMessages() {
     try {
-        setLoadingMessages(true);
-        const messages = (await client
-          ?.messageClient(conversationId)
-          .getMessages()) as Array<Message>;
-        if (messages.length > 0) {
-          var restructuredMessages: GroupedMessages = restructureMessages(
-            messages.reverse()
-          );
-          setMessages(restructuredMessages);
-        }
+      setLoadingMessages(true);
+      const messages = (await client
+        ?.messageClient(conversationId)
+        .getMessages()) as Array<Message>;
+      if (messages.length > 0) {
+        var restructuredMessages: GroupedMessages = restructureMessages(
+          messages.reverse()
+        );
+        setMessages(restructuredMessages);
+      }
     } catch (error) {
       console.log(error);
     } finally {
@@ -222,16 +224,16 @@ export default function Chat(props: ChatProps) {
 
   async function getBroadcastListMessages() {
     try {
-        setLoadingMessages(true);
-        const messages = (await client
-          ?.messageClient(conversationId)
-          .getBroadcastListMessages()) as Array<Message>;
-        if (messages.length > 0) {
-          var restructuredMessages: GroupedMessages = restructureMessages(
-            messages.reverse()
-          );
-          setMessages(restructuredMessages);
-        }
+      setLoadingMessages(true);
+      const messages = (await client
+        ?.messageClient(conversationId)
+        .getBroadcastListMessages()) as Array<Message>;
+      if (messages.length > 0) {
+        var restructuredMessages: GroupedMessages = restructureMessages(
+          messages.reverse()
+        );
+        setMessages(restructuredMessages);
+      }
     } catch (error) {
       console.log(error);
     } finally {
@@ -276,15 +278,15 @@ export default function Chat(props: ChatProps) {
 
   useEffect(() => {
     if (activeConversation) {
-      const recipients = participants.filter(
-        (id) => id !== client?.chatUserId
-      );
+      const recipients = participants.filter((id) => id !== client?.chatUserId);
       if (recipients && recipients.length > 0) {
         setRecipientId(recipients[0]);
       }
-      if(activeConversation.conversation.conversationType === "broadcast-chat"){
+      if (
+        activeConversation.conversation.conversationType === "broadcast-chat"
+      ) {
         getBroadcastListMessages();
-      }else{
+      } else {
         getMessages();
       }
     }
@@ -292,8 +294,8 @@ export default function Chat(props: ChatProps) {
 
   const handleNewMessages = (event: any) => {
     try {
-      console.log(event, ':::event')
-      if(event.message.conversationId === conversationId){
+      console.log(event, ":::event");
+      if (event.message.conversationId === conversationId) {
         setMessages((prev) => {
           return restructureMessages([event.message, ...prev]);
         });
@@ -443,30 +445,31 @@ export default function Chat(props: ChatProps) {
     }
   };
 
-  
   const broadcastMessage = async (externalInputRef?: RefObject<TextInput>) => {
     try {
       if (!globalTextMessage) return null;
-        if (client && conversationId) {
-          client.messageClient(conversationId).broadcastMessage(
-            { broadcastListId: conversationId, participantsIds: activeConversation.conversation.participants, newMessage:  {
-              conversationId: conversationId,
-              to: recipientId,
-              message: globalTextMessage,
-              reactions: [],
-              attachedMedia: [],
-              attachmentType: AttachmentTypes.NONE,
-              quotedMessage: activeQuote.message,
-            } }
-           );
-        }
-        setGlobalTextMessage("");
-        setIsEditing(false);
+      if (client && conversationId) {
+        client.messageClient(conversationId).broadcastMessage({
+          broadcastListId: conversationId,
+          participantsIds: activeConversation.conversation.participants,
+          newMessage: {
+            conversationId: conversationId,
+            to: recipientId,
+            message: globalTextMessage,
+            reactions: [],
+            attachedMedia: [],
+            attachmentType: AttachmentTypes.NONE,
+            quotedMessage: activeQuote.message,
+          },
+        });
+      }
+      setGlobalTextMessage("");
+      setIsEditing(false);
+      clearSelectedMessage();
+      if (activeQuote.message) {
         clearSelectedMessage();
-        if (activeQuote.message) {
-          clearSelectedMessage();
-        }
-      console.log(activeConversation.conversation.conversationType)
+      }
+      console.log(activeConversation.conversation.conversationType);
     } catch (err) {
       console.log(err);
     }
@@ -518,14 +521,14 @@ export default function Chat(props: ChatProps) {
   };
 
   const send = (externalInputRef: RefObject<TextInput>) => {
-    if(activeConversation.conversation.conversationType === "broadcast-chat"){
+    if (activeConversation.conversation.conversationType === "broadcast-chat") {
       return broadcastMessage();
     }
-    if(isEditing){
+    if (isEditing) {
       return sendEditedMessage(externalInputRef);
     }
     sendMessage();
-  }
+  };
 
   const onChatItemLongPress = (
     selectedMessage: Message,
@@ -625,7 +628,6 @@ export default function Chat(props: ChatProps) {
         uid: client.chatUserId,
         messageIds: activeConversation.unread,
       });
-
     }
   }, [client, conversationId, activeConversation]);
 
@@ -868,7 +870,8 @@ export default function Chat(props: ChatProps) {
   const chatInputProps: ChatInputRenderProps = {
     // sendMessage: (externalInputRef: RefObject<TextInput>) =>
     //   isEditing ? sendEditedMessage(externalInputRef) : sendMessage(),
-    sendMessage: (externalInputRef: RefObject<TextInput>) => send(externalInputRef),
+    sendMessage: (externalInputRef: RefObject<TextInput>) =>
+      send(externalInputRef),
     value: globalTextMessage,
     onValueChange: setGlobalTextMessage,
     openMediaOptions: (externalInputRef: RefObject<TextInput>) => {
@@ -1006,12 +1009,15 @@ export default function Chat(props: ChatProps) {
                     inputRef={inputRef}
                     mediaOptionsRef={mediaOptionsRef}
                     sendMessage={() => {
-                      if(isEditing){
-                        return sendEditedMessage()
-                      }else if(activeConversation.conversation.conversationType === "broadcast-chat"){
-                        return broadcastMessage()
+                      if (isEditing) {
+                        return sendEditedMessage();
+                      } else if (
+                        activeConversation.conversation.conversationType ===
+                        "broadcast-chat"
+                      ) {
+                        return broadcastMessage();
                       }
-                      sendMessage()
+                      sendMessage();
                     }}
                     isLoading={connectionStatus.connecting || loadingMessages}
                     conversationId={conversationId || ""}

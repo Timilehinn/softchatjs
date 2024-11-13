@@ -6,8 +6,10 @@ import { useChatClient } from "../../providers/chatClientProvider";
 import { ConversationListItem, ConversationListMeta } from "softchatjs-core";
 import Text from "../text/text";
 import { useChatState } from "../../providers/clientStateProvider";
+import { PiPlusCircle } from "react-icons/pi";
 
-export default function BroadcastLists(props: {}) {
+export default function BroadcastLists(props: { onCreateBroadcastList: () => void; }) {
+  const { onCreateBroadcastList } = props;
   const { client, config } = useChatClient();
   const { setActiveConversation } = useChatState();
 
@@ -16,7 +18,7 @@ export default function BroadcastLists(props: {}) {
   >([]);
 
   const handleBroadcastListMetaChanged = (event: any) => {
-    const list = Object.values(event.broadcastListMeta).flat();
+    const list = Object.values(event.broadcastListMeta).flat() as ConversationListItem[]
     setBroadcastLists(list);
   };
 
@@ -57,6 +59,9 @@ export default function BroadcastLists(props: {}) {
         }}
       >
         <p style={{ fontWeight: "bold", fontSize: "26px" }}>Broadcast lists</p>
+        <button onClick={() => onCreateBroadcastList?.()} style={{ border: 0, backgroundColor: 'transparent' }}>
+          <PiPlusCircle size={22} color={config.theme.icon} />
+        </button>
       </div>
 
       <div style={{ }}>

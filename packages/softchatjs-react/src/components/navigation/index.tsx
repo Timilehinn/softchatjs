@@ -5,21 +5,31 @@ import { UserMeta } from "softchatjs-core";
 import { BroadcastIcon, ChatIcon, ChatPlus } from "../assets/icons";
 import "./navigation.css";
 import { UserList } from "../user-conversations";
-import { ConnectionStatus, useChatState } from "../../providers/clientStateProvider";
+import {
+  ConnectionStatus,
+  useChatState,
+} from "../../providers/clientStateProvider";
 
 type View = "broadcast-lists" | "conversation-list";
+
+export type NavButton = {
+  label: string;
+  icon: JSX.Element;
+  key: string;
+  onClick: () => void;
+}
 
 export default function Navbar(props: {
   chatUser: UserMeta;
   activeView: View;
   userList: UserMeta[];
   onViewChanged: (view: View) => void;
-  renderNavbar: () => JSX.Element;
-  connectionStatus: ConnectionStatus,
+  renderNavbar: (props: NavButton[]) => JSX.Element;
+  connectionStatus: ConnectionStatus;
 }) {
   const { client, config } = useChatClient();
   const { setActiveConversation } = useChatState();
-  
+
   const [menu, showMenu] = useState(false);
 
   const navButtons = [
@@ -27,7 +37,10 @@ export default function Navbar(props: {
       label: "Chats",
       icon: <ChatIcon color={config.theme.icon} size={25} />,
       key: "conversation-list",
-      onClick: () => { props.onViewChanged("conversation-list");  setActiveConversation(null) }
+      onClick: () => {
+        props.onViewChanged("conversation-list");
+        setActiveConversation(null);
+      },
     },
     {
       label: "New chat",
@@ -39,7 +52,10 @@ export default function Navbar(props: {
       label: "Broadcast lists",
       icon: <BroadcastIcon color={config.theme.icon} size={25} />,
       key: "broadcast-lists",
-      onClick: () => { props.onViewChanged("broadcast-lists"); setActiveConversation(null) },
+      onClick: () => {
+        props.onViewChanged("broadcast-lists");
+        setActiveConversation(null);
+      },
     },
   ];
 
@@ -48,11 +64,23 @@ export default function Navbar(props: {
   }, []);
 
   if (props.renderNavbar) {
-    return <>{props.renderNavbar}</>;
+    return (
+      <div
+        style={{
+          height: "100%",
+          width: "50px",
+          borderRight: `1px solid ${config.theme.divider}`,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
+        {props.renderNavbar(navButtons)}
+      </div>
+    );
   }
 
   const renderNavList = useCallback(() => {
-    console.log(props.activeView);
     return (
       <>
         {navButtons.map((nav, i) => (
@@ -69,7 +97,9 @@ export default function Navbar(props: {
                   : `2px solid ${config.theme.background.secondary}`,
             }}
             title={nav.label}
-            onClick={() => props.connectionStatus.isConnected? nav.onClick() : null}
+            onClick={() =>
+              props.connectionStatus.isConnected ? nav.onClick() : null
+            }
           >
             {nav.icon}
           </button>
@@ -77,7 +107,6 @@ export default function Navbar(props: {
       </>
     );
   }, [navButtons, config.theme, props.activeView, props.connectionStatus]);
-  
 
   return (
     <>
@@ -112,9 +141,7 @@ export default function Navbar(props: {
           {renderNavList()}
         </div>
       </div>
-      {menu && (
-        <UserList users={props.userList} userListRef={null} />
-      )}
+      {menu && <UserList users={props.userList} userListRef={null} />}
     </>
   );
 }

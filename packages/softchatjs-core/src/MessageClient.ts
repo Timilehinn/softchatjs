@@ -205,6 +205,65 @@ export default class MessageClient {
     }
   }
 
+  private editConversationListMetaMessage({ isBroadcast, updatedMessage } : { isBroadcast: boolean, updatedMessage: any }) {
+    var conversationMeta = isBroadcast? this.connection.broadcastListMeta[updatedMessage.conversationId] : this.connection.conversationListMeta[updatedMessage.conversationId];
+    var messageId = updatedMessage.messageId;
+    if (conversationMeta) {
+      // const socketMessage = {
+      //   action: ServerActions.EDIT_MESSAGE,
+      //   message: {
+      //     ...updatedMessage,
+      //     token: this.connection.wsAccessConfig.token,
+      //   },
+      // };
+      // this.connection.socket.send(JSON.stringify(socketMessage));
+      var prevMessage = conversationMeta.conversation.messages.find(
+        (m) => m.messageId === messageId
+      );
+      if (prevMessage) {
+        var editedMessage = {
+          ...prevMessage,
+          message: updatedMessage.textMessage,
+          lastEdited: new Date(),
+        };
+        var updatedMessageList = conversationMeta.conversation.messages.map(
+          (m) => {
+            if (m.messageId === messageId) {
+              return editedMessage;
+            }
+            return m;
+          }
+        );
+        
+        if(isBroadcast){
+          this.connection.broadcastListMeta[updatedMessage.conversationId] = {
+            conversation: {
+              ...conversationMeta.conversation,
+              messages: updatedMessageList,
+            },
+            lastMessage: null,
+            unread: [],
+          };
+          this.connection.emit(Events.BROADCAST_LIST_META_CHANGED, {
+            broadcastListMeta: this.connection.broadcastListMeta,
+          });
+        }else{
+          this.connection.conversationListMeta[updatedMessage.conversationId] = {
+            conversation: {
+              ...conversationMeta.conversation,
+              messages: updatedMessageList,
+            },
+            lastMessage: { ...editedMessage },
+            unread: conversationMeta.unread,
+          };
+          this.connection.emit(Events.CONVERSATION_LIST_META_CHANGED, {
+            conversationListMeta: this.connection.conversationListMeta,
+          });
+        }
+      }
+    }
+  }
+
   private _editMessage(message: EditedMessage) {
     try {
       if (message) {
@@ -216,47 +275,82 @@ export default class MessageClient {
         this.connection.emit(Events.EDITED_MESSAGE, {
           message: updatedMessage,
         });
-        if (this.connection.socket) {
+        this.editConversationListMetaMessage({
+          isBroadcast: false, 
+          updatedMessage 
+        });
+
+        // update both lists !!might need improvement, maybe go back to using a single list.
+        this.editConversationListMetaMessage({
+          isBroadcast: true, 
+          updatedMessage 
+        });
+       
+        if(this.connection.socket){
           const socketMessage = {
             action: ServerActions.EDIT_MESSAGE,
             message: {
               ...updatedMessage,
               token: this.connection.wsAccessConfig.token,
+              isBroadcast: message.isBroadcast
             },
           };
           this.connection.socket.send(JSON.stringify(socketMessage));
-          var conversationMeta =
-            this.connection.conversationListMeta[message.conversationId];
-          var prevMessage = conversationMeta.conversation.messages.find(
-            (m) => m.messageId === message.messageId
-          );
-          if (prevMessage) {
-            var editedMessage = {
-              ...prevMessage,
-              message: message.textMessage,
-              lastEdited: new Date(),
-            };
-            var updatedMessageList = conversationMeta.conversation.messages.map(
-              (m) => {
-                if (m.messageId === message.messageId) {
-                  return editedMessage;
-                }
-                return m;
-              }
-            );
-            this.connection.conversationListMeta[message.conversationId] = {
-              conversation: {
-                ...conversationMeta.conversation,
-                messages: updatedMessageList,
-              },
-              lastMessage: { ...editedMessage },
-              unread: conversationMeta.unread,
-            };
-            this.connection.emit(Events.CONVERSATION_LIST_META_CHANGED, {
-              conversationListMeta: this.connection.conversationListMeta,
-            });
-          }
         }
+        // if(this.connection.socket){
+        //   const socketMessage = {
+        //     action: ServerActions.EDIT_MESSAGE,
+        //     message: {
+        //       ...updatedMessage,
+        //       token: this.connection.wsAccessConfig.token,
+        //     },
+        //   };
+        //   console.log(socketMessage)
+        //   this.connection.socket.send(JSON.stringify(socketMessage));
+        // }
+        // if (conversationMeta && this.connection.socket) {
+        //   const socketMessage = {
+        //     action: ServerActions.EDIT_MESSAGE,
+        //     message: {
+        //       ...updatedMessage,
+        //       token: this.connection.wsAccessConfig.token,
+        //     },
+        //   };
+        //   this.connection.socket.send(JSON.stringify(socketMessage));
+        //   var prevMessage = conversationMeta.conversation.messages.find(
+        //     (m) => m.messageId === message.messageId
+        //   );
+        //   if (prevMessage) {
+        //     var editedMessage = {
+        //       ...prevMessage,
+        //       message: message.textMessage,
+        //       lastEdited: new Date(),
+        //     };
+        //     var updatedMessageList = conversationMeta.conversation.messages.map(
+        //       (m) => {
+        //         if (m.messageId === message.messageId) {
+        //           return editedMessage;
+        //         }
+        //         return m;
+        //       }
+        //     );
+        //     this.connection.conversationListMeta[message.conversationId] = {
+        //       conversation: {
+        //         ...conversationMeta.conversation,
+        //         messages: updatedMessageList,
+        //       },
+        //       lastMessage: { ...editedMessage },
+        //       unread: conversationMeta.unread,
+        //     };
+        //     this.connection.emit(Events.CONVERSATION_LIST_META_CHANGED, {
+        //       conversationListMeta: this.connection.conversationListMeta,
+        //     });
+        //     // update message copy on broadcast chat screen
+        //     this.connection.emit(Events.BROADCAST_LIST_META_CHANGED, {
+        //       broadcastListMeta: this.connection.broadcastListMeta,
+        //     });
+        //   }
+        // }
       }
     } catch (error) {
       // maybe an error listener instead

@@ -231,7 +231,7 @@ export enum Screens {
   CONVERSATIONS = "conversations",
 }
 
-export type EditedMessage = { from: string, to: string, conversationId: string, messageId: string, textMessage: string, shouldEdit: boolean }
+export type EditedMessage = { from: string, to: string, conversationId: string, messageId: string, textMessage: string, shouldEdit: boolean, isBroadcast?: boolean }
 
 export type DeletedMessage = {
   conversationId: string, 

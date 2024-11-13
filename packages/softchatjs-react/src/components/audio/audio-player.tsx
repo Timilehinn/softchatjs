@@ -73,8 +73,9 @@ export default function AudioPlayer(props: AudioPlayerProps) {
         style={{
           backgroundColor: "transparent",
           border: 0,
-          marginRight: "15px",
-          marginTop: "5px",
+          padding: 0,
+          margin: '0px',
+          marginTop: '4px'
         }}
       >
         {isPlaying ? (
@@ -98,9 +99,8 @@ export default function AudioPlayer(props: AudioPlayerProps) {
         onCanPlay={() => setIsLoading(false)}
         src={audioUrl}
       >
-        {/* <source  type="audio/ogg; codecs=opus" /> */}
       </audio>
-      <p style={{ fontSize: "11.5px", color: textColor }}>
+      <p style={{ padding: 0, marginLeft: "10px", marginTop: 0, fontSize: "11.5px", color: textColor }}>
         {convertToMinutes(currentTime)} : {convertToMinutes(duration)}
       </p>
     </div>

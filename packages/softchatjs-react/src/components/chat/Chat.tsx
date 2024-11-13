@@ -18,7 +18,7 @@ import { useChatClient } from "../../providers/chatClientProvider";
 import { ImageViewer } from "../modals";
 import { ChatTopNav } from "./ChatTopNav";
 import { ChatIcon } from "../assets/icons";
-import Navbar from "../navigation";
+import Navbar, { NavButton } from "../navigation";
 import BroadcastLists from '../broadcast-lists'
 
 type ChatProps = {
@@ -29,7 +29,8 @@ type ChatProps = {
   }) => JSX.Element;
   renderChatHeader?: () => JSX.Element;
   renderChatInput?: (props: { onChange: (e: string) => void }) => JSX.Element;
-  renderNavbar?: () => JSX.Element;
+  renderNavbar?: (props: NavButton[]) => JSX.Element;
+  onCreateBroadcastList?: () => void;
   user: UserMeta;
   userList?: UserMeta[];
   /**@note
@@ -40,7 +41,7 @@ type ChatProps = {
 };
 
 const Chat = (props: ChatProps) => {
-  const { headerHeightOffset = 0, user, userList = [] } = props;
+  const { headerHeightOffset = 0, user, userList = [], onCreateBroadcastList } = props;
   const chatUserId = user.uid;
   const { client, config } = useChatClient();
   const {
@@ -351,7 +352,7 @@ const Chat = (props: ChatProps) => {
 
   useEffect(() => {
     try {
-      var conversationId = activeConversation.conversation.conversationId
+      var conversationId = activeConversation?.conversation?.conversationId
       if (conversationId) {
         if(activeConversation.conversation.conversationType === "broadcast-chat"){
           getBroadcastMessages(conversationId)
@@ -403,7 +404,7 @@ const Chat = (props: ChatProps) => {
           messagesEndRef={messagesEndRef}
           renderChatBubble={props.renderChatBubble}
           renderChatHeader={props.renderChatHeader}
-          getOlderMessages={(func) => getOlderMessages(func)}
+          getOlderMessages={(func) => activeConversation?.conversation?.conversationType !== "broadcast-chat"? getOlderMessages(func) : null}
         />
         <ChatInput
           closeGeneralMenu={() => setMenuDetails({ element: null })}
@@ -436,7 +437,7 @@ const Chat = (props: ChatProps) => {
         <Navbar
           chatUser={user}
           userList={userList}
-          renderNavbar={props?.renderNavbar}
+          renderNavbar={props.renderNavbar}
           activeView={view}
           onViewChanged={(value) => setView(value)}
           connectionStatus={connectionStatus}
@@ -453,7 +454,7 @@ const Chat = (props: ChatProps) => {
           />
         ):(
           <BroadcastLists 
-
+            onCreateBroadcastList={onCreateBroadcastList}
           />
         )}
       </div>

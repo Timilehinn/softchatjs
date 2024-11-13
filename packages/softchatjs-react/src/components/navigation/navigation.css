@@ -5,6 +5,9 @@
   transition: .3s;
   width: 100%;
   width: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .nav-btn:hover {

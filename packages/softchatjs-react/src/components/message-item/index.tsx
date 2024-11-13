@@ -104,21 +104,21 @@ export const MessageItem = (props: ConversationProps) => {
 
   const messageState = () => {
     if (message.messageState === MessageStates.SENT) {
-      return <BsCheck style={{ marginTop: "12px", color: "grey" }} />;
+      return <BsCheck style={{ marginTop: "8px", color: "grey" }} />;
     }
     if (
       message.messageState === MessageStates.DELIVERED ||
       message.messageState === MessageStates.READ
     ) {
-      return <BsCheckAll style={{ marginTop: "12px", color: "grey" }} />;
+      return <BsCheckAll style={{ marginTop: "8px", color: "grey" }} />;
     }
     if (message.messageState === MessageStates.LOADING) {
-      return <BsClock style={{ marginTop: "12px", color: "grey" }} />;
+      return <BsClock style={{ marginTop: "8px", color: "grey" }} />;
     }
     if (message.messageState === MessageStates.FAILED) {
-      return <BsX style={{ marginTop: "12px", color: "red" }} />;
+      return <BsX style={{ marginTop: "8px", color: "red" }} />;
     }
-    return <BsClock style={{ marginTop: "12px", color: "grey" }} />;
+    return <BsClock style={{ marginTop: "8px", color: "grey" }} />;
   };
 
   return (
@@ -216,7 +216,6 @@ export const MessageItem = (props: ConversationProps) => {
               {message.message ? (
                 <div
                   style={{
-                    // display: "flex",
                     alignItems: "center",
                     paddingLeft: hasAttachments && "10px",
                     paddingRight: hasAttachments && "10px",
@@ -224,6 +223,7 @@ export const MessageItem = (props: ConversationProps) => {
                     wordWrap: 'break-word'
                   }}
                 >
+                   
                   <Text
                     styles={{
                       textAlign: "left",
@@ -245,6 +245,18 @@ export const MessageItem = (props: ConversationProps) => {
                         message?.message?.length > 10 ? "0px" : "-25px",
                     }}
                   >
+                    {message.lastEdited && (
+                      <Text
+                        styles={{
+                          textAlign: "right",
+                          marginRight: "5px",
+                          color: messageDateColor,
+                          fontSize: "9px",
+                        }}
+                        size="sm"
+                        text={"(Edited)"}
+                      />
+                    )}
                     <Text
                       size="xs"
                       styles={{ color: messageDateColor }}
@@ -254,18 +266,7 @@ export const MessageItem = (props: ConversationProps) => {
                   </div>
                 </div>
               ) : null}
-              {message.lastEdited && (
-                <Text
-                  styles={{
-                    textAlign: "right",
-                    marginRight: "8px",
-                    color: messageDateColor,
-                    fontSize: "9px",
-                  }}
-                  size="sm"
-                  text={"(Edited)"}
-                />
-              )}
+             
             </div>
             {!oppositBubbleBoxes && (
               <div className={styles.conversation__text__container__reactions}>

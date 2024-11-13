@@ -5,8 +5,14 @@ import React, {
   useState,
   useRef,
 } from "react";
-import styles from "./input.module.css";
-import ChatClient, { Media, Message } from "softchatjs-core";
+import styles from "./chat-input.module.css";
+import "./chat-input.module.css";
+import ChatClient, {
+  AttachmentTypes,
+  Media,
+  MediaType,
+  Message,
+} from "softchatjs-core";
 import {
   AiOutlineAudio,
   AiOutlineClose,
@@ -25,7 +31,6 @@ import { VscSend } from "react-icons/vsc";
 // import AudioReactRecorder, { RecordState } from "audio-react-recorder";
 import { CiFaceSmile } from "react-icons/ci";
 import { InputEmojis } from "../emoji";
-import "./input.module.css";
 import { useChatClient } from "../../providers/chatClientProvider";
 import { convertToMinutes } from "../../helpers/date";
 import AudioPlayer from "../audio/audio-player";
@@ -33,7 +38,7 @@ import TrashIcon, { LockIcon } from "../assets/icons";
 // import { AudioRecorder } from "react-audio-voice-recorder";
 import { IoStopCircleOutline } from "react-icons/io5";
 import { useChatState } from "../../providers/clientStateProvider";
-import { LinearLoader } from '../Loaders/index'
+import { LinearLoader } from "../Loaders/index";
 
 const ChatInput = ({
   client,
@@ -92,7 +97,7 @@ const ChatInput = ({
   const { config } = useChatClient();
   const { theme } = config;
   const { activeConversation } = useChatState();
-  const [ uploading, showUploading ] = useState(false)
+  const [uploading, showUploading] = useState(false);
   const primaryActionColor = theme?.icon || "white";
   const inputBg = config?.theme?.input.bgColor || "#222529";
 
@@ -115,14 +120,15 @@ const ChatInput = ({
     }
   }, [editProps?.isEditing]);
 
-  useEffect(() => {
+  const prepareAudio = () => {
     if (navigator.mediaDevices) {
-
       const constraints = { audio: true };
       navigator.mediaDevices
         .getUserMedia(constraints)
         .then((stream) => {
           const mediaRecorder = new MediaRecorder(stream);
+          mediaRecorder.start(1000);
+          setIsRecording(true);
           setAudioRecorder(mediaRecorder);
 
           var chunks = [];
@@ -133,8 +139,7 @@ const ChatInput = ({
             chunks = [];
           };
 
-          mediaRecorder.onstart = () => {
-          };
+          mediaRecorder.onstart = () => {};
 
           mediaRecorder.ondataavailable = (e) => {
             chunks.push(e.data);
@@ -151,7 +156,7 @@ const ChatInput = ({
     } else {
       console.log("not media devices found");
     }
-  }, []);
+  }
 
   // useEffect(() => {
   //   if(audioRecorder) {
@@ -187,43 +192,30 @@ const ChatInput = ({
     return () => clearTimeout(debounceTimer);
   }, [message?.message, conversationId]);
 
-  const sendHandler = async () => {
-    if (!message?.message?.length && !files.length && !audioBlob) {
-      return;
-    }
-    setSending(true);
-
-    const close = () => {
-      setMessage({
-        message: "",
-      });
-      setEditDetails(undefined);
-    };
-
+  const uploadMessageAttachment = async () => {
     try {
-      let imageResData: any = [];
-      let mediaData: Media[];
-      if (files.length) {
+      let mediaData: Media[] = []
+      if (files.length > 0) {
         // Wait for all uploads to complete using Promise.all
-        showUploading(true)
+        showUploading(true);
         const res = await msClient.uploadFile(files[0], {
           filename: files[0].name,
           mimeType: files[0].type,
         });
 
         const type = files[0].type.split("/")[0];
-        mediaData = [
-          {
-            type: type as any,
-            ext: type === "image" ? ".png" : ".mp4",
-            mediaId: uuidv4(),
-            mediaUrl: res.link,
-            mimeType: files[0].type,
-          },
-        ];
+
+        mediaData.push({
+          type: type === "image" ? MediaType.IMAGE : MediaType.VIDEO,
+          ext: type === "image" ? ".png" : ".mp4",
+          mediaId: uuidv4(),
+          mediaUrl: res.link,
+          mimeType: files[0].type,
+        });
       }
 
       if (audioBlob) {
+        showUploading(true);
         const url = URL.createObjectURL(audioBlob);
 
         const res = await msClient.uploadFile(url, {
@@ -231,70 +223,104 @@ const ChatInput = ({
           mimeType: audioBlob.type,
         });
 
-        mediaData = [
-          {
-            type: "audio" as any,
-            ext: ".mp3",
-            mediaId: uuidv4(),
-            mediaUrl: res.link as any,
-            mimeType: "audio/mp3",
-            meta: {
-              audioDurationSec: voiceMessageDuration,
-            },
+        mediaData.push({
+          type: MediaType.AUDIO,
+          ext: ".mp3",
+          mediaId: uuidv4(),
+          mediaUrl: res.link as any,
+          mimeType: "audio/mp3",
+          meta: {
+            audioDurationSec: voiceMessageDuration,
           },
-        ];
-      }
-
-      const attachmentType =
-        files.length || audioBlob
-          ? { attachmentType: "media" as any }
-          : { attachmentType: "none" };
-
-      if (editProps?.isEditing) {
-        msClient.editMessage({
-          to: recipientId, // replace with actual userId
-          conversationId,
-          messageId: editProps?.message?.messageId as string,
-          textMessage: message?.message as string,
-          shouldEdit: true,
         });
-        setEditDetails(undefined);
-        close();
-
-        return;
       }
+      return mediaData;
+    } catch (error) {
+      console.error(error.message);
+      return [];
+    } finally {
+      showUploading(false);
+    }
+  };
 
-      if (editProps?.isReplying) {
-        msClient.sendMessage({
-          conversationId,
-          to: recipientId,
-          message: message?.message as any,
+  const reset = () => {
+    setMessage({
+      message: "",
+    });
+    setEditDetails(undefined);
+  };
 
-          reactions: [],
-          attachedMedia: mediaData,
-          quotedMessage: editProps.message,
-        });
-        close();
-        return;
-      }
+  const sendMessage = async () => {
+    var mediaData = await uploadMessageAttachment();
+    msClient.sendMessage({
+      conversationId,
+      to: recipientId,
+      message: message?.message as any,
+      reactions: [],
+      attachedMedia: mediaData,
+      quotedMessage: editProps?.message,
+      attachmentType:
+        mediaData.length > 0 ? AttachmentTypes.MEDIA : AttachmentTypes.NONE,
+    });
+    reset();
+  };
 
-      msClient.sendMessage({
-        conversationId,
+  const sendEditedMessage = async () => {
+    msClient.editMessage({
+      to: recipientId,
+      conversationId,
+      messageId: editProps?.message?.messageId as string,
+      textMessage: message?.message as string,
+      shouldEdit: true,
+    });
+    reset();
+  };
+
+  const broadcastMessage = async () => {
+    var mediaData = await uploadMessageAttachment();
+    client.messageClient(conversationId).broadcastMessage({
+      broadcastListId: conversationId,
+      participantsIds: activeConversation.conversation.participants,
+      newMessage: {
+        conversationId: conversationId,
         to: recipientId,
-        message: message?.message as any,
+        message: message?.message,
         reactions: [],
         attachedMedia: mediaData,
-        quotedMessage: null,
-        ...attachmentType,
-      });
-      close();
+        attachmentType:
+          mediaData.length > 0 ? AttachmentTypes.MEDIA : AttachmentTypes.NONE,
+        quotedMessage: editProps?.message,
+      },
+    });
+    reset();
+  };
+
+  const sendHandler = async () => {
+    setSending(true);
+    try {
+      
+      if (!message?.message?.length && !files.length && !audioBlob) {
+        return;
+      }
+      if (
+        activeConversation?.conversation.conversationType === "broadcast-chat"
+      ) {
+        if(editProps?.isEditing){
+          return sendEditedMessage()
+        }
+        return broadcastMessage();
+      }
+      if (editProps?.isEditing) {
+        return sendEditedMessage();
+      }
+      sendMessage()
+     
     } catch (err) {
       console.log(err);
     } finally {
       setSending(false);
       setFiles([]);
       setAudioBlob(null);
-      showUploading(false)
     }
   };
 
@@ -327,8 +353,8 @@ const ChatInput = ({
   //   );
 
   const recordVoiceMessage = () => {
-    audioRecorder.start(1000);
-    setIsRecording(true);
+    prepareAudio();
+    
   };
 
   const stopRecording = () => {
@@ -342,12 +368,25 @@ const ChatInput = ({
   };
 
   if (
-    activeConversation.conversation.conversationType === ("admin-chat" as any)
+    activeConversation?.conversation?.conversationType === "admin-chat"
   ) {
     return (
-      <div style={{ padding:"20px", flex: 1, display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+      <div
+        style={{
+          padding: "20px",
+          flex: 1,
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
         <LockIcon color="white" size={20} />
-        <Text size="xs" styles={{ marginLeft: '5px' }} text={"Only the Admin can send messages."} />
+        <Text
+          size="xs"
+          styles={{ marginLeft: "5px" }}
+          text={"Only the Admin can send messages."}
+        />
       </div>
     );
   }
@@ -470,9 +509,7 @@ const ChatInput = ({
 
   return (
     <div ref={inputContainerRef} style={{ height: "auto", width: "100%" }}>
-      {uploading && (
-        <LinearLoader />
-      )}
+      {uploading && <LinearLoader />}
       <EditPanel
         width={inputContainerWidth}
         message={editProps?.message}
@@ -494,7 +531,6 @@ const ChatInput = ({
         style={{ backgroundColor: theme?.background?.secondary }}
         className={styles.input}
       >
-
         <div className={styles.input__wrap}>
           <div className={styles.input__icon}>
             {!audioBlob && (
@@ -545,7 +581,7 @@ const ChatInput = ({
                       message: e.target.value,
                     })
                   }
-                  placeholder="Type your message"
+                  placeholder="Say something..."
                 />
 
                 <CiFaceSmile
@@ -583,12 +619,12 @@ const ChatInput = ({
               >
                 <AiOutlineAudio color={primaryActionColor} size={20} />
               </button>
-            ):(
+            ) : (
               <VscSend
-                    onClick={sendHandler}
-                    size={20}
-                    color={primaryActionColor}
-                  />
+                onClick={sendHandler}
+                size={20}
+                color={primaryActionColor}
+              />
             )}
           </div>
           {menuDetails.element ? (
@@ -641,7 +677,7 @@ const ChatAttachments = ({
   const { config } = useChatClient();
 
   const { theme } = config;
-  
+
   return (
     <div className={styles.chatPhotos} style={{ width, paddingBottom: "10px" }}>
       {audioBlob ? (
