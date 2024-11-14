@@ -4,6 +4,7 @@ import {
   TouchableOpacity,
   Text,
   View,
+  Button,
 } from "react-native";
 import { Conversations } from "softchatjs-react-native/src";
 import { useNavigation, router } from "expo-router";

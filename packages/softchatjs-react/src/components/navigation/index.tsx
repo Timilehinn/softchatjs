@@ -2,7 +2,7 @@ import { useChatClient } from "@/src/providers/chatClientProvider";
 import React, { useState, useEffect, useCallback } from "react";
 import Avartar from "../avartar/avartar";
 import { UserMeta } from "softchatjs-core";
-import { BroadcastIcon, ChatIcon, ChatPlus } from "../assets/icons";
+import { BroadcastIcon, ChatIcon, ChatIconOutlined, ChatPlus } from "../assets/icons";
 import "./navigation.css";
 import { UserList } from "../user-conversations";
 import {
@@ -35,7 +35,7 @@ export default function Navbar(props: {
   const navButtons = [
     {
       label: "Chats",
-      icon: <ChatIcon color={config.theme.icon} size={25} />,
+      icon: <ChatIconOutlined color={config.theme.icon} size={25} />,
       key: "conversation-list",
       onClick: () => {
         props.onViewChanged("conversation-list");

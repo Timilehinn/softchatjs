@@ -9,7 +9,6 @@ type ContextType = {
   client: ChatClient | null;
 };
 
-
 export const ChatClientContext = createContext<ContextType>({
   config: { theme: defaulTheme },
   client: null,

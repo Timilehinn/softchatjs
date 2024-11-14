@@ -1,6 +1,6 @@
 {
   "name": "softchatjs-core",
-  "version": "3.0.82",
+  "version": "3.0.83",
   "description": "",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",

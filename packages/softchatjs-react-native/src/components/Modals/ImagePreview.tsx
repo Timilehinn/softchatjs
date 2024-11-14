@@ -262,7 +262,7 @@ export default function ImagePreview(props: ImagePreviewProps) {
                 height: "100%",
                 width: "100%",
               }}
-              contentFit="cover"
+              contentFit="contain"
             />
             {/* </Animated.View>
           </GestureDetector> */}

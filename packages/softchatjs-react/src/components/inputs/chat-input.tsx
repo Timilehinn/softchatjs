@@ -12,6 +12,7 @@ import ChatClient, {
   Media,
   MediaType,
   Message,
+  generateId,
 } from "softchatjs-core";
 import {
   AiOutlineAudio,
@@ -39,6 +40,7 @@ import TrashIcon, { LockIcon } from "../assets/icons";
 import { IoStopCircleOutline } from "react-icons/io5";
 import { useChatState } from "../../providers/clientStateProvider";
 import { LinearLoader } from "../Loaders/index";
+// import { convertWebmToMp3 } from "@/src/helpers/toMp3";
 
 const ChatInput = ({
   client,
@@ -134,9 +136,9 @@ const ChatInput = ({
           var chunks = [];
 
           mediaRecorder.onstop = (e) => {
-            const blob = new Blob(chunks, { type: "audio/ogg; codecs=opus" });
-            setAudioBlob(blob);
+            const blob = new Blob(chunks, { type: 'audio/mp3' });
             chunks = [];
+            setAudioBlob(blob);
           };
 
           mediaRecorder.onstart = () => {};
@@ -146,7 +148,7 @@ const ChatInput = ({
             if (voiceMessageDuration >= 300) {
               mediaRecorder.stop();
             } else {
-              setVoiceMessageDuration((v) => v + 1);
+              setVoiceMessageDuration((t) => t + 1);
             }
           };
         })
@@ -197,13 +199,15 @@ const ChatInput = ({
       let mediaData: Media[] = []
       if (files.length > 0) {
         // Wait for all uploads to complete using Promise.all
+        const type = files[0].type.split("/")[0];
+
         showUploading(true);
         const res = await msClient.uploadFile(files[0], {
           filename: files[0].name,
           mimeType: files[0].type,
+          ext: type === "image" ? ".png" : ".mp4",
         });
 
-        const type = files[0].type.split("/")[0];
 
         mediaData.push({
           type: type === "image" ? MediaType.IMAGE : MediaType.VIDEO,
@@ -216,13 +220,15 @@ const ChatInput = ({
 
       if (audioBlob) {
         showUploading(true);
+        // const mp3Blob = await convertWebmToMp3(audioBlob);
+        // console.log(mp3Blob, ":::new blob")
+        console.log(audioBlob)
         const url = URL.createObjectURL(audioBlob);
-
         const res = await msClient.uploadFile(url, {
-          filename: "random",
-          mimeType: audioBlob.type,
+          filename: `${generateId()}.mp3`,
+          mimeType: 'audio/mp3',
+          ext: '.mp3'
         });
-
         mediaData.push({
           type: MediaType.AUDIO,
           ext: ".mp3",
@@ -233,6 +239,7 @@ const ChatInput = ({
             audioDurationSec: voiceMessageDuration,
           },
         });
+        setVoiceMessageDuration(0);
       }
       return mediaData;
     } catch (error) {

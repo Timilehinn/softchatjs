@@ -189,6 +189,7 @@ export default class Conversation {
     const socketMessage = {
       action: ServerActions.CREATE_CONVERSATION,
       message: fullMessage,
+      user: this.connection.userMeta
     };
     var result: ConversationListItem
     if (this.connection.socket) {

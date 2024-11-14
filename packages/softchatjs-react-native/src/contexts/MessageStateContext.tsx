@@ -61,6 +61,7 @@ export default initialMessageStateContext;
 const MessageStateContext = createContext<MessageStateContext>(
   initialMessageStateContext
 );
+
 export const useMessageState = () => useContext(MessageStateContext);
 
 export const MessageStateProvider = ({ children }: { children: JSX.Element }) => {
@@ -108,23 +109,18 @@ export const MessageStateProvider = ({ children }: { children: JSX.Element }) =>
   };
   
   const playVoiceMessage = async (media: Media) => {
-      if (activeVoiceMessage !== null && media.mediaId !== activeVoiceMessage?.mediaId) {
-        return unload()
-      }
-  
-    // if (sound && (audioState === 'playing' || audioState === 'paused') && media.mediaId !== activeVoiceMessage?.mediaId) {
-    //   unload();
-    // }
+    if (activeVoiceMessage !== null && media.mediaId !== activeVoiceMessage?.mediaId) {
+      return unload()
+    }
   
     setActiveVoiceMessage(media);
     setAudioState("loading");
   
     try {
       console.log('Loading Sound');
+      console.log(media.mediaUrl)
       const { sound: avSound } = await Audio.Sound.createAsync({ uri: media.mediaUrl }, {}, onPlaybackStatusUpdate);
-      
       setSound(avSound);
-  
       console.log('Playing Sound');
       setAudioState("playing");
       await avSound.playAsync();

@@ -22,11 +22,19 @@ export default function BroadcastLists(props: { onCreateBroadcastList: () => voi
     setBroadcastLists(list);
   };
 
-  useEffect(() => {
-    if (client) {
+  const getBroadcastLists = () => {
+    try {
       const res = client.getBroadcastLists();
       const list = Object.values(res).flat();
       setBroadcastLists(list);
+    } catch (error) {
+      
+    }
+  }
+
+  useEffect(() => {
+    if (client) {
+      getBroadcastLists();
       client.subscribe(
         "broadcast_list_meta_changed",
         handleBroadcastListMetaChanged

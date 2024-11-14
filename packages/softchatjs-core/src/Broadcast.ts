@@ -109,6 +109,7 @@ export default class BroadcastList {
           name: name,
           participants: this.participants,
           token: this.connection.wsAccessConfig.token,
+          user: this.connection.userMeta
         },
       };
       this.connection.socket.send(JSON.stringify(socketMessage));

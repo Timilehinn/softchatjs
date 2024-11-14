@@ -121,6 +121,7 @@ export default class MessageClient {
             to: newMessage.to,
             conversationType: this.getConversationType(),
             message: { ...newMessage, messageState: MessageStates.SENT },
+            user: this.connection.userMeta,
             token: this.connection.wsAccessConfig.token,
           },
         };
@@ -292,7 +293,8 @@ export default class MessageClient {
             message: {
               ...updatedMessage,
               token: this.connection.wsAccessConfig.token,
-              isBroadcast: message.isBroadcast
+              isBroadcast: message.isBroadcast,
+              user: this.connection.userMeta
             },
           };
           this.connection.socket.send(JSON.stringify(socketMessage));
@@ -379,6 +381,7 @@ export default class MessageClient {
             to: config.to,
             reactions,
             token: this.connection.wsAccessConfig.token,
+            user: this.connection.userMeta
           },
         };
         this.connection.socket.send(JSON.stringify(reactionPayload));
@@ -475,6 +478,7 @@ export default class MessageClient {
             conversationType: this.getConversationType(
               this.connection.activeConversationId
             ),
+            user: this.connection.userMeta,
             token: this.connection.wsAccessConfig.token,
           },
         })
@@ -494,6 +498,7 @@ export default class MessageClient {
             conversationType: this.getConversationType(
               this.connection.activeConversationId
             ),
+            user: this.connection.userMeta,
             token: this.connection.wsAccessConfig.token,
           },
         })
@@ -565,7 +570,10 @@ export default class MessageClient {
       this.connection.socket.send(
         JSON.stringify({
           action: ServerActions.READ_MESSAGES,
-          message: { ...data, token: this.connection.wsAccessConfig.token },
+          message: { 
+            ...data,
+            user: this.connection.userMeta,
+            token: this.connection.wsAccessConfig.token },
         })
       );
     }
@@ -589,6 +597,7 @@ export default class MessageClient {
         action: ServerActions.READ_MESSAGES,
         message: {
           ...data,
+          user: this.connection.userMeta,
           token: this.connection.wsAccessConfig.token,
         },
       };
@@ -738,6 +747,7 @@ export default class MessageClient {
             broadcastListId: payload.broadcastListId,
             participants: payload.participants,
             name: payload.name,
+            user: this.connection.userMeta,
             token: this.connection.wsAccessConfig.token,
           },
         };
@@ -764,6 +774,7 @@ export default class MessageClient {
             broadcastListId: payload.broadcastListId,
             participants: payload.participants,
             name: payload.name,
+            user: this.connection.userMeta,
             token: this.connection.wsAccessConfig.token,
           },
         };
@@ -820,6 +831,7 @@ export default class MessageClient {
             shouldEdit: false,
             conversationType: "broadcast-chat",
             message: messageStruct,
+            user: this.connection.userMeta,
             token: this.connection.wsAccessConfig.token,
           },
         };
@@ -927,6 +939,7 @@ export default class MessageClient {
             to,
             conversationId,
             conversationType: this.getConversationType(),
+            user: this.connection.userMeta,
             token: this.connection.wsAccessConfig.token,
           },
         })
@@ -1069,6 +1082,7 @@ export default class MessageClient {
     meta: {
       filename: string;
       mimeType: string;
+      ext: string
     }
   ) {
     try {
@@ -1082,6 +1096,7 @@ export default class MessageClient {
         key: generateId(),
         mediaType: meta.mimeType,
         uid: this.connection.userMeta.uid,
+        ext: meta.ext
       });
 
       let body;
@@ -1116,7 +1131,7 @@ export default class MessageClient {
         fileSize = totalSize;
       }
 
-      const data = await fetch(res.data.uploadUrl, {
+      await fetch(res.data.uploadUrl, {
         method: "PUT",
         body: body,
         headers: {
@@ -1162,6 +1177,7 @@ export default class MessageClient {
           key: generateId(),
           mediaType,
           uid: this.connection.userMeta.uid,
+          ext: ""
         });
         const data = await fetch(res.data.uploadUrl, {
           method: "PUT",

@@ -93,12 +93,10 @@ export default function VoiceMessage(props: VoiceMessageProps) {
   const { media, textColor = theme.text.primary } = props;
   const { fontFamily } = useConfig()
   const {
-    sound,
     audioState,
     playVoiceMessage,
     pauseVoiceMessage,
     resumeVoiceMessage,
-    unload,
     activeVoiceMessage,
     avPlayBackStatus,
   } = useMessageState();

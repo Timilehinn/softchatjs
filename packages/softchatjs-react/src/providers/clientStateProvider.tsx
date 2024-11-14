@@ -7,7 +7,11 @@ export type ConversationItem = {
   unread: string[];
 };
 
-export type ConnectionStatus = { isConnected: boolean, fetchingConversations: boolean, connecting: boolean }
+export type ConnectionStatus = {
+  isConnected: boolean;
+  fetchingConversations: boolean;
+  connecting: boolean;
+};
 
 type Context = {
   activeConversation: ConversationItem | null;
@@ -18,10 +22,9 @@ type Context = {
   setConversations: React.Dispatch<React.SetStateAction<ConversationItem[]>>;
   showImageModal: Media[];
   setShowImageModal: React.Dispatch<React.SetStateAction<Media[]>>;
-  connectionStatus: ConnectionStatus,
+  connectionStatus: ConnectionStatus;
   setConnectionStatus: React.Dispatch<React.SetStateAction<ConnectionStatus>>;
 };
-
 
 export const ChatStateContext = createContext<Context>({
   activeConversation: null,
@@ -30,12 +33,12 @@ export const ChatStateContext = createContext<Context>({
   setConversations: () => {},
   showImageModal: [],
   setShowImageModal: () => {},
-  connectionStatus: { 
+  connectionStatus: {
     isConnected: false,
     fetchingConversations: false,
-    connecting: false
-   },
-   setConnectionStatus: () => {}
+    connecting: false,
+  },
+  setConnectionStatus: () => {},
 });
 
 export const useChatState = () => useContext(ChatStateContext);
@@ -61,7 +64,7 @@ export const ChatStateProvider = ({ children }: { children: JSX.Element }) => {
         showImageModal,
         setShowImageModal,
         connectionStatus,
-        setConnectionStatus
+        setConnectionStatus,
       }}
     >
       {children}

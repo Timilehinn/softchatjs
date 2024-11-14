@@ -371,6 +371,7 @@ export default class Connection extends EventEmitter {
           message: {
             projectId: this.projectConfig.projectId,
             from: this.userMeta.uid,
+            user: this.userMeta
           },
         });
         this.socket.send(data);
@@ -404,6 +405,7 @@ export default class Connection extends EventEmitter {
               message: "Hello!",
               from: this.userMeta.uid,
               token: this.wsAccessConfig.token,
+              user: this.userMeta
             },
           });
           this.socket.send(data); // send the health check message

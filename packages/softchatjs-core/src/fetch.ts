@@ -160,7 +160,7 @@ export async function UPLOAD_MEDIA<Response>(
 
 export async function GET_PRESIGNED_URL<Response>(
   token: string,
-  data: Prettify<UploadContent & { mediaType: string, uid: string }>
+  data: Prettify<UploadContent & { mediaType: string, uid: string, ext: string }>
 ): Promise<APIResponse<Response>> {
   return await chatApi<Response>({
     endpoint: `${API}${ENDPOINTS.GET_PRESIGNED_URL}`,

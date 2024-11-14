@@ -1647,6 +1647,23 @@
     find-up "^5.0.0"
     js-yaml "^4.1.0"
 
+"@ffmpeg/ffmpeg@^0.12.10":
+  version "0.12.10"
+  resolved "https://registry.npmjs.org/@ffmpeg/ffmpeg/-/ffmpeg-0.12.10.tgz"
+  integrity sha512-lVtk8PW8e+NUzGZhPTWj2P1J4/NyuCrbDD3O9IGpSeLYtUZKBqZO8CNj1WYGghep/MXoM8e1qVY1GztTkf8YYQ==
+  dependencies:
+    "@ffmpeg/types" "^0.12.2"
+
+"@ffmpeg/types@^0.12.2":
+  version "0.12.2"
+  resolved "https://registry.npmjs.org/@ffmpeg/types/-/types-0.12.2.tgz"
+  integrity sha512-NJtxwPoLb60/z1Klv0ueshguWQ/7mNm106qdHkB4HL49LXszjhjCCiL+ldHJGQ9ai2Igx0s4F24ghigy//ERdA==
+
+"@ffmpeg/util@^0.12.1":
+  version "0.12.1"
+  resolved "https://registry.npmjs.org/@ffmpeg/util/-/util-0.12.1.tgz"
+  integrity sha512-10jjfAKWaDyb8+nAkijcsi9wgz/y26LOc1NKJradNMyCIl6usQcBbhkjX5qhALrSBcOy6TOeksunTYa+a03qNQ==
+
 "@flyerhq/react-native-link-preview@^1.6.0":
   version "1.6.0"
   resolved "https://registry.npmjs.org/@flyerhq/react-native-link-preview/-/react-native-link-preview-1.6.0.tgz"
@@ -12503,7 +12520,7 @@ socks@^2.8.3:
     smart-buffer "^4.2.0"
 
 softchatjs-core@*, "softchatjs-core@file:C:\\Users\\makin\\MSIDocs\\Pacavel\\softchatjsV2\\packages\\softchatjs-core":
-  version "3.0.0"
+  version "3.0.82"
   resolved "file:packages/softchatjs-core"
   dependencies:
     axios "^1.7.4"
@@ -12562,21 +12579,21 @@ softchatjs-core@*, "softchatjs-core@file:C:\\Users\\makin\\MSIDocs\\Pacavel\\sof
     softchatjs-react "*"
 
 softchatjs-react-native@*, "softchatjs-react-native@file:C:\\Users\\makin\\MSIDocs\\Pacavel\\softchatjsV2\\packages\\softchatjs-react-native":
-  version "4.1.69"
+  version "4.1.80"
   resolved "file:packages/softchatjs-react-native"
   dependencies:
     "@flyerhq/react-native-link-preview" "^1.6.0"
     date-fns "^4.0.0-beta.1"
-    emoji-datasource "^15.1.2"
     expo-clipboard "^6.0.3"
     expo-haptics "^13.0.1"
     lodash "^4.17.21"
     moment "^2.30.1"
 
 softchatjs-react@*, "softchatjs-react@file:C:\\Users\\makin\\MSIDocs\\Pacavel\\softchatjsV2\\packages\\softchatjs-react":
-  version "3.1.4"
+  version "3.2.0"
   resolved "file:packages/softchatjs-react"
   dependencies:
+    "@ffmpeg/ffmpeg" "^0.12.10"
     dayjs "^1.11.13"
     emoji-picker-react "^4.12.0"
     esbuild-plugin-postcss "^0.2.1"

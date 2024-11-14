@@ -5,6 +5,7 @@ import {
   Platform,
   TextInput,
   TouchableOpacity,
+  Button,
 } from "react-native";
 import { Chat } from "softchatjs-react-native/src";
 import { useLocalSearchParams } from "expo-router";

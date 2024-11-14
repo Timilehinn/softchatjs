@@ -6,8 +6,14 @@ import { useAppProvider } from "./context/AppProvider";
 import { useEffect } from "react";
 
 export default function Home() {
+
+  // const { setActiveConversation } = useChatState()
+
   return (
     <div style={{ height: '100vh', width: '100vw' }}>
+      {/* <button onClick={() => setActiveConversation(null)}>
+        reset
+      </button> */}
       <Chat
       // headerHeightOffset={50}
         user={{

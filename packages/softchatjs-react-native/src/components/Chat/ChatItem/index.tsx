@@ -28,7 +28,8 @@ import {
   Conversation,
   MediaType,
   MessageStates,
-  Message
+  Message,
+  generateId
 } from "softchatjs-core";
 import {
   ClockIcon,
@@ -195,11 +196,11 @@ export const ChatItem = forwardRef((props: ChatItemProps, ref: any) => {
         const res = await client.messageClient(conversation?.conversationId).uploadFile(
           media.mediaUrl,
           {
-            filename: 'testfile.png',
+            filename: `${generateId()}${media.ext}`,
             mimeType: media.mimeType as string,
+            ext: media.ext
           }
         )
-        console.log(res);
         if(res.success){
           removePendingMessage(message.messageId);
           if(conversation.conversationType !== "broadcast-chat"){

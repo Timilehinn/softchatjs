@@ -193,7 +193,7 @@ const ConversationItem = ({
     >
       <div style={{ marginRight: '10px' }}>
         {user[0] && (
-          <Avartar initials={user[0]?.participantDetails?.username?.substring(0,1)} size={50} url={user[0]?.participantDetails?.profileUrl} />
+          <Avartar initials={user[0]?.participantDetails?.username?.substring(0,1)} size={40} url={user[0]?.participantDetails?.profileUrl} />
         )}
       </div>
       <div style={{ width: "100%", padding: '20px 0px 20px 0px', borderBottom }}>

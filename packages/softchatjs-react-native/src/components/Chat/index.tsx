@@ -113,8 +113,6 @@ export default function Chat(props: ChatProps) {
     pendingMessages,
     pauseVoiceMessage,
     addNewPendingMessages,
-    activeVoiceMessage,
-    unload,
   } = useMessageState();
 
   const [messages, setMessages] = useState<Array<string | Message>>([
@@ -496,7 +494,7 @@ export default function Chat(props: ChatProps) {
           attachedMedia: [
             {
               type: MediaType.AUDIO,
-              ext: "audio/mp3",
+              ext: ".mp3",
               mediaId: generateId(),
               mediaUrl: uri as string,
               mimeType: "audio/mp3",
