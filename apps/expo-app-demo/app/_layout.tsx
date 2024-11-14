@@ -5,7 +5,7 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { useColorScheme } from '@/components/useColorScheme';
-import { ChatProvider } from "softchatjs-react-native/src"
+import { ChatProvider } from "softchatjs-react-native"
 import ChatClient from "softchatjs-core"
 import { Platform } from 'react-native';
 import ClientContextApi from '@/contexts/ClientContext';
