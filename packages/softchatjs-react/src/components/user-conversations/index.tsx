@@ -261,7 +261,7 @@ export const UserList = ({ users = [], userListRef }: { users?: UserMeta[], user
       className={styles.userList}
     >
       {users.map((item, index) => (
-        <button
+        <div
           key={index}
           onClick={() => {
             startConversation(item);
@@ -272,7 +272,7 @@ export const UserList = ({ users = [], userListRef }: { users?: UserMeta[], user
             <div className={styles.userList__avartar}>
               <Text
                 styles={{ color: config?.theme?.text?.primary || "white" }}
-                text={item.username}
+                text={item.username[0]}
               />
             </div>
             <Text
@@ -281,7 +281,7 @@ export const UserList = ({ users = [], userListRef }: { users?: UserMeta[], user
               styles={{ color: config?.theme?.text?.primary || "white" }}
             />
           </div>
-        </button>
+        </div>
       ))}
     </div>
   );
