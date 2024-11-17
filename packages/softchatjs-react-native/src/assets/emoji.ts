@@ -90,15 +90,6 @@ export const emojis = [
     ios_version: "9.1",
   },
   {
-    emoji: "🫠",
-    description: "melting face",
-    category: "Smileys & Emotion",
-    aliases: ["melting_face"],
-    tags: ["sarcasm", "dread"],
-    unicode_version: "14.0",
-    ios_version: "15.4",
-  },
-  {
     emoji: "😉",
     description: "winking face",
     category: "Smileys & Emotion",

@@ -12,6 +12,7 @@ import {
   Text,
   TouchableWithoutFeedback,
   Dimensions,
+  TouchableOpacity,
 } from "react-native";
 import Animated, {
   useAnimatedStyle,
@@ -102,40 +103,46 @@ export const ChatItem = forwardRef((props: ChatItemProps, ref: any) => {
   const deviceWidth = Dimensions.get("window").width;
 
   const pan = Gesture.Pan()
-  .enabled(conversation.conversationType !== "admin-chat")
-    .minDistance(DISTANCE_TO_ACTIVATE_PAN)
-    .onTouchesDown((e, state) => {
-      touchStart.value = {
-        x: e.changedTouches[0].x,
-        y: e.changedTouches[0].y,
-        time: Date.now(),
-      };
-    })
-    .onTouchesMove((e, state) => {
-      if (messageState < MessageStates.SENT) {
-        return;
-      }
-      touchStartX.value = e.changedTouches[0].x;
-      if (e.changedTouches[0].x + TOUCH_SLOP < touchStart.value.x) {
-        state.activate();
-      }
-    })
-    .onTouchesUp((e, state) => {
-      touchStartX.value = 0;
-      state.fail();
-    })
-    .onUpdate((e) => {
-      if (Math.abs(e.translationX) < deviceWidth * (30 / 100)) {
-        offset.value = e.translationX;
-      }
-    })
-    .onFinalize(() => {
-      isDragging.value = false;
-      offset.value = withSpring(0, {
-        damping: 100,
-      });
-      pressed.value = false;
+  .enabled(false)
+  // .enabled(conversation.conversationType !== "admin-chat")
+  .minDistance(DISTANCE_TO_ACTIVATE_PAN)
+  .onTouchesDown((e, state) => {
+    'worklet';
+    touchStart.value = {
+      x: e.changedTouches[0].x,
+      y: e.changedTouches[0].y,
+      time: Date.now(),
+    };
+  })
+  .onTouchesMove((e, state) => {
+    'worklet';
+    if (messageState < MessageStates.SENT) {
+      return;
+    }
+    touchStartX.value = e.changedTouches[0].x;
+    if (e.changedTouches[0].x + TOUCH_SLOP < touchStart.value.x) {
+      state.activate();
+    }
+  })
+  .onTouchesUp((e, state) => {
+    'worklet';
+    touchStartX.value = 0;
+    state.fail();
+  })
+  .onUpdate((e) => {
+    'worklet';
+    if (Math.abs(e.translationX) < deviceWidth * (30 / 100)) {
+      offset.value = e.translationX;
+    }
+  })
+  .onFinalize(() => {
+    'worklet';
+    isDragging.value = false;
+    offset.value = withSpring(0, {
+      damping: 100,
     });
+    pressed.value = false;
+  });
 
   const animatedStyles = useAnimatedStyle(() => ({
     transform: [{ translateX: offset.value < -1 ? offset.value : 0 }],
@@ -308,17 +315,21 @@ export const ChatItem = forwardRef((props: ChatItemProps, ref: any) => {
   return (
     <View ref={ref} style={{ flex: 1, marginBottom: 10 }}>
       <GestureDetector gesture={pan}>
-        <TouchableWithoutFeedback
-          onLongPress={() =>
+        <TouchableOpacity
+        activeOpacity={.8}
+          onLongPress={() => {
+            console.log('sfsdfs');
             onLongPress({
               message,
               chatItemRef: ref,
               isMessageOwner: position === "right",
             })
           }
+           
+          }
           
         >
-          <View
+          {/* <View
             style={[
               {
                 maxWidth: "100%",
@@ -343,8 +354,22 @@ export const ChatItem = forwardRef((props: ChatItemProps, ref: any) => {
             >
               <ReplyIcon />
             </Animated.View>
-          </View>
-        </TouchableWithoutFeedback>
+          </View> */}
+          {/* <Text>{message?.message}</Text> */}
+          <Default 
+      message={message} 
+      animatedStyles={animatedStyles}
+      position={position}
+      conversationType={conversation?.conversationType || 'private-chat'}
+      renderStateIcon={renderStateIcon}
+      chatUserId={chatUserId}
+      recipientId={recipientId}
+      onScrollToIndex={(messageId) => onScrollToIndex(messageId)}
+      isPending={isPending}
+      threaded={threaded}
+      retryUpload={retryUpload}
+    />
+        </TouchableOpacity>
       </GestureDetector>
     </View>
   );

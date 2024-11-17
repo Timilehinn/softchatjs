@@ -1,6 +1,6 @@
 {
   "name": "softchatjs-react-native",
-  "version": "4.1.80",
+  "version": "4.2.12",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -26,14 +26,14 @@
     "tsup": "^8.2.4"
   },
   "peerDependencies": {
-    "@shopify/flash-list": "^1.7.2",
-    "expo-av": "^14.0.7",
+    "expo-av": "^15.0.1",
     "expo-camera": "^15.0.16",
-    "expo-file-system": "^17.0.1",
+    "expo-file-system": "^18.0.3",
     "expo-image": "^1.13.0",
     "expo-image-picker": "^15.0.7",
     "react-native": ">=0.60.0",
-    "react-native-actions-sheet": "^0.9.7"
+    "react-native-actions-sheet": "^0.9.7",
+    "@shopify/flash-list": "^1.7.2"
   },
   "exports": {
     ".": {
@@ -43,6 +43,19 @@
     },
     "./src": "./src/index.ts"
   },
-  "files": ["dist", "node_modules", "package.json"],
-  "keywords": ["chat", "messaging", "private chat", "broadcasts", "chat sdk", "chat UI", "react", "javascript"]
+  "files": [
+    "dist",
+    "node_modules",
+    "package.json"
+  ],
+  "keywords": [
+    "chat",
+    "messaging",
+    "private chat",
+    "broadcasts",
+    "chat sdk",
+    "chat UI",
+    "react",
+    "javascript"
+  ]
 }

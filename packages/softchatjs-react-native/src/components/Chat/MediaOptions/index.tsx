@@ -3,7 +3,12 @@ import { View, Text, Dimensions, TouchableOpacity } from "react-native";
 import BottomSheet, { BottomSheetRef } from "../../BottomSheet";
 import { forwardRef, useRef, useState, useImperativeHandle } from "react";
 import { generateId } from "../../../utils";
-import { CameraIcon, DocumentIcon, ImageIcon, LocationIcon } from "../../../assets/icons";
+import {
+  CameraIcon,
+  DocumentIcon,
+  ImageIcon,
+  LocationIcon,
+} from "../../../assets/icons";
 import * as ImagePicker from "expo-image-picker";
 import { Media, MediaType, Message } from "softchatjs-core";
 import { useModalProvider } from "../../../contexts/ModalProvider";
@@ -28,7 +33,6 @@ export const MediaOptions = forwardRef((props: MediaOptionsProps, ref: any) => {
   const sheetRef = useRef<ActionSheetRef>(null);
   const { theme, fontFamily } = useConfig();
   const { displayModal } = useModalProvider();
-
   const {
     recipientId,
     chatUserId,
@@ -39,7 +43,7 @@ export const MediaOptions = forwardRef((props: MediaOptionsProps, ref: any) => {
 
   const closeSheet = () => {
     // ref.current.close();
-    sheetRef.current.hide()
+    sheetRef.current.hide();
   };
 
   useImperativeHandle(ref, () => ({
@@ -94,78 +98,83 @@ export const MediaOptions = forwardRef((props: MediaOptionsProps, ref: any) => {
     (Media & { base64: string | null | undefined }) | null
   >(null);
 
+  const pickImageWithFallback = async () => {};
+
   const pickImage = async () => {
     // sheetRef?.current?.hide();
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      // allowsEditing: true,
-      aspect: [4, 3],
-      quality: 0.3,
-      base64: true,
-    });
+    try {
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ["images", "videos"] as any,
+        aspect: [4, 3],
+        quality: 0.3,
+        base64: true,
+      });
 
-    if (!result.canceled) {
-      var base64 = result.assets[0].base64;
-      var type = result.assets[0].type;
-      var height = result.assets[0].height;
-      var width = result.assets[0].width;
-      var fileSize = result.assets[0].fileSize;
-      var fileSizeInMB = fileSize ? fileSize / (1024 * 1024) : 0; // Convert bytes to MB
-      if (type === "image") {
-        displayModal({
-          justifyContent: "flex-start",
-          children: (
-            <ImagePreview
-              conversationId={conversationId}
-              clearActiveQuote={clearActiveQuote}
-              activeQuote={activeQuote}
-              chatUserId={chatUserId}
-              recipientId={recipientId}
-              image={{
-                type: MediaType.IMAGE,
-                mimeType: result.assets[0].mimeType,
-                ext: ".png",
-                mediaId: generateId(),
-                base64: result.assets[0].uri as string,
-                mediaUrl: result.assets[0].uri,
-                meta: {
-                  aspectRatio: width / height || 0,
-                  height,
-                  width,
-                  size: fileSize,
-                },
-              }}
-            />
-          ),
-        });
-      } else if (type === "video") {
-        displayModal({
-          justifyContent: "flex-start",
-          children: (
-            <VideoViewer
-              conversationId={conversationId}
-              clearActiveQuote={clearActiveQuote}
-              activeQuote={activeQuote}
-              chatUserId={chatUserId}
-              recipientId={recipientId}
-              media={{
-                type: MediaType.VIDEO,
-                mimeType: result.assets[0].mimeType,
-                ext: ".mp4",
-                mediaId: generateId(),
-                // base64: result.assets[0].uri as string,
-                mediaUrl: result.assets[0].uri,
-                meta: {
-                  aspectRatio: width / height || 0,
-                  height,
-                  width,
-                  size: fileSize,
-                },
-              }}
-            />
-          ),
-        });
+      if (!result.canceled) {
+        var base64 = result.assets[0].base64;
+        var type = result.assets[0].type;
+        var height = result.assets[0].height;
+        var width = result.assets[0].width;
+        var fileSize = result.assets[0].fileSize;
+        var fileSizeInMB = fileSize ? fileSize / (1024 * 1024) : 0; // Convert bytes to MB
+        if (type === "image") {
+          displayModal({
+            justifyContent: "flex-start",
+            children: (
+              <ImagePreview
+                conversationId={conversationId}
+                clearActiveQuote={clearActiveQuote}
+                activeQuote={activeQuote}
+                chatUserId={chatUserId}
+                recipientId={recipientId}
+                image={{
+                  type: MediaType.IMAGE,
+                  mimeType: result.assets[0].mimeType,
+                  ext: ".png",
+                  mediaId: generateId(),
+                  base64: result.assets[0].uri as string,
+                  mediaUrl: result.assets[0].uri,
+                  meta: {
+                    aspectRatio: width / height || 0,
+                    height,
+                    width,
+                    size: fileSize,
+                  },
+                }}
+              />
+            ),
+          });
+        } else if (type === "video") {
+          displayModal({
+            justifyContent: "flex-start",
+            children: (
+              <VideoViewer
+                conversationId={conversationId}
+                clearActiveQuote={clearActiveQuote}
+                activeQuote={activeQuote}
+                chatUserId={chatUserId}
+                recipientId={recipientId}
+                media={{
+                  type: MediaType.VIDEO,
+                  mimeType: result.assets[0].mimeType,
+                  ext: ".mp4",
+                  mediaId: generateId(),
+                  // base64: result.assets[0].uri as string,
+                  mediaUrl: result.assets[0].uri,
+                  meta: {
+                    aspectRatio: width / height || 0,
+                    height,
+                    width,
+                    size: fileSize,
+                  },
+                }}
+              />
+            ),
+          });
+        }
       }
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -175,60 +184,62 @@ export const MediaOptions = forwardRef((props: MediaOptionsProps, ref: any) => {
   };
 
   return (
-    // <BottomSheet
-    //   ref={sheetRef}
-    //   onClose={close}
-    //   scrollRef={flatListRef}
-    //   height={defaultSheetHeight}
-    // >
-    <ActionSheet ref={sheetRef} gestureEnabled containerStyle={{ height: '40%', padding: 20 }}>
-        <View
-          style={{
-            width: "100%",
-            height: '100%',
-            backgroundColor: theme?.background.secondary,
-            borderRadius: 20,
-            padding: 10,
-            marginTop: 10
-          }}
-        >
-          {options.map((option, i) => (
-            <TouchableOpacity
-              onPress={option.onPress}
-              key={i}
-              style={[
-                {
-                  padding: 10,
-                  borderRadius: 100,
-                  flexDirection: "row",
-                  alignItems: "center",
-                  paddingVertical: 20,
-                },
-                i + 1 !== options.length && {
-                  borderBottomWidth: 1,
-                  borderBottomColor: theme?.divider,
-                },
-              ]}
+    <ActionSheet
+      ref={sheetRef}
+      gestureEnabled
+      openAnimationConfig={{ speed: 700 }}
+      containerStyle={{ 
+        height: "40%", 
+        padding: 20,
+        borderTopLeftRadius: 30,
+        borderTopRightRadius: 30,
+      }}
+    >
+      <View
+        style={{
+          width: "100%",
+          height: "100%",
+          backgroundColor: theme?.background.secondary,
+          borderRadius: 20,
+          padding: 10,
+          marginTop: 10,
+        }}
+      >
+        {options.map((option, i) => (
+          <TouchableOpacity
+            onPress={option.onPress}
+            key={i}
+            style={[
+              {
+                padding: 10,
+                borderRadius: 100,
+                flexDirection: "row",
+                alignItems: "center",
+                paddingVertical: 20,
+              },
+              i + 1 !== options.length && {
+                borderBottomWidth: 1,
+                borderBottomColor: theme?.divider,
+              },
+            ]}
+          >
+            {option.icon}
+            <Text
+              style={{
+                marginStart: 15,
+                textTransform: "capitalize",
+                fontFamily,
+                fontSize: 17,
+                color:
+                  option.label === "Delete" ? "red" : theme?.text.secondary,
+              }}
             >
-              {option.icon}
-              <Text
-                style={{
-                  marginStart: 15,
-                  textTransform: "capitalize",
-                  fontFamily,
-                  fontSize: 17,
-                  color:
-                    option.label === "Delete" ? "red" : theme?.text.secondary,
-                }}
-              >
-                {option.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-    {/* </BottomSheet> */}
+              {option.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
     </ActionSheet>
-
   );
 });
 

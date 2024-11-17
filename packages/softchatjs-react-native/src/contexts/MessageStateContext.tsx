@@ -99,8 +99,8 @@ export const MessageStateProvider = ({ children }: { children: JSX.Element }) =>
     );
   };
   
-  
   const onPlaybackStatusUpdate = (data: AVPlaybackStatus & { didJustFinish: boolean , positionMillis: number}) => {
+    console.log(data)
     setAvPlayBackStatus(data)
     if(data?.didJustFinish){
       setAudioState(null);
@@ -129,7 +129,6 @@ export const MessageStateProvider = ({ children }: { children: JSX.Element }) =>
       setAudioState(null);  
     }
   };
-  
 
   const pauseVoiceMessage = async () => {
     await sound?.pauseAsync();

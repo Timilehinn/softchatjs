@@ -22,13 +22,21 @@ export function XIcon(props: Icon) {
   );
 }
 
+export function TimesIcon(props: Icon){
+  const { size = 25, color = "black" } = props;
+
+  return (
+    <XIcon size={size} color={color} />
+  )
+}
+
 export function CloseIcon(props: Icon & { bgColor: string }) {
   const { size = 25, color = "black", bgColor } = props;
   return (
     <View
       style={{ padding: 3, borderRadius: size * 2, backgroundColor: bgColor }}
     >
-      <XIcon size={size} color={color} />
+      <TimesIcon size={size} color={color} />
     </View>
   );
 }

@@ -1,4 +1,4 @@
-import React from 'react'
+import React from "react";
 import {
   StyleSheet,
   View,
@@ -14,9 +14,7 @@ import {
   Message,
   UserMeta,
 } from "softchatjs-core";
-import {
-  ChatTheme
-} from '../../../types'
+import { ChatTheme } from "../../../types";
 import { useCallback } from "react";
 import Sticker from "./Sticker";
 import MessageAvatar from "../MessageAvatar";
@@ -31,12 +29,12 @@ type QuotedProps = {
   layout?: "stacked";
   theme?: ChatTheme;
   position?: "left" | "right";
-  chatUserId?: string
+  chatUserId?: string;
 };
 
 export default function Quoted(props: QuotedProps) {
   const { quotedMessage, layout, onPress, theme, position, chatUserId } = props;
-  const { fontFamily } = useConfig()
+  const { fontFamily } = useConfig();
 
   if (!quotedMessage) {
     return null;
@@ -99,10 +97,10 @@ export default function Quoted(props: QuotedProps) {
         } else if (mediaType === MediaType.AUDIO) {
           return (
             <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <MicIcon size={20} color={'white'} />
+              <MicIcon size={20} color={"white"} />
               <Text
                 style={{
-                  color: 'white',
+                  color: "white",
                   marginStart: 5,
                 }}
               >
@@ -113,9 +111,8 @@ export default function Quoted(props: QuotedProps) {
             </View>
           );
         }
-        
     }
-  }
+  };
 
   if (layout === "stacked") {
     return (
@@ -157,7 +154,7 @@ export default function Quoted(props: QuotedProps) {
               {truncate(quotedMessage?.message, 100)}
             </Text>
           ) : (
-           <>{renderMediaPreview()}</>
+            <>{renderMediaPreview()}</>
           )}
         </View>
       </TouchableOpacity>
@@ -182,8 +179,6 @@ export default function Quoted(props: QuotedProps) {
   //   return chatUserId === messageOwner.uid? `You replied to ${messageOwner.username}` : `${messageOwner.username} replied to you.`
   // }
 
-  
-
   return (
     <TouchableOpacity
       onPress={() => onPress?.()}
@@ -192,20 +187,27 @@ export default function Quoted(props: QuotedProps) {
           backgroundColor: "rgba(0,0,0,.3)",
           padding: 5,
           borderRadius: 5,
-          width: "100%",
           marginBottom: 5,
           borderLeftWidth: 4,
-          borderColor:
-            // position === "right"
-              // ? theme?.chatBubble.right.replyBorderColor
-              // : theme?.chatBubble.left.replyBorderColor,
-              quotedMessage.messageOwner.color
+          borderColor: quotedMessage.messageOwner.color,
         },
       ]}
     >
-      <Text style={{ color: quotedMessage.messageOwner.color, textTransform: 'capitalize', fontFamily, marginBottom: 5, textShadowColor: 'rgba(0, 0, 0, 0.3)',
-  textShadowOffset: { width: .5, height: .5 },
-  textShadowRadius: 5, }}>{quotedMessage.messageOwner.uid === chatUserId? "You" : quotedMessage.messageOwner.username}</Text>
+      <Text
+        style={{
+          color: quotedMessage.messageOwner.color,
+          textTransform: "capitalize",
+          fontFamily,
+          marginBottom: 5,
+          textShadowColor: "rgba(0, 0, 0, 0.3)",
+          textShadowOffset: { width: 0.5, height: 0.5 },
+          textShadowRadius: 5,
+        }}
+      >
+        {quotedMessage.messageOwner.uid === chatUserId
+          ? "You"
+          : quotedMessage.messageOwner.username}
+      </Text>
       <>{renderMediaPreview()}</>
       <Preview
         message={quotedMessage.message}
@@ -216,18 +218,17 @@ export default function Quoted(props: QuotedProps) {
         }
       />
       {quotedMessage.message && (
-  <Text
-  style={{
-    display: quotedMessage.message ? "flex" : "none",
-    fontFamily,
-    color: "white",
-    fontSize: 14,
-  }}
->
-  {quotedMessage.message}
-</Text>
+        <Text
+          style={{
+            display: quotedMessage.message ? "flex" : "none",
+            fontFamily,
+            color: "white",
+            fontSize: 14,
+          }}
+        >
+          {quotedMessage.message}
+        </Text>
       )}
-    
     </TouchableOpacity>
   );
 }

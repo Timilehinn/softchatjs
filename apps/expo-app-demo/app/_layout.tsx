@@ -1,11 +1,11 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { processFontFamily, useFonts } from 'expo-font';
+import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { useColorScheme } from '@/components/useColorScheme';
-import { ChatProvider } from "softchatjs-react-native"
+import { ChatProvider } from "softchatjs-react-native/src"
 import ChatClient from "softchatjs-core"
 import { Platform } from 'react-native';
 import ClientContextApi from '@/contexts/ClientContext';
@@ -87,14 +87,12 @@ function RootLayoutNav() {
 
   const colorScheme = useColorScheme();
  
-  const fontFamly = processFontFamily("SpaceMono")
-
   return (
     <ClientContextApi client={client}>
     <ChatProvider
     client={client}
-    theme={beautySpaceTheme}
-    fontFamily={fontFamly}
+    // theme={beautySpaceTheme}
+    // fontFamily={'SpaceMono'}
       // theme={{
       //   background: {
       //     primary: '#FFFFFF', // White background for light mode

@@ -96,63 +96,6 @@ export default function ImagePreview(props: ImagePreviewProps) {
     })
     .runOnJS(true);
 
-  const sendMessage = async (mediaUrl: string) => {
-    try {
-      if (client && conversationId) {
-        var timeStamps = generateFillerTimestamps();
-        // const conversationId = generateConversationId(chatUserId, recipientId);
-        const messageId = generateId();
-
-        const newMessage: Message = {
-          conversationId,
-          from: chatUserId as string,
-          to: recipientId,
-          message: message,
-          messageState: MessageStates.LOADING,
-          quotedMessageId: activeQuote?.messageId || "",
-          quotedMessage: activeQuote,
-          messageId,
-          reactions: [],
-          attachedMedia: [
-            {
-              type: MediaType.IMAGE,
-              ext: ".png",
-              mediaId: generateId(),
-              mediaUrl: mediaUrl,
-              meta: {
-                aspectRatio: image?.meta?.aspectRatio,
-                height: image?.meta?.height,
-                width: image?.meta?.width,
-                size: image?.meta?.size,
-              },
-            },
-          ],
-          lastEdited: null,
-          attachmentType: AttachmentTypes.MEDIA,
-          ...timeStamps,
-          messageOwner: {
-            // uid: chatUserId,
-            ...userMeta,
-            ...timeStamps,
-          },
-        };
-        if (client) {
-          client.messageClient(conversationId).sendMessage(newMessage);
-        }
-        setGlobalTextMessage("");
-        setMessage("");
-        console.log("sending -2");
-        if (activeQuote?.message) {
-          clearActiveQuote();
-        }
-      } else {
-        console.log("no client connection yet");
-      }
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
   const uploadImage = async () => {
     try {
       if (client && image?.base64) {
@@ -248,14 +191,6 @@ export default function ImagePreview(props: ImagePreviewProps) {
               alignItems: "center",
             }}
           >
-            {/* <GestureDetector gesture={pinch}>
-          <Animated.View
-            style={[{
-              width: '100%',
-              height: '100%'
-            }, animatedStyles]}
-          > */}
-
             <Image
               source={{ uri: url }}
               style={{
@@ -264,8 +199,6 @@ export default function ImagePreview(props: ImagePreviewProps) {
               }}
               contentFit="contain"
             />
-            {/* </Animated.View>
-          </GestureDetector> */}
           </View>
         </TouchableWithoutFeedback>
 

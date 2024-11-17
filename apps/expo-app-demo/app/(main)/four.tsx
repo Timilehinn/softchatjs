@@ -1,14 +1,9 @@
 import {
   StyleSheet,
-  Platform,
-  TouchableOpacity,
-  Text,
   View,
 } from "react-native";
 import { BroadcastLists } from "softchatjs-react-native/src";
 import { useNavigation, router } from "expo-router";
-import { useRef } from "react";
-import { ConversationsRefs } from "softchatjs-react-native/src/components/Conversations";
 import { useClient } from "@/contexts/ClientContext";
 
 export default function TabOneScreen() {

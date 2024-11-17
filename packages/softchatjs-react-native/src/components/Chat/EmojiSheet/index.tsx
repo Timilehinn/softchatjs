@@ -1,219 +1,207 @@
-import React from 'react'
+import React from "react";
 import {
   View,
   Text,
   Dimensions,
   TouchableOpacity,
+  Platform,
+  Alert,
+  KeyboardAvoidingView,
 } from "react-native";
-import { Image } from "expo-image";
 import BottomSheet, { BottomSheetRef } from "../../BottomSheet";
-import { Emoticon } from './type';
-import { Colors } from "../../../constants/Colors";
-import { forwardRef, useCallback, useEffect, useRef, useState, useImperativeHandle } from "react";
-import { GET_EMOJIS } from "../../../api";
-import { generateConversationId, generateFillerTimestamps, generateId, AttachmentTypes, MediaType, Message, MessageStates, UserMeta } from "softchatjs-core";
-import { KeyboardIcon, SearchIcon } from "../../../assets/icons";
+import {
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+  useImperativeHandle,
+  forwardRef,
+} from "react";
+import TrashIcon, {
+  CopyIcon,
+  EditIcon,
+  EmojiIcon,
+  ReplyIcon,
+} from "../../../assets/icons";
+import { ChatTheme } from "../../../types";
+import { Message, Emoji } from "softchatjs-core";
 import Search from "../../Search";
-import { FlashList } from "@shopify/flash-list";
+// import { FlashList } from "@shopify/flash-list";
+import { emojis } from "../../../assets/emoji";
 import { useConfig } from "../../../contexts/ChatProvider";
-import { useMessageState } from "../../../contexts/MessageStateContext";
 import ActionSheet, { ActionSheetRef } from "react-native-actions-sheet";
-
+import { FlashList } from "react-native-actions-sheet/dist/src/views/FlashList";
 
 type EmojiListProps = {
-  openKeyboard: () => void;
-  sendSticker: () => void;
-  recipientId: string
+  recipientId: string;
+  message: Message | null;
+  theme: ChatTheme | undefined;
 };
 
-export const EmojiSheet = forwardRef((props: EmojiListProps, ref: any) => {
-  const emojiListRef = useRef<ActionSheetRef>(null);
+var windowHeight = Dimensions.get("window").height;
 
-  const { client, theme, fontFamily } = useConfig()
-  const { openKeyboard, sendSticker, recipientId } = props;
-  const flatListRef = useRef<FlashList<Emoticon>>(null);
-  const width = Dimensions.get("window").width;
-  const emojiSize = 40;
-  var noOfColumns = Math.floor(width / emojiSize);
-  const [height, setHeight] = useState("45%");
-  const [searchValue, setSearchValue] = useState("");
-  const { userMeta, stickers, setStickers, globalTextMessage, setGlobalTextMessage } = useMessageState();
-  const [ isSearching, setIsSearching ] = useState(false)
+export const EmojiList = forwardRef(
+  (props: EmojiListProps, ref: any) => {
+    const emojiRef = useRef<ActionSheetRef>(null);
+    const { client, fontFamily } = useConfig();
+    const {
+      recipientId,
+      message,
+      theme,
+    } = props;
+    const flatListRef = useRef(null);
+    const [searchValue, setSearchValue] = useState("");
 
-  const closeSheet = () => {
-    emojiListRef?.current?.hide();
-  };
+    const width = Dimensions.get("window").width;
+    const emojiSize = 40;
+    var noOfColumns = Math.floor(width / emojiSize);
 
-  const openSheet = () => {
-    emojiListRef?.current?.show();
-  };
+    const close = () => {
+      emojiRef?.current?.hide();
+    };
 
-  const onClose = () => {
-    setHeight("45%");
-  };
+    const open = () => {
+      emojiRef?.current?.show();
+    };
 
-  useImperativeHandle(ref, () => ({
-    open: () => openSheet(),
-    close: () => closeSheet(),
-  }));
+    useImperativeHandle(ref, () => ({
+      open: () => open(),
+      close: () => close(),
+    }));
 
-  useEffect(() => {
-    (async() => {
-      if(client){
-        const userId = client?.chatUserId
-        const conversationId = generateConversationId(userId as string, recipientId, client.projectId);
-        const stickers = await client.messageClient(conversationId).getEmojiList();
-        setStickers(stickers);
-      }
-    })()
-  }, [client]);
+    const addReaction = useCallback(
+      (emoji: string) => {
+        if (client && message) {
+          const newReaction = {
+            emoji: emoji,
+            uid: client.chatUserId,
+          };
 
-  
-    const renderItem = useCallback(({ item, index }: { item: any, index: number }) => {
-      const userId = client?.chatUserId
-      const conversationId = generateConversationId(userId as string, recipientId, client?.projectId || '');
-      const messageId = generateId();
-      const newMessage: Partial<Message> = {
-        conversationId,
-        from: userId as string,
-        to: recipientId,
-        message: globalTextMessage,
-        messageState: MessageStates.LOADING,
-        messageId,
-        attachmentType: AttachmentTypes.STICKER,
-        attachedMedia: [{
-          type: MediaType.STICKER,
-          ext: '',
-          mediaId: '',
-          mediaUrl: item.images.preview_gif.url,
-        }],
-        reactions: [],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        messageOwner: {
-          ...userMeta,
-          ...generateFillerTimestamps(),
-        },
-      };
+          const existingReactionIndex = message.reactions.findIndex(
+            (reaction) => reaction.uid === client.chatUserId
+          );
 
-    return (
-      <TouchableOpacity
-        key={index}
-        onPress={() => {
-          if(client){
-            client.messageClient(newMessage.conversationId as string).sendMessage(newMessage as Message)
+          let updatedReactions: Array<{ uid: string; emoji: string }>;
+
+          if (existingReactionIndex !== -1) {
+            updatedReactions = [...message.reactions];
+            updatedReactions[existingReactionIndex] = newReaction;
+          } else {
+            updatedReactions = [...message.reactions, newReaction];
           }
-          setGlobalTextMessage('');
-          closeSheet();
-        }}
-        style={{
-          height: emojiSize,
-          minWidth: emojiSize,
-          alignItems: "center",
-          margin: .7,
-          flex: 1,
-          justifyContent: "center",
-          borderRadius: emojiSize
-        }}
-      >
-        <Image
-          source={{ uri: item.images.preview_gif.url }}
-          style={{ height: 40, width: 40 }}
-          cachePolicy="disk"
-        />
-      </TouchableOpacity>
+
+          client.messageClient(message.conversationId).reactToMessage({
+            conversationId: message.conversationId,
+            messageId: message.messageId,
+            reactions: updatedReactions,
+            to: recipientId,
+          });
+
+          emojiRef?.current?.hide();
+        } else {
+          console.log("not sending");
+        }
+      },
+      [message, client, recipientId]
     );
-  }, [recipientId, client]);
 
-  var filtered_emojis = stickers.filter((data: Emoticon) => {
-    return data.title.toLowerCase()?.indexOf(searchValue.toLowerCase()) !== -1;
-  });
+    var filtered_emojis = emojis.filter((data: Emoji) => {
+      return (
+        data.description.toLowerCase()?.indexOf(searchValue.toLowerCase()) !==
+        -1
+      );
+    });
 
-  const emoji_list = filtered_emojis.length > 0 ? filtered_emojis : stickers;
+    const emoji_list = filtered_emojis.length > 0 ? filtered_emojis : emojis;
 
-  return (
-    // <BottomSheet
-    //   ref={emojiListRef}
-    //   onClose={onClose}
-    //   scrollRef={flatListRef}
-    //   height={height}
-    // >
-    <ActionSheet ref={emojiListRef} onClose={() => { emojiListRef.current.snapToIndex(0); setIsSearching(false) }} gestureEnabled snapPoints={[60, 100]} containerStyle={{ height: '70%', padding: 0 }}>
-
-      <View
-        style={{
-          // flex: 1,
-          height: "100%",
-          width: "100%",
-          justifyContent: "center",
-          
-        }}
-      >
-        <View
-          style={{
-            marginTop: 25,
-            marginBottom: 10,
-          }}
-        >
-          {isSearching ? (
-            <Search 
-                value={searchValue}
-                setValue={setSearchValue}
-                placeholder="Find stickers"
-                containerStyle={{ paddingHorizontal: 10 }}
-            />
-          ) : (
-            <View
+    const renderEmoji = useCallback(
+      ({ item, index }: { item: any; index: number }) => {
+        return (
+          <TouchableOpacity
+            key={index}
+            onPress={() => {
+              addReaction(item.emoji);
+            }}
+            style={{
+              height: emojiSize,
+              minWidth: emojiSize,
+              alignItems: "center",
+              margin: 0.7,
+              flex: 1,
+              justifyContent: "center",
+              borderRadius: emojiSize,
+            }}
+          >
+            <Text
               style={{
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "space-between",
-                paddingHorizontal: 10,
+                fontSize: Platform.OS === "android" ? 25 : 35,
+                fontFamily,
               }}
             >
-              <TouchableOpacity
-                style={{ padding: 10 }}
-                onPress={() => {
-                  emojiListRef.current.snapToIndex(1);
-                  setIsSearching(true)
-                }}
-              >
-                <SearchIcon color={theme?.text.secondary} />
-              </TouchableOpacity>
-              <Text style={{ fontSize: 25, color: theme?.text.secondary, fontFamily }}>Stickers</Text>
-              <TouchableOpacity
-                style={{ padding: 10 }}
-                onPress={() => {
-                  closeSheet();
-                  setTimeout(() => {
-                    setHeight("45%");
-                    openKeyboard();
-                  }, 300);
-                }}
-              >
-                <KeyboardIcon size={30} color={theme?.text.secondary} />
-              </TouchableOpacity>
-            </View>
-          )}
-        </View>
-        <View
-          style={{
-            height: "90%",
-            width: "100%",
-          }}
-        >
-          <FlashList
-            ref={flatListRef}
-            numColumns={noOfColumns}
-            data={emoji_list}
-            estimatedItemSize={1800}
-            renderItem={renderItem}
-            ListFooterComponent={() => <View style={{ height: 100 }} />}
-          />
-        </View>
-      </View>
-    </ActionSheet>
-  );
-})
+              {item.emoji}
+            </Text>
+          </TouchableOpacity>
+        );
+      },
+      [message]
+    );
 
-export default EmojiSheet
+    return (
+      <ActionSheet
+        ref={emojiRef}
+        enableGesturesInScrollView
+        keyboardHandlerEnabled={false}
+        isModal
+        openAnimationConfig={{ speed: 700 }}
+        onClose={close}
+        gestureEnabled
+        containerStyle={{
+          borderTopLeftRadius: 30,
+          borderTopRightRadius: 30,
+          backgroundColor: theme.background.primary,
+          height: windowHeight - (30 / 100) * windowHeight,
+          padding: 0,
+        }}
+      >
+        {/* <KeyboardAvoidingView behavior="position" style={{ flex: 1, height: '100%', backgroundColor: theme.background.primary }}> */}
+          <View
+            style={{
+              flex: 1,
+              minHeight: windowHeight - (30 / 100) * windowHeight,
+              width: "100%",
+            }}
+          >
+            <Search
+              value={searchValue}
+              setValue={setSearchValue}
+              placeholder="Find a reaction"
+            />
+            <View
+              style={{
+                height: "100%",
+                width: "100%",
+                paddingTop: 5,
+                padding: 15,
+                flexDirection: "row",
+                flexWrap: "wrap",
+                flexGrow: 1,
+                flex: 1,
+              }}
+            >
+              <FlashList
+                ref={flatListRef}
+                numColumns={noOfColumns}
+                data={emoji_list}
+                estimatedItemSize={8000}
+                renderItem={renderEmoji}
+                ListEmptyComponent={() => <Text>emepty</Text>}
+              />
+            </View>
+          </View>
+        {/* </KeyboardAvoidingView> */}
+      </ActionSheet>
+    );
+  }
+);
+
+export default EmojiList;

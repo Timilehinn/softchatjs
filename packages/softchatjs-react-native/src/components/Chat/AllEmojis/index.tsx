@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react'
 import {
   View,
   Text,
@@ -7,7 +7,6 @@ import {
   Platform,
   Alert,
   KeyboardAvoidingView,
-  ToastAndroid,
 } from "react-native";
 import BottomSheet, { BottomSheetRef } from "../../BottomSheet";
 import {
@@ -16,7 +15,7 @@ import {
   useRef,
   useState,
   useImperativeHandle,
-  forwardRef,
+  forwardRef
 } from "react";
 import TrashIcon, {
   CopyIcon,
@@ -25,14 +24,13 @@ import TrashIcon, {
   ReplyIcon,
 } from "../../../assets/icons";
 import { ChatTheme } from "../../../types";
-import { Message, Emoji } from "softchatjs-core";
+import { Message, Emoji } from "softchatjs-core"
 import Search from "../../Search";
 // import { FlashList } from "@shopify/flash-list";
 import { emojis } from "../../../assets/emoji";
 import { useConfig } from "../../../contexts/ChatProvider";
 import ActionSheet, { ActionSheetRef } from "react-native-actions-sheet";
-import { FlashList } from "react-native-actions-sheet/dist/src/views/FlashList";
-import * as Clipboard from 'expo-clipboard';
+import {FlashList} from 'react-native-actions-sheet/dist/src/views/FlashList';
 
 type MessageOptionsProps = {
   recipientId: string;
@@ -41,15 +39,15 @@ type MessageOptionsProps = {
   onReply: () => void;
   onStartEditing: () => void;
   theme: ChatTheme | undefined;
-  openEmojiList: () => void;
 };
 
 var defaultSheetHeight = "55%";
-var windowHeight = Dimensions.get("window").height;
+var windowHeight = Dimensions.get("window").height
 
 export const MessageOptions = forwardRef(
   (props: MessageOptionsProps, ref: any) => {
     const optionsRef = useRef<ActionSheetRef>(null);
+    // const optionsRef = useRef<BottomSheetRef>();
     const { client, fontFamily } = useConfig();
     const {
       recipientId,
@@ -58,11 +56,12 @@ export const MessageOptions = forwardRef(
       onReply,
       onStartEditing,
       theme,
-      openEmojiList,
     } = props;
     const flatListRef = useRef(null);
     const [height, setHeight] = useState(defaultSheetHeight);
+    const [view, changeView] = useState<"preview" | "emojis">("preview");
     const [searchValue, setSearchValue] = useState("");
+
     const width = Dimensions.get("window").width;
     const emojiSize = 40;
     var noOfColumns = Math.floor(width / emojiSize);
@@ -70,6 +69,7 @@ export const MessageOptions = forwardRef(
     const close = () => {
       setHeight(defaultSheetHeight);
       optionsRef?.current?.hide();
+      changeView("preview");
     };
 
     const open = () => {
@@ -103,24 +103,16 @@ export const MessageOptions = forwardRef(
           {
             text: "Cancel",
             onPress: () => console.log("Cancelled"),
-            style: "cancel",
+            style: "cancel"
           },
           {
             text: "Proceed",
             onPress: () => deleteMessage(),
-            style: "destructive",
-          },
+            style: "destructive"
+          }
         ],
         { cancelable: false }
       );
-    };
-
-    const copyToClipboard = async (text: string) => {
-      await Clipboard.setStringAsync(text);
-      if (Platform.OS === "android") {
-        ToastAndroid.show("Copied text message", ToastAndroid.SHORT);
-      }
-      optionsRef.current.hide();
     };
 
     const options = useMemo(() => {
@@ -141,7 +133,7 @@ export const MessageOptions = forwardRef(
           label: "Copy",
           icon: <CopyIcon size={20} color={theme?.icon} />,
           isVisible: true,
-          onPress: () => copyToClipboard(message?.message),
+          onPress: () => {},
         },
         {
           label: "Delete",
@@ -150,14 +142,13 @@ export const MessageOptions = forwardRef(
           onPress: () => showAlert(),
         },
       ];
-    }, [isMessageOwner, onReply, message, onStartEditing]);
+    }, [isMessageOwner, view, onReply, onStartEditing]);
 
     const showAllEmojis = () => {
-      optionsRef.current.hide();
-      setTimeout(() => {
-        openEmojiList();
-      },200)
+      changeView("emojis");
+      optionsRef.current.snapToIndex(1)
     };
+
 
     const addReaction = useCallback(
       (emoji: string) => {
@@ -166,6 +157,8 @@ export const MessageOptions = forwardRef(
             emoji: emoji,
             uid: client.chatUserId,
           };
+          console.log(newReaction, '--newReaction')
+
           const existingReactionIndex = message.reactions.findIndex(
             (reaction) => reaction.uid === client.chatUserId
           );
@@ -223,7 +216,7 @@ export const MessageOptions = forwardRef(
               <Text
                 style={{
                   fontSize: Platform.OS === "ios" ? emojiSize : emojiSize - 5,
-                  fontFamily,
+                  fontFamily
                 }}
               >
                 {emoji.emoji}
@@ -275,12 +268,7 @@ export const MessageOptions = forwardRef(
               borderRadius: emojiSize,
             }}
           >
-            <Text
-              style={{
-                fontSize: Platform.OS === "android" ? 25 : 35,
-                fontFamily,
-              }}
-            >
+            <Text style={{ fontSize: Platform.OS === "android" ? 25 : 35, fontFamily }}>
               {item.emoji}
             </Text>
           </TouchableOpacity>
@@ -290,86 +278,44 @@ export const MessageOptions = forwardRef(
     );
 
     return (
-      <ActionSheet
-        ref={optionsRef}
-        enableGesturesInScrollView
-        keyboardHandlerEnabled={false}
-        isModal
-        openAnimationConfig={{ speed: 700 }}
-        onClose={close}
-        gestureEnabled
-        containerStyle={{
-          borderTopLeftRadius: 30,
-          borderTopRightRadius: 30,
-          backgroundColor: theme.background.primary,
-          height: '47%',
-          padding: 0,
-        }}
-      >
-        <View
-          style={{
-            // flex: 1,
-            height: "100%",
-            width: "100%",
-            justifyContent: "flex-start",
-            paddingHorizontal: 15,
-            paddingTop: 5,
-          }}
-        >
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-              height: 50,
-            }}
-          >
-            {renderStickers()}
-          </View>
-          <View
-            style={{
-              borderRadius: 20,
-              paddingHorizontal: 20,
-              marginTop: 20,
-              backgroundColor: theme?.background.secondary,
-            }}
-          >
-            {options
-              .filter((o) => o.isVisible)
-              .map((option, i) => (
-                <TouchableOpacity
-                  onPress={() => option.onPress()}
-                  key={i}
-                  style={[
-                    {
-                      height: 60,
-                      flexDirection: "row",
-                      alignItems: "center",
-                    },
-                    i !== 0 && {
-                      borderTopWidth: 1,
-                      borderTopColor: theme?.divider,
-                    },
-                  ]}
-                >
-                  {option.icon}
-                  <Text
-                    style={{
-                      marginStart: 15,
-                      fontFamily,
-                      fontSize: 17,
-                      color:
-                        option.label === "Delete"
-                          ? "red"
-                          : theme?.text.secondary,
-                    }}
-                  >
-                    {option.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-          </View>
-        </View>
+    <ActionSheet ref={optionsRef} enableGesturesInScrollView keyboardHandlerEnabled={false} isModal openAnimationConfig={{ speed: 700 }} onClose={close} gestureEnabled snapPoints={[70, 100]} containerStyle={{ height: windowHeight - 30/100 * windowHeight, padding: 0 }}>
+            <KeyboardAvoidingView 
+            behavior="padding"
+            style={{ flex: 1 }}>
+            <View style={{ flex: 1, 
+                 minHeight: windowHeight - 35/100 * windowHeight,
+            
+            width: '100%' }}>
+               <Search
+                value={searchValue}
+                setValue={setSearchValue}
+                placeholder="Find a reaction"
+              />
+            <View
+              style={{
+                height: '100%',
+                width: "100%",
+                paddingTop: 5,
+                padding: 15,
+                flexDirection: "row",
+                flexWrap: "wrap",
+                flexGrow: 1,
+                flex: 1,
+              }}
+            >
+             
+                <FlashList
+                  ref={flatListRef}
+                  numColumns={noOfColumns}
+                  data={emoji_list}
+                  estimatedItemSize={8000}
+                  renderItem={renderEmoji}
+                  ListEmptyComponent={() => <Text>emepty</Text>}
+                  ListFooterComponent={() => <View style={{ height: 100 }} />}
+                />
+            </View>
+            </View>
+            </KeyboardAvoidingView>
       </ActionSheet>
     );
   }

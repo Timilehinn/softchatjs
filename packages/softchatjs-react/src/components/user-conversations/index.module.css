@@ -80,7 +80,6 @@
 }
 
 .userList{
-    height: 300px;
     width: 300px;
     background-color:#202326;
     border-radius: 20px;
@@ -95,10 +94,22 @@
 .userList__wrap{
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    /* justify-content: space-between; */
     padding: 10px;
     background-color: transparent;
     border: 0;
+    width: 100%;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+}
+
+.scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  
+.scrollbar {
+-ms-overflow-style: none;
+scrollbar-width: none;
 }
 
 .userList__avartar{

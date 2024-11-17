@@ -59,9 +59,9 @@ export default function Navbar(props: {
     },
   ];
 
-  useEffect(() => {
-    document.addEventListener("mousedown", () => showMenu(false));
-  }, []);
+  // useEffect(() => {
+  //   document.addEventListener("mousedown", () => showMenu(false));
+  // }, []);
 
   if (props.renderNavbar) {
     return (
@@ -141,7 +141,7 @@ export default function Navbar(props: {
           {renderNavList()}
         </div>
       </div>
-      {menu && <UserList users={props.userList} userListRef={null} />}
+      {menu && <UserList users={props.userList} userListRef={null} close={() => showMenu(false)} />}
     </>
   );
 }

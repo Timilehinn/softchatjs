@@ -216,7 +216,11 @@ export default class Conversation {
         // check tthis out
         const prevConversation = this.connection.conversationListMeta[conversationId];
         var messages = [ ...prevConversation.conversation.messages ];
-        messages.unshift(fullMessage.message);
+
+        // check if the user created the conversation with an initial message.
+        if(fullMessage.message?.message){
+          messages.unshift(fullMessage.message);
+        }
         var updatedConversationListMeta = {
           conversation: { ...prevConversation.conversation, messages },
           lastMessage: fullMessage.message,

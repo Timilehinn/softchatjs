@@ -9,7 +9,6 @@ import {
 import { Conversations } from "softchatjs-react-native/src";
 import { useNavigation, router } from "expo-router";
 import { useRef } from "react";
-import { ConversationsRefs } from "softchatjs-react-native/src/components/Conversations";
 import { useClient } from "@/contexts/ClientContext";
 
 const users = [
@@ -98,7 +97,6 @@ const users = [
 export default function TabOneScreen() {
   const navigation = useNavigation();
   const { client } = useClient();
-  const conversationRef = useRef<ConversationsRefs>();
 
   const chatUser =
     Platform.OS === "android"
@@ -114,7 +112,6 @@ export default function TabOneScreen() {
   return (
     <View style={styles.container}>
       <Conversations
-        ref={conversationRef}
         user={chatUser}
         users={users}
         onOpen={({ activeConversation }) => {
@@ -158,7 +155,7 @@ export default function TabOneScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 50,
+    paddingTop: 20,
   },
   title: {
     fontSize: 20,

@@ -5,19 +5,29 @@ import React, {
   useEffect,
   useState,
   useCallback,
-  useMemo
+  useMemo,
 } from "react";
 import styles from "./index.module.css";
-import { ChatEventGenerics, Conversation, MediaType, Message, UserMeta } from "softchatjs-core";
+import {
+  ChatEventGenerics,
+  Conversation,
+  MediaType,
+  Message,
+  UserMeta,
+} from "softchatjs-core";
 import Text from "../text/text";
 import { formatConversationTime, formatWhatsAppDate } from "../../helpers/date";
-import { ConnectionStatus, useChatState } from "../../providers/clientStateProvider";
+import {
+  ConnectionStatus,
+  useChatState,
+} from "../../providers/clientStateProvider";
 import { useChatClient } from "../../providers/chatClientProvider";
 import Avartar from "../avartar/avartar";
 import { MdMessage } from "react-icons/md";
 import { FaCheck } from "react-icons/fa6";
-import ConversationHeader from './ConversationHeader'
+import ConversationHeader from "./ConversationHeader";
 import { VerifiedIcon } from "../assets/icons";
+import { IoCloseCircle } from "react-icons/io5";
 
 type ConversationItem = {
   conversation: Conversation;
@@ -32,7 +42,7 @@ export const ConversationList = ({
   userListRef,
   renderConversationList,
   connectionStatus,
-  resetState
+  resetState,
 }: {
   setMainListOpen: any;
   setShowUserList: Dispatch<SetStateAction<boolean>>;
@@ -42,13 +52,12 @@ export const ConversationList = ({
     conversations: ConversationItem[];
     onCoversationItemClick: (conversationItem: ConversationItem) => void;
   }) => JSX.Element;
-  connectionStatus: ConnectionStatus,
+  connectionStatus: ConnectionStatus;
   resetState: () => void;
 }) => {
   const { client, config } = useChatClient();
   const { setActiveConversation, conversations } = useChatState();
-  const [ searchVal, setSearchVal ] = useState('')
-  
+  const [searchVal, setSearchVal] = useState("");
 
   if (renderConversationList) {
     return (
@@ -75,48 +84,53 @@ export const ConversationList = ({
     try {
       const userId = client.chatUserId;
       const data = conversations.filter((c) => {
+        const participantMatch = c.conversation.participantList.some(
+          (participant) => {
+            const username =
+              participant.participantDetails.username.toLowerCase();
+            const firstname =
+              participant.participantDetails?.firstname?.toLowerCase() || "";
+            const lastname =
+              participant.participantDetails?.lastname?.toLowerCase() || "";
+            const uid = participant.participantDetails?.uid;
 
-        const participantMatch = c.conversation.participantList.some((participant) => {
-          const username = participant.participantDetails.username.toLowerCase();
-          const firstname = participant.participantDetails?.firstname?.toLowerCase() || "";
-          const lastname = participant.participantDetails?.lastname?.toLowerCase() || "";
-          const uid = participant.participantDetails?.uid;
-    
-          return (
-            uid !== userId && 
-            (
-              username.includes(searchVal.toLowerCase()) ||
-              firstname.includes(searchVal.toLowerCase()) ||
-              lastname.includes(searchVal.toLowerCase())
-            )
-          );
-        });
+            return (
+              uid !== userId &&
+              (username.includes(searchVal.toLowerCase()) ||
+                firstname.includes(searchVal.toLowerCase()) ||
+                lastname.includes(searchVal.toLowerCase()))
+            );
+          }
+        );
         return participantMatch;
       });
-    
+
       return data;
     } catch (error) {
-      return conversations
+      return conversations;
     }
   }, [conversations, searchVal]);
 
   return (
     <div
-      style={{ background: config?.theme?.background?.secondary, borderRight: `1px solid ${config.theme.divider}` }}
+      style={{
+        background: config?.theme?.background?.secondary,
+        borderRight: `1px solid ${config.theme.divider}`,
+      }}
       className={styles.list}
     >
-      <ConversationHeader 
+      <ConversationHeader
         connectionStatus={connectionStatus}
-        theme={config.theme} 
+        theme={config.theme}
         onTextChange={(val) => setSearchVal(val)}
       />
       {filteredConversations.length === 0 && (
         <div className={styles.list__empty}>
-        <Text
-          styles={{ textAlign: "center", color: config.theme.text.primary }}
-          text="Start a new conversation."
-        />
-      </div>
+          <Text
+            styles={{ textAlign: "center", color: config.theme.text.primary }}
+            text="Start a new conversation."
+          />
+        </div>
       )}
       {filteredConversations.map((item, index) => (
         <ConversationItem
@@ -126,7 +140,7 @@ export const ConversationList = ({
             setMainListOpen(false);
             resetState();
           }}
-          borderBottom={''}
+          borderBottom={""}
         />
       ))}
     </div>
@@ -136,7 +150,7 @@ export const ConversationList = ({
 const ConversationItem = ({
   item,
   onClick,
-  borderBottom
+  borderBottom,
 }: {
   item: {
     conversation: Conversation;
@@ -144,7 +158,7 @@ const ConversationItem = ({
     unread: string[];
   };
   onClick: () => void;
-  borderBottom: string
+  borderBottom: string;
 }) => {
   const { client, config } = useChatClient();
   const { activeConversation } = useChatState();
@@ -159,7 +173,6 @@ const ConversationItem = ({
     if (item.lastMessage?.attachmentType === "media") {
       return (
         <div className={styles.media}>
-         
           <img
             src={
               item.lastMessage.attachedMedia.find((i) => i.type === "image")
@@ -182,21 +195,28 @@ const ConversationItem = ({
       <Text
         styles={{ textAlign: "left", color: textColor }}
         size="sm"
-        text={item.lastMessage?.message?.length > 75? item.lastMessage?.message?.substring(0, 75)+'...' : item.lastMessage?.message}
+        text={
+          item.lastMessage?.message?.length > 75
+            ? item.lastMessage?.message?.substring(0, 75) + "..."
+            : item.lastMessage?.message
+        }
       />
     );
   };
   return (
-    <div
-      className={styles.item}
-      onClick={onClick}
-    >
-      <div style={{ marginRight: '10px' }}>
+    <div className={styles.item} onClick={onClick}>
+      <div style={{ marginRight: "10px" }}>
         {user[0] && (
-          <Avartar initials={user[0]?.participantDetails?.username?.substring(0,1)} size={40} url={user[0]?.participantDetails?.profileUrl} />
+          <Avartar
+            initials={user[0]?.participantDetails?.username?.substring(0, 1)}
+            size={40}
+            url={user[0]?.participantDetails?.profileUrl}
+          />
         )}
       </div>
-      <div style={{ width: "100%", padding: '20px 0px 20px 0px', borderBottom }}>
+      <div
+        style={{ width: "100%", padding: "20px 0px 20px 0px", borderBottom }}
+      >
         <div
           style={{
             width: "100%",
@@ -205,17 +225,22 @@ const ConversationItem = ({
             justifyContent: "space-between",
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-          <Text
-            styles={{ textAlign: "left", color: textColor, textTransform: "capitalize", marginRight: '5px' }}
-            weight="bold"
-            text={user[0]?.participantDetails?.username}
-          />
-          {item.conversation.conversationType === "admin-chat" as any && (
-            <VerifiedIcon size={15} color={config.theme.icon} />
-          )}
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <Text
+              styles={{
+                textAlign: "left",
+                color: textColor,
+                textTransform: "capitalize",
+                marginRight: "5px",
+              }}
+              weight="bold"
+              text={user[0]?.participantDetails?.username}
+            />
+            {item.conversation.conversationType === ("admin-chat" as any) && (
+              <VerifiedIcon size={15} color={config.theme.icon} />
+            )}
           </div>
-         
+
           <Text
             size="sm"
             styles={{ color: textColor }}
@@ -246,20 +271,56 @@ const ConversationItem = ({
   );
 };
 
-export const UserList = ({ users = [], userListRef }: { users?: UserMeta[], userListRef?: any }) => {
+export const UserList = ({
+  users = [],
+  userListRef,
+  close,
+}: {
+  users?: UserMeta[];
+  userListRef?: any;
+  close: () => void;
+}) => {
   const { client, config } = useChatClient();
 
   const startConversation = (item: UserMeta) => {
-    const conn = client.newConversation(item, null);
-    conn.create("Hey there 👋");
-  }
-
+    try {
+      const conn = client.newConversation(item, null);
+      conn.create("Hey there 👋");
+      close();
+    } catch (error) {
+      console.error(error?.message);
+    }
+  };
   return (
     <div
       ref={userListRef}
       style={{ background: config?.theme?.background?.secondary || "#202326" }}
       className={styles.userList}
     >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: 15,
+        }}
+      >
+        <Text
+          styles={{ color: config?.theme?.text?.primary || "white" }}
+          text="Users"
+        />
+        <button
+          onClick={close}
+          style={{
+            backgroundColor: "transparent",
+            border: 0,
+            cursor: "pointer",
+          }}
+        >
+          <IoCloseCircle size={22} />
+        </button>
+      </div>
+      <div className={styles.scrollbar} style={{ overflowY: 'scroll', height: '300px' }}>
       {users.map((item, index) => (
         <button
           key={index}
@@ -268,13 +329,8 @@ export const UserList = ({ users = [], userListRef }: { users?: UserMeta[], user
           }}
           className={styles.userList__wrap}
         >
-          <div className={styles.userList__user}>
-            <div className={styles.userList__avartar}>
-              <Text
-                styles={{ color: config?.theme?.text?.primary || "white" }}
-                text={item.username}
-              />
-            </div>
+          <Avartar initials={item.username.substring(0,1)} url={item.profileUrl} />
+          <div className={styles.userList__user} style={{ marginLeft: '6px' }}>
             <Text
               size="sm"
               text={item.username}
@@ -283,6 +339,7 @@ export const UserList = ({ users = [], userListRef }: { users?: UserMeta[], user
           </div>
         </button>
       ))}
+      </div>
     </div>
   );
 };

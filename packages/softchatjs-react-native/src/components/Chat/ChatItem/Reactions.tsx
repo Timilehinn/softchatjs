@@ -46,7 +46,7 @@ export default function Reactions(props: ReactionProps) {
           style={{
             backgroundColor: position === "left" ? theme?.background.primary : theme?.background.secondary,
             borderRadius: 45,
-            borderWidth: 2,
+            borderWidth: 1,
             borderColor: theme?.divider,
             alignItems: "center",
             justifyContent: "center",

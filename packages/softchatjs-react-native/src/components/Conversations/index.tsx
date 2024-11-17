@@ -176,24 +176,27 @@ const Conversations = forwardRef((props: ConversationProps, ref) => {
       setUserMeta(user);
       client.initializeUser(user);
     }
-  }, [user]);
+  }, [user, client]);
 
   useEffect(() => {
-    const res = client.getConversations();
-    setConversationList(sortConversations(res))
-    client.subscribe(Events.CONNECTION_CHANGED, handleConnectionChanged);
-    client.subscribe(
-      Events.CONVERSATION_LIST_META_CHANGED,
-      handleConversationListChanged
-    );
-    return () => {
-      client.unsubscribe(Events.CONNECTION_CHANGED, handleConnectionChanged);
-      client.unsubscribe(
+    if(client){
+      const res = client.getConversations();
+      setConversationList(sortConversations(res))
+      client.subscribe(Events.CONNECTION_CHANGED, handleConnectionChanged);
+      client.subscribe(
         Events.CONVERSATION_LIST_META_CHANGED,
         handleConversationListChanged
       );
-    };
-  }, []);
+      return () => {
+        client.unsubscribe(Events.CONNECTION_CHANGED, handleConnectionChanged);
+        client.unsubscribe(
+          Events.CONVERSATION_LIST_META_CHANGED,
+          handleConversationListChanged
+        );
+      };
+    }
+   
+  }, [client]);
 
   const renderConversations = useCallback(
     ({
@@ -322,7 +325,7 @@ const Conversations = forwardRef((props: ConversationProps, ref) => {
             </>
           ) : (
             <>
-              {activeVoiceMessage && (
+              {/* {activeVoiceMessage && (
                 <View
                   style={{
                     borderWidth: 1,
@@ -351,7 +354,7 @@ const Conversations = forwardRef((props: ConversationProps, ref) => {
                     <XIcon color={theme?.icon} size={15} />
                   </TouchableOpacity>
                 </View>
-              )}
+              )} */}
               <View
                 style={{
                   width: "100%",

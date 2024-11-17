@@ -17,6 +17,9 @@ import {
   Platform,
   Dimensions,
   RefreshControl,
+  Modal,
+  TouchableOpacity,
+  Button,
 } from "react-native";
 import {
   ChatBubbleRenderProps,
@@ -57,6 +60,9 @@ import { useMessageState } from "../../contexts/MessageStateContext";
 import { LockIcon, MessagePlus } from "../../assets/icons";
 import { Audio } from "expo-av";
 import { interpolate } from "react-native-reanimated";
+import { ScrollView } from "react-native-actions-sheet";
+import { useModalProvider } from "../../contexts/ModalProvider";
+import EmojiListModal from '../../components/Modals/EmojiList'
 
 type ChatProps = {
   activeConversation: ConversationListItem;
@@ -82,6 +88,21 @@ export type SelectedMessage = {
 
 type GroupedMessages = Array<string | Message>;
 
+const KeyboardAvoiding = (props: { keyboardOffset: number, children: Children }) => {
+  if(Platform.OS === "android"){
+    return <>{props.children}</>
+  }
+  return (
+    <KeyboardAvoidingView
+    style={{ flex: 1, height: '100%', width: '100%' }}
+    behavior={Platform.OS === "ios" ? "padding" : "height"}
+    keyboardVerticalOffset={props.keyboardOffset}
+  >
+    {props.children}
+  </KeyboardAvoidingView>
+  )
+}
+
 export default function Chat(props: ChatProps) {
   const { client, theme, fontFamily } = useConfig();
   const {
@@ -98,6 +119,7 @@ export default function Chat(props: ChatProps) {
   const participantList = activeConversation.conversation.participantList;
   const participants = activeConversation.conversation.participants;
   const [permissionResponse, requestPermission] = Audio.usePermissions();
+  const { displayModal } = useModalProvider();
   const scrollRef = useRef<FlashList<Message | string> | null>(null);
   const inputRef = useRef<TextInput>(null);
   const emojiListRef = useRef<BottomSheetRef>(null);
@@ -115,9 +137,9 @@ export default function Chat(props: ChatProps) {
     addNewPendingMessages,
   } = useMessageState();
 
-  const [messages, setMessages] = useState<Array<string | Message>>([
+  const [messages, setMessages] = useState<Array<string | Message>>(activeConversation.conversation?.messages? restructureMessages([
     ...activeConversation.conversation.messages.reverse(),
-  ]);
+  ]) : []);
   const [isEditing, setIsEditing] = useState(false);
   const [refMap, setRefMap] = useState<{
     [key: string]: { ref: RefObject<View> | null; index: number };
@@ -241,7 +263,7 @@ export default function Chat(props: ChatProps) {
 
   async function getOlderMessages() {
     try {
-      if (client && messages.length > 0) {
+      if (client && messages.length >= 25) {
         setLoadingOlderMessages(true);
         const olderMessages = (await client
           .messageClient(conversationId)
@@ -386,8 +408,17 @@ export default function Chat(props: ChatProps) {
   }, [client, conversationId]);
 
   const openEmojis = () => {
-    emojiListRef?.current?.open();
+    // emojiListRef?.current?.open();
     inputRef?.current?.blur();
+    displayModal({
+      children: <EmojiListModal 
+      message={selectedMessage.message}
+      recipientId={recipientId}
+      theme={theme}
+      type="message"
+      onSelect={(value) => setGlobalTextMessage(p => p+value)}
+      />
+    })
   };
 
   const sendMessage = async () => {
@@ -703,6 +734,15 @@ export default function Chat(props: ChatProps) {
           }, 500);
         }}
         theme={theme}
+        openEmojiList={() => {
+          displayModal({
+            children: <EmojiListModal 
+            message={selectedMessage.message}
+            recipientId={recipientId}
+            theme={theme}
+            />
+          })
+        }}
       />
     );
   }, [
@@ -818,10 +858,12 @@ export default function Chat(props: ChatProps) {
             onScrollToMessage(messageId);
           }}
           layout={layout}
-          onLongPress={({ message, chatItemRef, isMessageOwner }) =>
+          onLongPress={({ message, chatItemRef, isMessageOwner }) => {
             activeConversation.conversation.conversationType !== "admin-chat"
-              ? onChatItemLongPress(message, chatItemRef, isMessageOwner)
-              : null
+            ? onChatItemLongPress(message, chatItemRef, isMessageOwner)
+            : null
+          }
+           
           }
           inputRef={inputRef}
           position={chatUserId === item.from ? "right" : "left"}
@@ -891,6 +933,45 @@ export default function Chat(props: ChatProps) {
     isLoading: connectionStatus.connecting || loadingMessages,
   };
 
+  // const [ modal, showModal ] = useState(false)
+
+  // return (
+  //   <GestureHandlerRootView
+  //   style={{
+  //     ...styles.main,
+  //     backgroundColor: theme?.background.primary,
+  //   }}
+  // >
+  //   <View>
+  //        <Modal visible={modal} style={{ flex: 1 }}>
+  //       <View style={{ flex: 1, height: '100%', width: '100%', backgroundColor: 'red' }}>
+  //         <Text>sdfsdf</Text>
+  //       </View>
+  //     </Modal> 
+  //     <TouchableOpacity onPress={() => showModal(true)} style={{ padding: 10, backgroundColor: 'red' }}>
+  //       <Text>cliek me</Text>
+  //     </TouchableOpacity>
+  //        <EmojiSheet
+  //       ref={emojiListRef}
+  //       openKeyboard={() => inputRef?.current?.focus()}
+  //       sendSticker={sendMessage}
+  //       recipientId={recipientId}
+  //     />
+  //     <MediaOptions
+  //       conversationId={conversationId}
+  //       clearActiveQuote={clearSelectedMessage}
+  //       activeQuote={activeQuote?.message}
+  //       ref={mediaOptionsRef}
+  //       chatUserId={client?.chatUserId as string}
+  //       recipientId={recipientId}
+  //     />
+  //     <>{renderMessageOptions()}</>
+  //   </View>
+  // </GestureHandlerRootView>
+
+  
+  // )
+
   return (
     <GestureHandlerRootView
       style={{
@@ -904,11 +985,12 @@ export default function Chat(props: ChatProps) {
         renderChatHeader={renderChatHeader}
         isTyping={isTyping}
       />
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={keyboardOffset}
-      >
+      {/* <Button title="oepner"  
+      onPress={() => {
+    messageOptionsRef?.current?.open();
+      }}
+      /> */}
+      <KeyboardAvoiding keyboardOffset={keyboardOffset}>
         {messages.length === 0 ? (
           renderPlaceholder()
         ) : (
@@ -921,7 +1003,7 @@ export default function Chat(props: ChatProps) {
             <FlashList
               ref={scrollRef}
               inverted
-              onScroll={() => (isScrolling ? null : onStartedScrolling())}
+              // onScroll={() => (isScrolling ? null : onStartedScrolling())}
               data={messages}
               keyExtractor={(_, index) => index.toString()}
               renderItem={renderChatItem}
@@ -952,9 +1034,7 @@ export default function Chat(props: ChatProps) {
               contentContainerStyle={{
                 paddingTop: 0,
               }}
-              estimatedItemSize={100}
-              // onViewableItemsChanged={onViewRef.current}
-              viewabilityConfig={viewConfigRef.current}
+              estimatedItemSize={200}
               onEndReached={() => {
                 getOlderMessages();
               }}
@@ -1041,12 +1121,12 @@ export default function Chat(props: ChatProps) {
             </View>
           )}
         </View>
-      </KeyboardAvoidingView>
+      </KeyboardAvoiding>
       <EmojiSheet
         ref={emojiListRef}
-        openKeyboard={() => inputRef?.current?.focus()}
-        sendSticker={sendMessage}
+        message={selectedMessage.message}
         recipientId={recipientId}
+        theme={theme}
       />
       <MediaOptions
         conversationId={conversationId}
@@ -1057,6 +1137,11 @@ export default function Chat(props: ChatProps) {
         recipientId={recipientId}
       />
       <>{renderMessageOptions()}</>
+      {/* <Modal visible style={{ flex: 1 }}>
+        <View style={{ flex: 1, height: '100%', width: '100%', backgroundColor: 'red' }}>
+          <Text>sdfsdf</Text>
+        </View>
+      </Modal> */}
     </GestureHandlerRootView>
   );
 }

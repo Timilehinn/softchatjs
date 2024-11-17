@@ -18,6 +18,7 @@ import Animated, {
 import TrashIcon, {
   AttachmentIcon,
   CloseIcon,
+  EmojiIcon,
   LockClosed,
   LockOpen,
   MicIcon,
@@ -154,15 +155,10 @@ export default function ChatInput(props: ChatInputProps) {
     "inactive" | "recording" | "paused" | "stopped"
   >("inactive");
 
-  useEffect(() => {
-    console.log("re-rendered 3");
-  }, []);
-
   const hasTyped = useMemo(() => {
     if (messageType === "text") {
       return value.length > 0 ? true : false;
     }
-
     // just to stop the send btn from being disabled incase of a multimedia-text message
     return true;
   }, [value]);
@@ -184,18 +180,6 @@ export default function ChatInput(props: ChatInputProps) {
     }
     return value;
   }, []);
-
-  async function pauseRecording() {
-    recording?.pauseAsync();
-    setVoiceMessageState("paused");
-  }
-
-  async function continueRecording() {
-    recording?.startAsync();
-    setVoiceMessageState("recording");
-  }
-
-  async function stopRecording() {}
 
   if (isRecording) {
     return (
@@ -287,8 +271,8 @@ export default function ChatInput(props: ChatInputProps) {
             flex: 1,
             flexDirection: "row",
             alignItems: "center",
-            borderRadius: 15,
-            padding: Platform.OS === "ios" ? 5 : 2,
+            borderRadius: 25,
+            padding: Platform.OS === "ios" ? 5 : 2.5,
           }}
         >
           <TextInput
@@ -310,14 +294,10 @@ export default function ChatInput(props: ChatInputProps) {
               onPress={() => openEmojis?.()}
               style={{ padding: 4, display: isEditing ? "none" : "flex" }}
             >
-              <StickerIcon size={18} color={theme?.icon} />
+              <EmojiIcon size={25} color={theme?.icon} />
             </TouchableOpacity>
           )}
         </View>
-
-        {/* {!hasTyped && mediaOptionsRef && (
-         <></>
-        )} */}
         {isEditing && (
           <TouchableOpacity
             activeOpacity={0.7}
@@ -385,7 +365,7 @@ const styles = StyleSheet.create({
     height: Platform.OS === "ios" ? "100%" : "100%",
     width: "100%",
     paddingHorizontal: 10,
-    borderRadius: 10,
+    borderRadius: 25,
     flex: 1,
   },
 });
