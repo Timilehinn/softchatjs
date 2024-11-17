@@ -15,7 +15,7 @@ export default function Sticker(props: SickerProps) {
       <Image
       source={{ uri: message.attachedMedia[0].mediaUrl }}
       cachePolicy="disk"
-      style={{ height: 70, width: 70 }}
+      style={{ height: 70, width: 70, borderRadius: 8 }}
     />
     )
   },[])

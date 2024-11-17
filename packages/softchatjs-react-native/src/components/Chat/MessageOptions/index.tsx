@@ -9,7 +9,6 @@ import {
   KeyboardAvoidingView,
   ToastAndroid,
 } from "react-native";
-import BottomSheet, { BottomSheetRef } from "../../BottomSheet";
 import {
   useCallback,
   useMemo,

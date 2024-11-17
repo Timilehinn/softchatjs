@@ -31,7 +31,7 @@ export default function Preview({
             alignItems: "flex-start",
             width: '100%',
             minWidth: 220,
-            marginBottom: 5,
+            // marginBottom: 5,
             // borderWidth: 1,
             // borderColor: theme?.icon,
             padding: 8,

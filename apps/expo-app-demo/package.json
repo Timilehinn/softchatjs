@@ -32,6 +32,7 @@
     "expo-splash-screen": "~0.29.10",
     "expo-status-bar": "~2.0.0",
     "expo-system-ui": "~4.0.3",
+    "expo-video": "~2.0.0",
     "expo-web-browser": "~14.0.1",
     "react": "18.3.1",
     "react-dom": "18.3.1",
@@ -45,8 +46,7 @@
     "react-native-svg": "15.8.0",
     "react-native-web": "~0.19.10",
     "softchatjs-core": "*",
-    "softchatjs-react-native": "*",
-    "expo-video": "~2.0.0"
+    "softchatjs-react-native": "*"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

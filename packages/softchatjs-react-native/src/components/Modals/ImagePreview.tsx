@@ -30,10 +30,6 @@ import ChatInput from "../Chat/ChatInput";
 import { XIcon } from "../../assets/icons";
 import { useModalProvider } from "../../contexts/ModalProvider";
 import { UPLOAD_MEDIA } from "../../api";
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-} from "react-native-reanimated";
 import { useConfig } from "../../contexts/ChatProvider";
 import { useMessageState } from "../../contexts/MessageStateContext";
 import { Image } from "expo-image";
@@ -75,26 +71,6 @@ export default function ImagePreview(props: ImagePreviewProps) {
   const screenWidth = width;
   const screenHeight = height;
   const [uploading, showUploading] = useState(false);
-
-  const scale = useSharedValue(1);
-  const startScale = useSharedValue(0);
-
-  const animatedStyles = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
-
-  const pinch = Gesture.Pinch()
-    .onStart(() => {
-      startScale.value = scale.value;
-    })
-    .onUpdate((event) => {
-      scale.value = clamp(
-        startScale.value * event.scale,
-        0.5,
-        Math.min(width / 100, height / 100)
-      );
-    })
-    .runOnJS(true);
 
   const uploadImage = async () => {
     try {

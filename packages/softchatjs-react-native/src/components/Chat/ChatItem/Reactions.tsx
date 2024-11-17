@@ -38,7 +38,7 @@ export default function Reactions(props: ReactionProps) {
   }
 
   return (
-    <View style={[{ flexDirection: "row" }, layout !== 'stacked' && { marginTop: -3 }]}>
+    <View style={[{ flexDirection: "row" }]}>
       {reactions.map((reaction, i) => (
         <TouchableOpacity
           key={i}

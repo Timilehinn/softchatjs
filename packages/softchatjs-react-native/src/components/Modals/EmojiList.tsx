@@ -121,6 +121,7 @@ export default function EmojiListModal(props: EmojiListProps) {
         flex: 1,
         height: "100%",
         width: "100%",
+        paddingTop: Platform.OS === "ios"? 40 : 0
       }}
     >
       <View

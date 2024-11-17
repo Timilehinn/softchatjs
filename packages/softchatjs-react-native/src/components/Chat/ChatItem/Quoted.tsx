@@ -185,11 +185,13 @@ export default function Quoted(props: QuotedProps) {
       style={[
         {
           backgroundColor: "rgba(0,0,0,.3)",
-          padding: 5,
-          borderRadius: 5,
-          marginBottom: 5,
+          padding: 8,
+          borderTopRightRadius: 15,
+          borderTopLeftRadius: 15,
           borderLeftWidth: 4,
-          borderColor: quotedMessage.messageOwner.color,
+          borderTopWidth: 4,
+          borderTopColor: 'transparent',
+          borderLeftColor: quotedMessage.messageOwner.color,
         },
       ]}
     >
@@ -224,6 +226,7 @@ export default function Quoted(props: QuotedProps) {
             fontFamily,
             color: "white",
             fontSize: 14,
+            marginTop: 5
           }}
         >
           {quotedMessage.message}

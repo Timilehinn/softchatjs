@@ -6,13 +6,21 @@ import { useModalProvider } from '../../../../contexts/ModalProvider';
 import VideoViewer from '../../../Modals/VideoViewer';
 import { PlayIcon } from '../../../../assets/icons';
 import { useConfig } from '../../../../contexts/ChatProvider';
+import { useVideoPlayer, VideoView } from "expo-video";
+import { useEvent } from "expo";
 
-export default function VideoPlayer(props: { media: Media, message: Message, recipientId: string }) {
 
-  const { client } = useConfig()
+export default function VideoPlayer(props: { media: Media, message: Message, recipientId: string, position: "left" | "right" }) {
+
+  const { client, theme } = useConfig()
   const video = useRef(null);
   const [status, setStatus] = useState({});
   const { displayModal } = useModalProvider();
+
+  const player = useVideoPlayer(props.media.mediaUrl, (player) => {
+    // player.loop = true;
+    // player.play();
+  });
 
   const deleteMessage = () => {
     if (client) {
@@ -34,19 +42,13 @@ export default function VideoPlayer(props: { media: Media, message: Message, rec
           props.media
         } />
       })
-    } style={styles.container}>
-      <Video
-        ref={video}
+    } style={{ ...styles.container, borderRadius: 16.5, padding: 2, backgroundColor: props.position === "right"? theme.chatBubble.right.bgColor : theme.chatBubble.left.bgColor }}>
+      <VideoView
         style={styles.video}
-        source={{
-          uri: props.media.mediaUrl,
-        }}
-        // useNativeControls
-        resizeMode={ResizeMode.COVER}
-        isLooping
-        onPlaybackStatusUpdate={status => setStatus(() => status)}
+        player={player}
+        contentFit="cover"
       />
-      <View style={{ flex: 1, position: "absolute", borderRadius: 5, height: '100%', width: '100%', backgroundColor: "rgba(0,0,0,.6)", alignItems: 'center', justifyContent: 'center' }}>
+      <View style={{ flex: 1, position: "absolute", borderRadius: 15, height: '100%', width: '100%', backgroundColor: "rgba(0,0,0,.6)", alignItems: 'center', justifyContent: 'center' }}>
         <PlayIcon color='white' size={30} />
       </View>
     </TouchableOpacity>
@@ -55,13 +57,17 @@ export default function VideoPlayer(props: { media: Media, message: Message, rec
 
 const styles = StyleSheet.create({
   container: {
-    height: 200, minWidth: 250,
+    height: 200, 
+    minWidth: 250,
+    borderRadius: 15,
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   buttons: {
 
   },
   video: {
     flex: 1,
-    borderRadius: 5
+    borderRadius: 15
   }
 })

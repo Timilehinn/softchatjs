@@ -155,7 +155,7 @@ export default function TabOneScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 20,
+    paddingTop: Platform.OS === "ios"? 45 : 0,
   },
   title: {
     fontSize: 20,

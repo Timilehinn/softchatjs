@@ -12,17 +12,18 @@ type Props = {
   message: Message;
   isPending?: boolean;
   recipientId: string;
+  position?: "left" | "right"
 };
 
 export default function MediaMessage(props: Props) {
-  const { message, isPending, recipientId } = props;
+  const { message, isPending, recipientId, position } = props;
 
   const { theme } = useConfig();
 
   const { displayModal } = useModalProvider();
 
   return (
-    <View style={{ marginBottom: message?.message ? 7 : 0 }}>
+    <View style={{ marginTop: message?.message ? 3 : 0 }}>
       {message.attachedMedia.map((media, i) => {
         if (media.type === MediaType.IMAGE) {
           return (
@@ -44,14 +45,17 @@ export default function MediaMessage(props: Props) {
               }
               key={i}
               activeOpacity={0.7}
+              style={{ padding: 2, borderRadius: 16.5, backgroundColor: position === "right"? theme.chatBubble.right.bgColor : theme.chatBubble.left.bgColor }}
             >
               <Image
+                placeholder={require("../../../../assets/img_placeholder.png")}
+                placeholderContentFit="cover"
                 source={{ uri: isPending ? media.mediaUrl : media.mediaUrl }}
                 style={{
                   height: 200,
                   width: 250,
-                  borderRadius: 5,
-                  marginBottom: 10,
+                  borderRadius: 15,
+                  // marginBottom: 10,
                 }}
                 cachePolicy="disk"
                 contentFit="cover"
@@ -71,6 +75,7 @@ export default function MediaMessage(props: Props) {
               media={media}
               message={message}
               recipientId={recipientId}
+              position={position}
             />
           );
         }

@@ -5,7 +5,6 @@ import ChatClient from "softchatjs-core";
 import defaultTheme from "../theme";
 import { MessageStateProvider } from "./MessageStateContext";
 
-
 type ChatProvider = {
   children: JSX.Element;
   theme?: ChatTheme;
@@ -31,9 +30,9 @@ export default function ChatProvider(
 
   return (
     <ConfigContext.Provider value={{ theme, client, fontFamily }}>
-      <ModalProvider>
-        <MessageStateProvider>{children}</MessageStateProvider>
-      </ModalProvider>
+      <MessageStateProvider>
+        <ModalProvider>{children}</ModalProvider>
+      </MessageStateProvider>
     </ConfigContext.Provider>
   );
 }

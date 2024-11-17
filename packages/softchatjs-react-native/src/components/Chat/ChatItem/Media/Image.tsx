@@ -37,6 +37,7 @@ export default function ImageAttachment(props: Props) {
           activeOpacity={0.7}
         >
           <Image
+            placeholder={require("../../../../assets/img_placeholder.png")}
             source={{ uri: media.mediaUrl }}
             style={{
               height: 200,

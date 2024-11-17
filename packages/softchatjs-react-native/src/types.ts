@@ -317,3 +317,8 @@ export type Emoji = {
   unicode_version: string,
   ios_version: string
 }
+
+export type BottomSheetRef = {
+  open: () => void,
+  close: () => void,
+}

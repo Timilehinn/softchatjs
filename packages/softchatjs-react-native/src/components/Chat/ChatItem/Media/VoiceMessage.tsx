@@ -156,17 +156,20 @@ export default function VoiceMessage(props: VoiceMessageProps) {
   return (
     <View
       style={{
-        flex: 1,
         flexDirection: "row",
         alignItems: "center",
         width: "100%",
+        minWidth: 50,
+        backgroundColor: theme.background.disabled,
+        padding: 10,
+        borderRadius: 25
+        // backgroundColor: 'red'
       }}
     >
       <>{renderVoiceMessageControls()}</>
       <View
         style={{
           flex: 1,
-          height: 3,
           backgroundColor: theme?.divider,
           marginHorizontal: 10,
         }}

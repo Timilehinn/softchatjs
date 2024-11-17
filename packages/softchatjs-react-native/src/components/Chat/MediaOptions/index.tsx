@@ -1,6 +1,5 @@
 import React from "react";
 import { View, Text, Dimensions, TouchableOpacity } from "react-native";
-import BottomSheet, { BottomSheetRef } from "../../BottomSheet";
 import { forwardRef, useRef, useState, useImperativeHandle } from "react";
 import { generateId } from "../../../utils";
 import {
@@ -109,7 +108,6 @@ export const MediaOptions = forwardRef((props: MediaOptionsProps, ref: any) => {
         quality: 0.3,
         base64: true,
       });
-
       if (!result.canceled) {
         var base64 = result.assets[0].base64;
         var type = result.assets[0].type;
@@ -118,59 +116,65 @@ export const MediaOptions = forwardRef((props: MediaOptionsProps, ref: any) => {
         var fileSize = result.assets[0].fileSize;
         var fileSizeInMB = fileSize ? fileSize / (1024 * 1024) : 0; // Convert bytes to MB
         if (type === "image") {
-          displayModal({
-            justifyContent: "flex-start",
-            children: (
-              <ImagePreview
-                conversationId={conversationId}
-                clearActiveQuote={clearActiveQuote}
-                activeQuote={activeQuote}
-                chatUserId={chatUserId}
-                recipientId={recipientId}
-                image={{
-                  type: MediaType.IMAGE,
-                  mimeType: result.assets[0].mimeType,
-                  ext: ".png",
-                  mediaId: generateId(),
-                  base64: result.assets[0].uri as string,
-                  mediaUrl: result.assets[0].uri,
-                  meta: {
-                    aspectRatio: width / height || 0,
-                    height,
-                    width,
-                    size: fileSize,
-                  },
-                }}
-              />
-            ),
-          });
+          setTimeout(() => {
+            displayModal({
+              justifyContent: "flex-start",
+              children: (
+                <ImagePreview
+                  conversationId={conversationId}
+                  clearActiveQuote={clearActiveQuote}
+                  activeQuote={activeQuote}
+                  chatUserId={chatUserId}
+                  recipientId={recipientId}
+                  image={{
+                    type: MediaType.IMAGE,
+                    mimeType: result.assets[0].mimeType,
+                    ext: ".png",
+                    mediaId: generateId(),
+                    base64: result.assets[0].uri as string,
+                    mediaUrl: result.assets[0].uri,
+                    meta: {
+                      aspectRatio: width / height || 0,
+                      height,
+                      width,
+                      size: fileSize,
+                    },
+                  }}
+                />
+              ),
+            });
+          },500)
+          
         } else if (type === "video") {
-          displayModal({
-            justifyContent: "flex-start",
-            children: (
-              <VideoViewer
-                conversationId={conversationId}
-                clearActiveQuote={clearActiveQuote}
-                activeQuote={activeQuote}
-                chatUserId={chatUserId}
-                recipientId={recipientId}
-                media={{
-                  type: MediaType.VIDEO,
-                  mimeType: result.assets[0].mimeType,
-                  ext: ".mp4",
-                  mediaId: generateId(),
-                  // base64: result.assets[0].uri as string,
-                  mediaUrl: result.assets[0].uri,
-                  meta: {
-                    aspectRatio: width / height || 0,
-                    height,
-                    width,
-                    size: fileSize,
-                  },
-                }}
-              />
-            ),
-          });
+          setTimeout(() => {
+            displayModal({
+              justifyContent: "flex-start",
+              children: (
+                <VideoViewer
+                  conversationId={conversationId}
+                  clearActiveQuote={clearActiveQuote}
+                  activeQuote={activeQuote}
+                  chatUserId={chatUserId}
+                  recipientId={recipientId}
+                  media={{
+                    type: MediaType.VIDEO,
+                    mimeType: result.assets[0].mimeType,
+                    ext: ".mp4",
+                    mediaId: generateId(),
+                    // base64: result.assets[0].uri as string,
+                    mediaUrl: result.assets[0].uri,
+                    meta: {
+                      aspectRatio: width / height || 0,
+                      height,
+                      width,
+                      size: fileSize,
+                    },
+                  }}
+                />
+              ),
+            });
+          },500)
+         
         }
       }
     } catch (error) {

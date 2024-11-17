@@ -28,6 +28,7 @@ import {
   Children,
   AttachmentTypes,
   Prettify,
+  BottomSheetRef,
 } from "../../types";
 import { ChatItem } from "./ChatItem";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -54,7 +55,6 @@ import {
   ConversationListMeta,
   ConversationListItem,
 } from "softchatjs-core";
-import { BottomSheetRef } from "../BottomSheet";
 import { format, isThisWeek } from "date-fns";
 import { useMessageState } from "../../contexts/MessageStateContext";
 import { LockIcon, MessagePlus } from "../../assets/icons";
