@@ -1,6 +1,6 @@
 {
   "name": "softchatjs-react-native",
-  "version": "4.2.24",
+  "version": "4.2.26",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -9,7 +9,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsup ./src",
     "pub": "npm publish --access public",
-    "dev": "tsup ./src --format cjs,esm --dts --watch"
+    "dev": "tsup ./src --format esm --dts --watch"
   },
   "dependencies": {
     "@flyerhq/react-native-link-preview": "^1.6.0",
