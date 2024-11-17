@@ -322,7 +322,7 @@ export const UserList = ({
       </div>
       <div className={styles.scrollbar} style={{ overflowY: 'scroll', height: '300px' }}>
       {users.map((item, index) => (
-        <button
+        <div
           key={index}
           onClick={() => {
             startConversation(item);
@@ -337,7 +337,7 @@ export const UserList = ({
               styles={{ color: config?.theme?.text?.primary || "white" }}
             />
           </div>
-        </button>
+        </div>
       ))}
       </div>
     </div>
