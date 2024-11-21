@@ -146,8 +146,8 @@ export default function Default(props: DefaultProps) {
           <BroadcastIcon
             color={
               position === "right"
-                ? theme.chatBubble.right.messageTimeColor
-                : theme.chatBubble.left.messageTimeColor
+                ? theme?.chatBubble.right.messageTimeColor
+                : theme?.chatBubble.left.messageTimeColor
             }
             size={13}
           />

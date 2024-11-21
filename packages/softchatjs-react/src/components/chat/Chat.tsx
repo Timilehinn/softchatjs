@@ -4,8 +4,9 @@ import ChatClient, {
   Conversation,
   Message,
   UserMeta,
+  ConnectionEvent, 
+  ConversationListMeta
 } from "softchatjs-core";
-import { ConnectionEvent, ConversationListMeta } from "softchatjs-core";
 import styles from "./chat.module.css";
 import ChatInput from "../inputs/chat-input";
 import MessageList from "../message-list/message-list";
@@ -33,15 +34,23 @@ type ChatProps = {
   onCreateBroadcastList?: () => void;
   user: UserMeta;
   userList?: UserMeta[];
+  /**
+   * use activeConversationId to preselect a conversation once the user enters the chat. 
+   */
+  activeConversationId?: string
   /**@note
    * This value calculates the the height off the container incase of an external header
    * Value should be in px i.e 300
    */
   headerHeightOffset?: number;
+  /**
+   * FCM token used to send push notifications to web users
+   */
+  webToken?: string
 };
 
 const Chat = (props: ChatProps) => {
-  const { headerHeightOffset = 0, user, userList = [], onCreateBroadcastList } = props;
+  const { headerHeightOffset = 0, user, userList = [], onCreateBroadcastList, activeConversationId, webToken } = props;
   const chatUserId = user.uid;
   const { client, config } = useChatClient();
   const {
@@ -71,7 +80,7 @@ const Chat = (props: ChatProps) => {
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
   const [forceScrollCount, setForceScrollCount] = useState(0);
   const [recipientId, setRecipientId] = useState("");
-  const conversationId = activeConversation?.conversation.conversationId!;
+  
   const [isSmallScreen, setIsSmallScreen] = useState(false);
   const [inputContainerWidth, setInputContainerWidth] = useState(0);
   const [ view, setView ] = useState<"conversation-list" | "broadcast-lists">("conversation-list")
@@ -104,9 +113,31 @@ const Chat = (props: ChatProps) => {
     }
   };
 
+  const getPreSelectedConversation = () => {
+    try {
+      if(activeConversationId){
+        const converationListMeta = client.getConversations();
+        const selectedConveration = converationListMeta[activeConversationId];
+        if(selectedConveration){
+          setActiveConversation(selectedConveration);
+        }
+      }
+    } catch (error) {
+      console.error(error.message)
+    }
+  }
+
   useEffect(() => {
-    client.initializeUser(props.user);
-  }, [props.user]);
+    getPreSelectedConversation();
+  },[activeConversationId, client, connectionStatus])
+
+  useEffect(() => {
+    if(props.user && webToken){
+      client.initializeUser(props.user, { notificationConfig: { type: "fcm", token: webToken } });
+    }else{
+      client.initializeUser(props.user);
+    }
+  }, [props.user, webToken]);
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -391,7 +422,7 @@ const Chat = (props: ChatProps) => {
           setEditDetails={setEditDetails}
           messages={messages}
           mousePosition={position}
-          conversationId={conversationId}
+          conversationId={activeConversation?.conversation?.conversationId}
           client={client}
           textInputRef={textInputRef}
           presentPage={presentPage}
@@ -414,7 +445,7 @@ const Chat = (props: ChatProps) => {
           setEditDetails={setEditDetails}
           editProps={editDetails as any}
           recipientId={recipientId}
-          conversationId={conversationId}
+          conversationId={activeConversation?.conversation?.conversationId}
           client={client}
           recipientTyping={recipientTyping}
           textInputRef={textInputRef}
@@ -471,7 +502,7 @@ const Chat = (props: ChatProps) => {
             setEditDetails={setEditDetails}
             messages={messages}
             mousePosition={position}
-            conversationId={conversationId}
+            conversationId={activeConversation?.conversation?.conversationId}
             client={client}
             textInputRef={textInputRef}
             presentPage={presentPage}
@@ -494,7 +525,7 @@ const Chat = (props: ChatProps) => {
             setEditDetails={setEditDetails}
             editProps={editDetails as any}
             recipientId={recipientId}
-            conversationId={conversationId}
+            conversationId={activeConversation?.conversation?.conversationId}
             client={client}
             recipientTyping={recipientTyping}
             textInputRef={textInputRef}

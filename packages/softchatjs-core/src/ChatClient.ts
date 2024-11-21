@@ -1,5 +1,5 @@
 import BroadcastList from "./Broadcast";
-import Connection from "./Connection";
+import Connection, { ConnectionState, connectionStates } from "./Connection";
 import Conversation from "./Conversation";
 import MessageClient from "./MessageClient";
 import { buildError } from "./error";
@@ -13,16 +13,8 @@ import {
 import WebSocket from "isomorphic-ws";
 
 export type NotificationConfig = {
-  expo: {
-    expoPushToken: string
-  },
-  web: {},
-  fcm: {
-    deviceId: string
-  },
-  apns: {
-    deviceId: string
-  }
+  type: "expo" | "fcm" | "apns"
+  token: string 
 }
 
 export default class ChatClient {
@@ -53,12 +45,8 @@ export default class ChatClient {
     if (data) {
       if (ChatClient.client_instance) {
         const conn = Connection.getInstance(ChatClient.client_instance);
-        conn.emit(Events.CONNECTION_CHANGED, {
-          connecting: true,
-          isConnected: false,
-          fetchingConversations: true,
-        });
         this.connection = conn;
+        this.connection.updateConnectionState(connectionStates.GETTING_CONVERSATIONS);
         conn._initiateConnection(data, config);
         this.chatUserId = data.uid
       }
@@ -79,6 +67,11 @@ export default class ChatClient {
       if (this.connection.socket?.readyState !== WebSocket.OPEN) {
         console.info("Retrying connection...");
         if (this.connection.userMeta) {
+          this.connection.emit(Events.CONNECTION_CHANGED, {
+            connecting: true,
+            isConnected: false,
+            fetchingConversations: true,
+          });
           this.connection._initiateConnection(this.connection.userMeta, { connectionConfig: { reset: true } });
         }
       }
@@ -87,19 +80,11 @@ export default class ChatClient {
     }
   }
 
-  getConnectionStatus() {
+  getConnectionStatus(): ConnectionState {
     if (this.connection) {
-      return {
-        isConnecting: this.connection.connecting,
-        isConnected: this.connection.wsConnected,
-        isFetchingConversations: this.connection.fetchingConversations,
-      };
+      return this.connection.connectionState
     } else {
-      return {
-        isConnecting: false,
-        isConnected: false,
-        isFetchingConversations: false,
-      };
+      return connectionStates.NO_CONNECTION
     }
   }
 

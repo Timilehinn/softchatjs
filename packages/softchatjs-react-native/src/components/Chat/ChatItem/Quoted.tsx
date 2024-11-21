@@ -186,8 +186,10 @@ export default function Quoted(props: QuotedProps) {
         {
           backgroundColor: "rgba(0,0,0,.3)",
           padding: 8,
-          borderTopRightRadius: 15,
-          borderTopLeftRadius: 15,
+          marginTop: 8,
+          marginLeft: 8,
+          marginRight: 8,
+          borderRadius: 10,
           borderLeftWidth: 4,
           borderTopWidth: 4,
           borderTopColor: 'transparent',

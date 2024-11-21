@@ -16,6 +16,7 @@ export type NavButton = {
   label: string;
   icon: JSX.Element;
   key: string;
+  visible: boolean;
   onClick: () => void;
 }
 
@@ -41,12 +42,14 @@ export default function Navbar(props: {
         props.onViewChanged("conversation-list");
         setActiveConversation(null);
       },
+      visible: true
     },
     {
       label: "New chat",
       icon: <ChatPlus color={config.theme.icon} size={25} />,
       key: "new-chat",
       onClick: () => showMenu(true),
+      visible: props.userList.length > 0? true : false
     },
     {
       label: "Broadcast lists",
@@ -56,6 +59,7 @@ export default function Navbar(props: {
         props.onViewChanged("broadcast-lists");
         setActiveConversation(null);
       },
+      visible: true
     },
   ];
 
@@ -68,7 +72,7 @@ export default function Navbar(props: {
       <div
         style={{
           height: "100%",
-          width: "50px",
+          maxWidth: "50px",
           borderRight: `1px solid ${config.theme.divider}`,
           display: "flex",
           flexDirection: "column",
@@ -83,7 +87,7 @@ export default function Navbar(props: {
   const renderNavList = useCallback(() => {
     return (
       <>
-        {navButtons.map((nav, i) => (
+        {navButtons.filter(b => b.visible).map((nav, i) => (
           <button
             key={i}
             className={`nav-btn`}
@@ -91,6 +95,7 @@ export default function Navbar(props: {
               borderRight: 0,
               borderTop: 0,
               borderBottom: 0,
+              cursor: props.connectionStatus.isConnected? 'pointer' : 'progress',
               borderLeft:
                 props.activeView === nav.key
                   ? `2px solid ${config.theme.icon}`

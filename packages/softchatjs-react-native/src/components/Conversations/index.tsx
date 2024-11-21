@@ -116,13 +116,6 @@ const Conversations = forwardRef((props: ConversationProps, ref) => {
   
   const [conversationList, setConversationList] = useState<{ conversation: Conversation; lastMessage: Message; unread: string[] }[]>([ ...retrieveFromCache(store) ]);
 
-  // useEffect(() =>{
-  //   if(store){
-  //     var cList = retrieveFromCache(store);
-  //     setConversationList(cList)
-  //   }
-  // },[store])
-
   const [connectionStatus, setConnectionStatus] = useState<ConnectionEvent>({
     isConnected: false,
     fetchingConversations: false,
@@ -174,14 +167,25 @@ const Conversations = forwardRef((props: ConversationProps, ref) => {
   useEffect(() => {
     if (client) {
       setUserMeta(user);
-      client.initializeUser(user);
+      // client.initializeUser(user);
     }
   }, [user, client]);
 
+  const getMemoizedConversations = () => {
+    const res = client.getConversations();
+    setConversationList(sortConversations(res))
+  }
+
+  const getConnectionStatus = () => {
+    const connStatus = client.getConnectionStatus();
+    console.log(connStatus.connecting, ':::connStatus')
+    setConnectionStatus(connStatus);
+  }
+
   useEffect(() => {
     if(client){
-      const res = client.getConversations();
-      setConversationList(sortConversations(res))
+      getMemoizedConversations();
+      getConnectionStatus();
       client.subscribe(Events.CONNECTION_CHANGED, handleConnectionChanged);
       client.subscribe(
         Events.CONVERSATION_LIST_META_CHANGED,

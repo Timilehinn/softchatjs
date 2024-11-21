@@ -99,8 +99,8 @@ export default function TabOneScreen() {
   const { client } = useClient();
 
   const chatUser =
-    Platform.OS === "android"
-      ? { uid: "100", username: "mike", color: "green" }
+    Platform.OS !== "android"
+      ? { uid: "20", username: "mike", color: "green" }
       : {
           uid: "30",
           username: "timi",

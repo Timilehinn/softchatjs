@@ -142,7 +142,7 @@ export default function Stacked(props: StackedProps) {
                 }}
               >
                 {message.isBroadcast && (
-                  <BroadcastIcon color={theme.chatBubble.right.messageColor} size={13} />
+                  <BroadcastIcon color={theme?.chatBubble.right.messageColor} size={13} />
                 )}
                 <Text style={[{ color: theme?.text.secondary, fontFamily }]}>
                   {message.messageOwner?.username}

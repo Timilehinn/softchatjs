@@ -49,11 +49,11 @@ export default function ChatHeader(props: ChatHeaderProps) {
     );
   }
 
-  if(conversation.conversationType === "broadcast-chat"){
+  if(conversation?.conversationType === "broadcast-chat"){
     return (
       <View style={{ height: 'auto', paddingVertical: 10, width: '100%', alignItems: 'center', justifyContent: 'center', borderBottomColor: theme?.divider, borderBottomWidth: 1 }}>
         <BroadcastIcon size={50} />
-        <Text style={{ fontFamily, color: theme?.text.secondary }}>{conversation.name?? 'Broadcast List'}</Text>
+        <Text style={{ fontFamily, color: theme?.text.secondary }}>{conversation?.name?? 'Broadcast List'}</Text>
       </View>
     )
   }

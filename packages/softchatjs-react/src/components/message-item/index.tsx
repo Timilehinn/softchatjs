@@ -181,15 +181,9 @@ export const MessageItem = (props: ConversationProps) => {
                 />
               </div>
             )}
-
+            <div style={{ display: 'flex', alignItems: 'flex-end' }}>
             <div
-              style={
-                !message.message
-                  ? { padding: "0px", backgroundColor: chatBoxColor }
-                  : {
-                      backgroundColor: chatBoxColor,
-                    }
-              }
+              style={{ backgroundColor: chatBoxColor }}
               className={`${styles.conversation__text__wrap} ${
                 hasAttachments
                   ? styles.conversation__text__wrap__attach
@@ -220,10 +214,9 @@ export const MessageItem = (props: ConversationProps) => {
                     paddingLeft: hasAttachments && "10px",
                     paddingRight: hasAttachments && "10px",
                     justifyContent: "space-between",
-                    wordWrap: 'break-word'
+                    wordWrap: 'break-word',
                   }}
                 >
-                   
                   <Text
                     styles={{
                       textAlign: "left",
@@ -233,14 +226,11 @@ export const MessageItem = (props: ConversationProps) => {
                     size="sm"
                     text={message?.message}
                   />
-                  {/* <FormattedText content={message.message} /> */}
                   <div
                     style={{
                       display: "flex",
                       justifyContent: "flex-end",
                       alignItems: "center",
-                      // background: "red",
-                      // height: "5px",
                       marginTop:
                         message?.message?.length > 10 ? "0px" : "-25px",
                     }}
@@ -266,7 +256,14 @@ export const MessageItem = (props: ConversationProps) => {
                   </div>
                 </div>
               ) : null}
-             
+            </div>
+            {/* {!hideAvartar && (
+              
+            )} */}
+            {/* <div style={{ height: '20px', width: '20px', backgroundColor: hideAvartar? 'transparent' : chatBoxColor }}>
+              <div style={{ backgroundColor: hideAvartar? 'transparent' : config.theme.background.primary, height: '100%', width: '100%', borderBottomLeftRadius: '15px' }} />
+            </div> */}
+
             </div>
             {!oppositBubbleBoxes && (
               <div className={styles.conversation__text__container__reactions}>

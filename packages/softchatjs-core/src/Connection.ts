@@ -40,15 +40,42 @@ let defaultUser = {
   custom: {},
 };
 
+let defaultNotificationConfig = { type: null, token: null }
+
+export const connectionStates = {
+  NO_CONNECTION: {
+    connecting: false,
+    isConnected: false,
+    fetchingConversations: false,
+  },
+  GETTING_CONVERSATIONS: {
+    connecting: true,
+    isConnected: false,
+    fetchingConversations: true,
+  },
+  SOCKET_CONNECTING: {
+    connecting: true,
+    isConnected: false,
+    fetchingConversations: false,
+  },
+  SOCKET_CONNECTED: {
+    connecting: false,
+    isConnected: true,
+    fetchingConversations: false,
+  },
+} as const;
+
+export type ConnectionState = typeof connectionStates[keyof typeof connectionStates];
+
 export default class Connection extends EventEmitter {
   private static connection: Connection;
   connecting: boolean;
   socket: WebSocket | null;
   conversations: Array<Conversation>;
   conversationMap: ConversationMap;
-  wsConnected: boolean;
+  // wsConnected: boolean;
   wsAccessConfig: WsAccessConfig;
-  fetchingConversations: boolean;
+  // fetchingConversations: boolean;
   retry_delay_ms: number;
   max_retry_count: number;
   health_check_interval: number;
@@ -62,6 +89,7 @@ export default class Connection extends EventEmitter {
   private healthCheckRef: NodeJS.Timeout | undefined;
   private retryRef: NodeJS.Timeout | undefined;
   shouldReconnect: boolean;
+  connectionState: ConnectionState
 
   constructor(client_instance: ChatClient) {
     super();
@@ -71,9 +99,9 @@ export default class Connection extends EventEmitter {
     this.conversationMap = {};
     this.conversationListMeta = {};
     this.broadcastListMeta = {};
-    this.wsConnected = false;
+    // this.wsConnected = false;
     this.wsAccessConfig = { url: "", token: "" };
-    this.fetchingConversations = false;
+    // this.fetchingConversations = false;
     this.retry_delay_ms = 5000;
     this.max_retry_count = 5;
     this.health_check_interval = 30000;
@@ -87,6 +115,7 @@ export default class Connection extends EventEmitter {
     this.screen = Screens.CONVERSATIONS;
     this.healthCheckRef = undefined;
     this.shouldReconnect = true;
+    this.connectionState = connectionStates.NO_CONNECTION
   }
 
   static getInstance(client_instance: ChatClient) {
@@ -97,11 +126,16 @@ export default class Connection extends EventEmitter {
     return Connection.connection;
   }
 
-  
+  updateConnectionState(state: ConnectionState) {
+    this.connectionState = state
+    this.emit(Events.CONNECTION_CHANGED, state);
+  }
+
   private async _getConversations({ token }: { token: string }) {
     try {
       if (this.userMeta) {
-        this.fetchingConversations = true;
+        // this.fetchingConversations = true;
+        this.updateConnectionState(connectionStates.GETTING_CONVERSATIONS)
         const response = await GET_CONVERSATIONS<{
           conversations: Conversation[];
         }>(token);
@@ -150,7 +184,7 @@ export default class Connection extends EventEmitter {
         console.error(err);
       }
     } finally {
-      this.fetchingConversations = false;
+      // this.fetchingConversations = false;
     }
   }
 
@@ -158,7 +192,7 @@ export default class Connection extends EventEmitter {
   private async _getBroadcastLists({ token }: { token: string }) {
     try {
       if (this.userMeta) {
-        this.fetchingConversations = true;
+        // this.fetchingConversations = true;
         const response = await GET_BROADCASTLISTS<{
           conversations: Conversation[];
         }>(token);
@@ -194,7 +228,7 @@ export default class Connection extends EventEmitter {
         console.error(err);
       }
     } finally {
-      this.fetchingConversations = false;
+      // this.fetchingConversations = false;
     }
   }
 
@@ -238,11 +272,8 @@ export default class Connection extends EventEmitter {
           token: res.data.token,
         }), await this._getBroadcastLists({ token: res.data.token })])
        
-        this.emit(Events.CONNECTION_CHANGED, {
-          connecting: true,
-          isConnected: false,
-          fetchingConversations: false,
-        });
+        this.updateConnectionState(connectionStates.SOCKET_CONNECTING)
+        // this.emit(Events.CONNECTION_CHANGED, connectionStates.SOCKET_CONNECTING);
 
         // Define the message to send on connection
         const message = JSON.stringify({
@@ -251,25 +282,21 @@ export default class Connection extends EventEmitter {
           action: ServerActions.INITIALIZE,
           userMeta: {
             ...this.userMeta,
-            expoPushToken: config?.notificationConfig?.expo.expoPushToken,
           },
           newConversation: true,
           recipientMeta: {},
           projectId: this.projectConfig.projectId,
-          expoPushToken: config?.notificationConfig?.expo.expoPushToken,
+          notification: { ...defaultNotificationConfig, ...config?.notificationConfig }
         });
 
         // Check if WebSocket is already open
         if (this.socket && this.socket.readyState === WebSocket.OPEN) {
           this.socket.send(message); // send the message
-          this.wsConnected = true;
+          // this.wsConnected = true;
 
           // Emit successful connection state
-          this.emit(Events.CONNECTION_CHANGED, {
-            connecting: false,
-            isConnected: true,
-            fetchingConversations: false,
-          });
+          this.updateConnectionState(connectionStates.SOCKET_CONNECTED)
+          // this.emit(Events.CONNECTION_CHANGED, connectionStates.SOCKET_CONNECTED);
         } else {
           if (this.socket) {
             this.socket.close();
@@ -283,7 +310,7 @@ export default class Connection extends EventEmitter {
 
             // Send the initial message
             ws.send(message);
-            this.wsConnected = true;
+            // this.wsConnected = true;
 
             // Setup event handlers and start health checks
             this.setupEventHandlers();
@@ -291,11 +318,8 @@ export default class Connection extends EventEmitter {
 
             // Emit connection success
             this.connecting = false;
-            this.emit(Events.CONNECTION_CHANGED, {
-              connecting: false,
-              isConnected: true,
-              fetchingConversations: false,
-            });
+            this.updateConnectionState(connectionStates.SOCKET_CONNECTED)
+            // this.emit(Events.CONNECTION_CHANGED, connectionStates.SOCKET_CONNECTED);
 
             // Emit updated conversation list
             this.emit(Events.CONVERSATION_LIST_CHANGED, {
@@ -306,22 +330,16 @@ export default class Connection extends EventEmitter {
         }
       } else {
         // Handle unsuccessful session creation
-        this.wsConnected = false;
-        this.emit(Events.CONNECTION_CHANGED, {
-          connecting: false,
-          isConnected: false,
-          fetchingConversations: false,
-        });
+        // this.wsConnected = false;
+        this.updateConnectionState(connectionStates.NO_CONNECTION)
+        // this.emit(Events.CONNECTION_CHANGED, connectionStates.NO_CONNECTION);
       }
     } catch (error) {
       // Handle general errors
       console.error("Connection error:", error);
-      this.wsConnected = false;
-      this.emit(Events.CONNECTION_CHANGED, {
-        connecting: false,
-        isConnected: false,
-        fetchingConversations: false,
-      });
+      // this.wsConnected = false;
+      this.updateConnectionState(connectionStates.NO_CONNECTION)
+      // this.emit(Events.CONNECTION_CHANGED, connectionStates.NO_CONNECTION);
 
       // Needs to be handled better
       console.warn("Connection error. Attempting to reconnect...");
@@ -365,7 +383,7 @@ export default class Connection extends EventEmitter {
     try {
       if (this.socket) {
         this.shouldReconnect = config?.shouldReconnect ?? true;
-        this.wsConnected = false;
+        // this.wsConnected = false;
         const data = JSON.stringify({
           action: ServerActions.CONNECTION_CLOSED,
           message: {
@@ -376,11 +394,15 @@ export default class Connection extends EventEmitter {
         });
         this.socket.send(data);
         this.socket.close();
-        this.emit(Events.CONNECTION_CHANGED, {
-          connecting: false,
-          isConnected: false,
-          fetchingConversations: false,
-        });
+        this.conversationMap = {};
+        this.conversationListMeta = {};
+        this.broadcastListMeta = {}
+        this.updateConnectionState(connectionStates.NO_CONNECTION);
+        // this.emit(Events.CONNECTION_CHANGED, {
+        //   connecting: false,
+        //   isConnected: false,
+        //   fetchingConversations: false,
+        // });
       }
     } catch (error) {
       if(error instanceof Error){
@@ -424,12 +446,13 @@ export default class Connection extends EventEmitter {
         `Connection attempt failed after multiple retries. Please check your network settings or try again.`
       );
     }
-    this.emit(Events.CONNECTION_CHANGED, {
-      connecting: true,
-      isConnected: false,
-      fetchingConversations: false,
-    });
-    if (!this.wsConnected) {
+    this.updateConnectionState(connectionStates.SOCKET_CONNECTING)
+    // this.emit(Events.CONNECTION_CHANGED, {
+    //   connecting: true,
+    //   isConnected: false,
+    //   fetchingConversations: false,
+    // });
+    if (!this.connectionState.isConnected) {
       this.retryRef = setTimeout(() => {
         this._initiateConnection(this.userMeta);
         this.retry_count += 1;
@@ -446,7 +469,7 @@ export default class Connection extends EventEmitter {
 
       // Handle errors
       this.socket.onerror = (event: ErrorEvent) => {
-        this.wsConnected = false;
+        // this.wsConnected = false;
         if (this.shouldReconnect) {
           console.error("Socket error. Attempting to reconnect... Event: ", event);
           this.retryConnection();
@@ -455,7 +478,7 @@ export default class Connection extends EventEmitter {
 
       // Handle disconnection (socket closes)
       this.socket.onclose = () => {
-        this.wsConnected = false;
+        // this.wsConnected = false;
         if (this.shouldReconnect) {
           console.warn("Socket closed. Attempting to reconnect...");
           this.retryConnection();

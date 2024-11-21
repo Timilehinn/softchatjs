@@ -63,7 +63,17 @@ export default function ConversationHeader({
         value={value}
         onChange={e => handleTextChange(e.target.value)}
         placeholder="Search chats"
-        style={{ height: '40px', width: '100%', marginTop: '15px', textIndent: '15px', backgroundColor: 'transparent', color: 'white', border: `1px solid ${theme.divider}`, borderRadius: '10px' }}
+        style={{ 
+          height: '40px', 
+          width: '100%', 
+          marginTop: '15px', 
+          textIndent: '15px', 
+          backgroundColor: 'transparent', 
+          // color: 'white', 
+          border: `1px solid ${theme.divider}`, 
+          borderRadius: '10px',
+          color: theme.text.primary
+        }}
       />
     </div>
   );

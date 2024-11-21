@@ -27,7 +27,6 @@ import { ChatTheme } from "../../../types";
 import { Message, Emoji } from "softchatjs-core";
 import Search from "../../Search";
 // import { FlashList } from "@shopify/flash-list";
-import { emojis } from "../../../assets/emoji";
 import { useConfig } from "../../../contexts/ChatProvider";
 import ActionSheet, { ActionSheetRef } from "react-native-actions-sheet";
 import { FlashList } from "react-native-actions-sheet/dist/src/views/FlashList";
@@ -45,6 +44,53 @@ type MessageOptionsProps = {
 
 var defaultSheetHeight = "55%";
 var windowHeight = Dimensions.get("window").height;
+var emojis = [
+  {
+    emoji: "😀",
+    description: "grinning face",
+    category: "Smileys & Emotion",
+    aliases: ["grinning"],
+    tags: ["smile", "happy"],
+    unicode_version: "6.1",
+    ios_version: "6.0",
+  },
+  {
+    emoji: "😃",
+    description: "grinning face with big eyes",
+    category: "Smileys & Emotion",
+    aliases: ["smiley"],
+    tags: ["happy", "joy", "haha"],
+    unicode_version: "6.0",
+    ios_version: "6.0",
+  },
+  {
+    emoji: "😄",
+    description: "grinning face with smiling eyes",
+    category: "Smileys & Emotion",
+    aliases: ["smile"],
+    tags: ["happy", "joy", "laugh", "pleased"],
+    unicode_version: "6.0",
+    ios_version: "6.0",
+  },
+  {
+    emoji: "😁",
+    description: "beaming face with smiling eyes",
+    category: "Smileys & Emotion",
+    aliases: ["grin"],
+    tags: [],
+    unicode_version: "6.0",
+    ios_version: "6.0",
+  },
+  {
+    emoji: "😆",
+    description: "grinning squinting face",
+    category: "Smileys & Emotion",
+    aliases: ["laughing", "satisfied"],
+    tags: ["happy", "haha"],
+    unicode_version: "6.0",
+    ios_version: "6.0",
+  },
+]
 
 export const MessageOptions = forwardRef(
   (props: MessageOptionsProps, ref: any) => {
@@ -205,7 +251,7 @@ export const MessageOptions = forwardRef(
             },
           ]}
         >
-          {emojis.slice(0, 5).map((emoji, i) => (
+          {emojis.map((emoji, i) => (
             <TouchableOpacity
               key={i}
               onPress={() => addReaction(emoji.emoji)}
@@ -246,47 +292,6 @@ export const MessageOptions = forwardRef(
         </View>
       );
     }, [message]);
-
-    var filtered_emojis = emojis.filter((data: Emoji) => {
-      return (
-        data.description.toLowerCase()?.indexOf(searchValue.toLowerCase()) !==
-        -1
-      );
-    });
-
-    const emoji_list = filtered_emojis.length > 0 ? filtered_emojis : emojis;
-
-    const renderEmoji = useCallback(
-      ({ item, index }: { item: any; index: number }) => {
-        return (
-          <TouchableOpacity
-            key={index}
-            onPress={() => {
-              addReaction(item.emoji);
-            }}
-            style={{
-              height: emojiSize,
-              minWidth: emojiSize,
-              alignItems: "center",
-              margin: 0.7,
-              flex: 1,
-              justifyContent: "center",
-              borderRadius: emojiSize,
-            }}
-          >
-            <Text
-              style={{
-                fontSize: Platform.OS === "android" ? 25 : 35,
-                fontFamily,
-              }}
-            >
-              {item.emoji}
-            </Text>
-          </TouchableOpacity>
-        );
-      },
-      [message]
-    );
 
     return (
       <ActionSheet

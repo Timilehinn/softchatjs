@@ -45,7 +45,7 @@ import Stacked from "./Layouts/Stacked";
 import Default from "./Layouts/Default";
 import { useConfig } from "../../../contexts/ChatProvider";
 import { useMessageState } from "../../../contexts/MessageStateContext";
-import { ChatBubbleRenderProps } from "@/src";
+import { ChatBubbleRenderProps } from "../../../types";
 
 type OnSelectedMessage = {
   message: Message;
@@ -314,7 +314,7 @@ export const ChatItem = forwardRef((props: ChatItemProps, ref: any) => {
 
   return (
     <View ref={ref} style={{ flex: 1, marginBottom: 10 }}>
-      <GestureDetector gesture={pan}>
+      {/* <GestureDetector gesture={pan}> */}
         <TouchableOpacity
         activeOpacity={.8}
           onLongPress={() => {
@@ -370,7 +370,7 @@ export const ChatItem = forwardRef((props: ChatItemProps, ref: any) => {
       retryUpload={retryUpload}
     />
         </TouchableOpacity>
-      </GestureDetector>
+      {/* </GestureDetector> */}
     </View>
   );
 })

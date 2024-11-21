@@ -8,7 +8,7 @@ import { MessageStateProvider } from "./MessageStateContext";
 type ChatProvider = {
   children: JSX.Element;
   theme?: ChatTheme;
-  fontFamily: string | null;
+  fontFamily: string | undefined;
 };
 
 const ConfigContext = createContext<
@@ -16,7 +16,7 @@ const ConfigContext = createContext<
 >({
   theme: defaultTheme,
   client: null,
-  fontFamily: null,
+  fontFamily: undefined,
 });
 
 export function useConfig() {

@@ -1,6 +1,5 @@
 import React from "react"
 import { View, Text } from "react-native";
-import { Colors } from "../constants/Colors";
 
 type BadgeProps = {
   label: string | number
