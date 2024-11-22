@@ -89,7 +89,8 @@ export default class Connection extends EventEmitter {
   private healthCheckRef: NodeJS.Timeout | undefined;
   private retryRef: NodeJS.Timeout | undefined;
   shouldReconnect: boolean;
-  connectionState: ConnectionState
+  connectionState: ConnectionState;
+  notificationConfig: NotificationConfig
 
   constructor(client_instance: ChatClient) {
     super();
@@ -99,9 +100,7 @@ export default class Connection extends EventEmitter {
     this.conversationMap = {};
     this.conversationListMeta = {};
     this.broadcastListMeta = {};
-    // this.wsConnected = false;
     this.wsAccessConfig = { url: "", token: "" };
-    // this.fetchingConversations = false;
     this.retry_delay_ms = 5000;
     this.max_retry_count = 5;
     this.health_check_interval = 30000;
@@ -115,7 +114,8 @@ export default class Connection extends EventEmitter {
     this.screen = Screens.CONVERSATIONS;
     this.healthCheckRef = undefined;
     this.shouldReconnect = true;
-    this.connectionState = connectionStates.NO_CONNECTION
+    this.connectionState = connectionStates.NO_CONNECTION;
+    this.notificationConfig = { type: null, token: null };
   }
 
   static getInstance(client_instance: ChatClient) {
@@ -241,6 +241,7 @@ export default class Connection extends EventEmitter {
     }
   ) {
     try {
+    
       this.shouldReconnect = true;
       this.userMeta = user;
       if (config?.connectionConfig?.reset) {
@@ -252,6 +253,10 @@ export default class Connection extends EventEmitter {
       // Clear previous health check interval
       clearTimeout(this.retryRef);
       clearTimeout(this.retryRef);
+
+      if(config?.notificationConfig){
+        this.notificationConfig = config.notificationConfig
+      }
       // Create a session to retrieve token and wsURI
       const res = await CREATE_SESSION<{ token: string; wsURI: string }>({
         userId: this.userMeta.uid,
@@ -286,7 +291,7 @@ export default class Connection extends EventEmitter {
           newConversation: true,
           recipientMeta: {},
           projectId: this.projectConfig.projectId,
-          notification: { ...defaultNotificationConfig, ...config?.notificationConfig }
+          notification: this.notificationConfig
         });
 
         // Check if WebSocket is already open

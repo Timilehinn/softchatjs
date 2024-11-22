@@ -197,7 +197,13 @@ export type InitiateConnection = {
 export type StringOrNumber = string | number
 
 export type Config = {
+/**
+ * - `projectId`: The ID of the project.
+ */
   projectId: string,
+  /**
+ * - `subId`: The subscriber ID.
+ */
   subId: string
 }
 

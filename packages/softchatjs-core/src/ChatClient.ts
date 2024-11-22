@@ -12,9 +12,19 @@ import {
 } from "./types";
 import WebSocket from "isomorphic-ws";
 
+type InitializeUser = {
+  data: UserMeta, 
+  config?: { 
+    notificationConfig?: NotificationConfig, 
+    connectionConfig?: { 
+      reset: boolean 
+    } 
+  }
+}
+
 export type NotificationConfig = {
-  type: "expo" | "fcm" | "apns"
-  token: string 
+  type: "expo" | "fcm" | "apns" | null
+  token: string | null 
 }
 
 export default class ChatClient {
@@ -32,6 +42,7 @@ export default class ChatClient {
     this.chatUserId = '';
     this.connection = null;
   }
+
 
   static getInstance({ projectId, subId }: Config) {
     if (!ChatClient.client_instance) {
@@ -72,7 +83,7 @@ export default class ChatClient {
             isConnected: false,
             fetchingConversations: true,
           });
-          this.connection._initiateConnection(this.connection.userMeta, { connectionConfig: { reset: true } });
+          this.connection._initiateConnection(this.connection.userMeta, { connectionConfig: { reset: true }, notificationConfig: this.connection.notificationConfig });
         }
       }
     } else {
@@ -159,8 +170,8 @@ export default class ChatClient {
         sendTypingNotification: msClient.sendTypingNotification.bind(msClient),
         sendStoppedTypingNotification: msClient.sendStoppedTypingNotification.bind(msClient),
         reactToMessage: msClient.reactToMessage.bind(msClient),
-        uploadAttachment: msClient.uploadAttachment.bind(msClient),
-        uploadAttachmentV2: msClient.uploadAttachmentV2.bind(msClient),
+        // uploadAttachment: msClient.uploadAttachment.bind(msClient),
+        // uploadAttachmentV2: msClient.uploadAttachmentV2.bind(msClient),
         uploadFile: msClient.uploadFile.bind(msClient),
         setActiveConversation: msClient.setActiveConversation.bind(msClient),
         unSetActiveConversation: msClient.unSetActiveConversation.bind(msClient),
