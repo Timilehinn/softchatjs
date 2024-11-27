@@ -6,7 +6,6 @@ import React, {
   useEffect,
   useRef,
   useState,
-  useMemo,
 } from "react";
 import {
   View,
@@ -17,9 +16,6 @@ import {
   Platform,
   Dimensions,
   RefreshControl,
-  Modal,
-  TouchableOpacity,
-  Button,
 } from "react-native";
 import {
   ChatBubbleRenderProps,
@@ -46,13 +42,9 @@ import {
   ChatEventGenerics,
   ConnectionEvent,
   Events,
-  generateConversationId,
   generateId,
   Message,
-  Conversation,
   MediaType,
-  UserMeta,
-  ConversationListMeta,
   ConversationListItem,
 } from "softchatjs-core";
 import { format, isThisWeek } from "date-fns";
@@ -60,18 +52,33 @@ import { useMessageState } from "../../contexts/MessageStateContext";
 import { LockIcon, MessagePlus } from "../../assets/icons";
 import { Audio } from "expo-av";
 import { interpolate } from "react-native-reanimated";
-import { ScrollView } from "react-native-actions-sheet";
 import { useModalProvider } from "../../contexts/ModalProvider";
 import EmojiListModal from '../../components/Modals/EmojiList'
 
 type ChatProps = {
+  /**
+   * Active conversation is the current conversation the user is actively engaged in
+   */
   activeConversation: ConversationListItem;
-  layout?: "stacked";
-  // chatUser: UserMeta;
+  /**
+   * Render a custom chat item
+   */
   renderChatBubble?: (props: Prettify<ChatBubbleRenderProps>) => void;
+  /**
+   * Render a customer chat input
+   */
   renderChatInput?: (props: Prettify<ChatInputRenderProps>) => void;
+  /**
+   * Render a custom chat header
+   */
   renderChatHeader?: (props: Prettify<ChatHeaderRenderProps>) => void;
+  /**
+   * Render a custom empty state when a user has no messages
+   */
   placeholder?: Children;
+  /**
+   * Value passed to adjust how the keyboard adjusts the input field when it's open
+   */
   keyboardOffset?: number;
 };
 
@@ -106,7 +113,6 @@ const KeyboardAvoiding = (props: { keyboardOffset: number, children: Children })
 export default function Chat(props: ChatProps) {
   const { client, theme, fontFamily } = useConfig();
   const {
-    layout,
     activeConversation,
     renderChatBubble,
     renderChatInput,
@@ -114,6 +120,7 @@ export default function Chat(props: ChatProps) {
     placeholder,
     keyboardOffset = Platform.OS === "ios" ? 10 : 0,
   } = props;
+  let layout: "stacked" | undefined
   const chatUserId = client.chatUserId;
   const conversationId = activeConversation.conversation.conversationId;
   const participantList = activeConversation.conversation.participantList;

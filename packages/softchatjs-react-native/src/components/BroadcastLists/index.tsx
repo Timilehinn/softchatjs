@@ -10,7 +10,25 @@ import ChatClient, { Events, ConversationListMeta, ConversationListItem } from "
 import { useConfig } from "../../contexts/ChatProvider";
 import { ArrowRight } from "../../assets/icons";
 
-export default function BroadcastLists(props: { client: ChatClient | null, onOpen: (item: ConversationListItem) => void; renderPlaceholder?: () => JSX.Element, renderItem?: (data: ConversationListItem, index: number) => JSX.Element,  }) {
+type BroadcastListsProps =  { 
+  /**
+   * ChatClient instance
+   */
+  client: ChatClient | null, 
+  /**Function
+   *  to select a broadcastlist item
+   */
+  onOpen: (item: ConversationListItem) => void; renderPlaceholder?: () => JSX.Element, 
+  /**
+   * 
+   * @param data: ConversationListItem 
+   * @param index: number
+   * @returns 
+   */
+  renderItem?: (data: ConversationListItem, index: number) => JSX.Element 
+}
+
+export default function BroadcastLists(props: BroadcastListsProps) {
   const { client, onOpen, renderPlaceholder } = props;
   const { fontFamily, theme } = useConfig();
 
@@ -57,13 +75,6 @@ export default function BroadcastLists(props: { client: ChatClient | null, onOpe
       );
     };
   }, []);
-
-  const chatUser = {
-    uid: "30",
-    username: "timi",
-    color: "blue",
-    profileUrl: "https://gravatar.com/avatar/582f9168aca439f2d795206bd5ba49ae",
-  };
 
   const renderBroadcastItem = useCallback(({ item, index }: { item: ConversationListItem, index: number }) => {
 

@@ -10,7 +10,7 @@ npm install softchatjs-react softchatjs-core
 
 ```
 
-Initialize the client. Get your projectId on the dashboard. 
+Initialize the client. Create a free account at: https://www.softchatjs.com
 
 ```
 import ChatClient from "softchatjs-core";

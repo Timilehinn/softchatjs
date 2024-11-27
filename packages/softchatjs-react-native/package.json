@@ -1,6 +1,6 @@
 {
   "name": "softchatjs-react-native",
-  "version": "4.2.31",
+  "version": "4.2.34",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -10,6 +10,12 @@
     "build": "tsup ./src",
     "pub": "npm publish --access public",
     "dev": "tsup ./src --format esm --dts --watch"
+  },
+  "author": "Softchatjs",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Timilehinn/softchatjs/tree/main/packages/softchatjs-react-native"
   },
   "dependencies": {
     "@flyerhq/react-native-link-preview": "^1.6.0",

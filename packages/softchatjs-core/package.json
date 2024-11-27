@@ -12,8 +12,12 @@
     "pub": "npm publish --access public",
     "dev": "tsup ./src --format cjs,esm --dts --watch"
   },
-  "author": "",
+  "author": "Softchatjs",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Timilehinn/softchatjs/tree/main/packages/softchatjs-core"
+  },
   "dependencies": {
     "axios": "^1.7.4",
     "events": "^3.3.0",
@@ -41,5 +45,6 @@
       "types": "./dist/index.d.ts"
     },
     "./dist": "./dist/index.js"
-  }
+  },
+  "keywords": ["chat", "messaging", "private chat", "broadcasts", "chat sdk", "chat UI", "react", "javascript"]
 }

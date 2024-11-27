@@ -37,9 +37,9 @@ client.initializeUser(chatUser);
 ```
 
 ## Notifications
-Push notifications are currently only supported via `Expo`, `FCM` and `APNS`, Expo push notifications work out of the box but your `FCM` and `APNS` credentials need to be added on our dashboard: `Project -> Settings`.
+Push notifications are supported through Expo, Firebase Cloud Messaging (FCM), and Apple Push Notification Service (APNS). While Expo push notifications are configured to work seamlessly without additional setup, integrating `FCM` or `APNS` requires uploading your credentials to the dashboard. Navigate to `Project → Settings` to add your `FCM` or `APNS` credentials.
 
-How to initiate a session with a users' notification details:
+How to initiate a session with a user's notification details:
 ```javascript
 var notificationConfig = {
   type: "expo" // "expo" | "fcm" | "apns",

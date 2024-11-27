@@ -52,19 +52,43 @@ import {  } from "../../../../softchatjs-core/dist/types";
 type ConversationProps = {
   /**
    * Function to open a Conversation
-   * @example: onOpen: () => navigation.navigate('Chat')
+   * @example: onOpen: ({ activeConversation }) => navigation.navigate('Chat')
    */
   onOpen: (props: {
     activeConversation: ConversationListItem
   }) => void;
-
+  /**
+   * 
+   * @description Render a your own conversation list items 
+   * @returns JSX Element
+   */
   renderItem?: (props: {
     conversationDetails: ConversationListRenderProps;
   }) => void;
+  /**
+   * The user initiating the chat, 'uid' and 'username' are required
+   * @example { uid: "1234", username: "abc-123" }
+   */
   user: UserMeta;
+  /**
+   * @description Render a custom conversation header, props: { isConnected: boolean, isConnecting: boolean }
+   * @returns JSX Element
+   */
   renderHeader?: (props: ConversationHeaderRenderProps) => void;
+  /**
+   * 
+   * @description Render a custom placeholder component props: { loading: boolean }
+   * @returns JSX Element
+   */
   renderPlaceHolder?: ({ loading }: { loading: boolean }) => Children;
+  /**
+   * @description The list of users a conversation can be initiated with, accepts an array of [{ uid: "1234", username: "abc-123" }]
+   * - If the users array is empty, the new chat button will be hidden
+   */
   users?: UserMeta[];
+  /**
+   * @description You can pass a stored conversation map to the store this show your previous conversation before the client is initialized
+   */
   store?: ConversationListMeta
 };
 
