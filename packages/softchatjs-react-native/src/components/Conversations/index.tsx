@@ -138,7 +138,7 @@ const Conversations = forwardRef((props: ConversationProps, ref) => {
     }>
   >(null);
   
-  const [conversationList, setConversationList] = useState<{ conversation: Conversation; lastMessage: Message; unread: string[] }[]>([ ...retrieveFromCache(store) ]);
+  const [conversationList, setConversationList] = useState<{ conversation: Conversation; lastMessage: Message; unread: string[] }[]>([ ...retrieveFromCache(store)]);
 
   const [connectionStatus, setConnectionStatus] = useState<ConnectionEvent>({
     isConnected: false,

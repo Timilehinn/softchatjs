@@ -1,6 +1,6 @@
 {
   "name": "softchatjs-core",
-  "version": "3.1.33",
+  "version": "3.2.0",
   "description": "",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -13,7 +13,7 @@
     "dev": "tsup ./src --format cjs,esm --dts --watch"
   },
   "author": "Softchatjs",
-  "license": "ISC",
+  "license": "Proprietary",
   "repository": {
     "type": "git",
     "url": "https://github.com/Timilehinn/softchatjs/tree/main/packages/softchatjs-core"

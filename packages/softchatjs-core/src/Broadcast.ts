@@ -55,7 +55,10 @@ export default class BroadcastList {
     return BroadcastList.conversation;
   }
 
-  private generateConversation(name: string, conversationId: string): Conversation & { name: string } {
+  private generateConversation(
+    name: string,
+    conversationId: string
+  ): Conversation & { name: string } {
     const timeStamps = generateFillerTimestamps();
     const participantIds = this.participants.map((p) => p.uid);
     const senderObject = {
@@ -97,9 +100,10 @@ export default class BroadcastList {
   }
 
   create(name: string = `${this.participants.length} Recipients`) {
-    if(!this.connection){
-      throw new Error('Inialize uesr before calling method')
-    }
+    try {
+      if (!this.connection) {
+        throw new Error("Inialize uesr before calling method");
+      }
       const conversationId = generateId();
       const newConveration = this.generateConversation(name, conversationId);
       const socketMessage = {
@@ -109,24 +113,31 @@ export default class BroadcastList {
           name: name,
           participants: this.participants,
           token: this.connection.wsAccessConfig.token,
-          user: this.connection.userMeta
+          user: this.connection.userMeta,
         },
       };
       this.connection.socket.send(JSON.stringify(socketMessage));
       this.connection.broadcastListMeta[conversationId] = {
         conversation: newConveration,
         lastMessage: null,
-        unread: []
+        unread: [],
       };
       this.reset();
       this.connection.emit(Events.BROADCAST_LIST_META_CHANGED, {
         broadcastListMeta: this.connection.broadcastListMeta,
       });
-      return { [conversationId]: {
-        conversation: newConveration,
-        lastMessage: null,
-        unread: []
-      }}
+      return {
+        [conversationId]: {
+          conversation: newConveration,
+          lastMessage: null,
+          unread: [],
+        },
+      };
+    } catch (error) {
+      if(error instanceof Error){
+        console.error(error.message);
+      }
+    }
   }
 
   reset() {

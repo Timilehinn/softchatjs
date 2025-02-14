@@ -27,6 +27,7 @@ export default function Navbar(props: {
   onViewChanged: (view: View) => void;
   renderNavbar: (props: NavButton[]) => JSX.Element;
   connectionStatus: ConnectionStatus;
+  enableBroadcasts?: boolean
 }) {
   const { client, config } = useChatClient();
   const { setActiveConversation } = useChatState();
@@ -59,7 +60,7 @@ export default function Navbar(props: {
         props.onViewChanged("broadcast-lists");
         setActiveConversation(null);
       },
-      visible: true
+      visible: props.enableBroadcasts
     },
   ];
 

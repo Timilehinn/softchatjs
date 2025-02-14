@@ -157,7 +157,7 @@ export default function ChatInput(props: ChatInputProps) {
 
   const hasTyped = useMemo(() => {
     if (messageType === "text") {
-      return value.length > 0 ? true : false;
+      return value?.length > 0 ? true : false;
     }
     // just to stop the send btn from being disabled incase of a multimedia-text message
     return true;

@@ -47,10 +47,15 @@ type ChatProps = {
    * FCM token used to send push notifications to web users
    */
   webToken?: string
+   /**
+   * Hide the broadcast icon on the navigation bar
+   * NOTE: this doesn't disable the functionality itself
+   */
+  enableBroadcasts?: boolean
 };
 
 const Chat = (props: ChatProps) => {
-  const { headerHeightOffset = 0, user, userList = [], onCreateBroadcastList, activeConversationId, webToken } = props;
+  const { headerHeightOffset = 0, user, userList = [], onCreateBroadcastList, activeConversationId, webToken, enableBroadcasts = true } = props;
   const chatUserId = user.uid;
   const { client, config } = useChatClient();
   const {
@@ -472,6 +477,7 @@ const Chat = (props: ChatProps) => {
           activeView={view}
           onViewChanged={(value) => setView(value)}
           connectionStatus={connectionStatus}
+          enableBroadcasts={enableBroadcasts}
         />
         {view === "conversation-list" ? (
           <MainList
