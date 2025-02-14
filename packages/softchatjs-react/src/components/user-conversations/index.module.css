@@ -9,6 +9,13 @@
     height: 100%;
     width: 100%;
     position: relative;
+    overflow-y: scroll;
+    -ms-overflow-style: none;  /* Internet Explorer 10+ */
+    scrollbar-width: none;  /* Firefox */
+}
+
+.list::-webkit-scrollbar {
+    display: none;  /* Safari and Chrome */
 }
 
 .list__empty{
@@ -19,9 +26,7 @@
 }
 
 .item:hover{
-    opacity: .7;
-    
-  
+    opacity: .7
 }
 
 .item{

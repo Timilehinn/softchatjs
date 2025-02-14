@@ -134,6 +134,7 @@ export const ConversationList = ({
       )}
       {filteredConversations.map((item, index) => (
         <ConversationItem
+          key={index}
           item={item}
           onClick={() => {
             setActiveConversation(item);
