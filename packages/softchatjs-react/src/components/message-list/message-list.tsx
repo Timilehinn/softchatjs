@@ -1,6 +1,7 @@
 import React, {
   Dispatch,
   Ref,
+  useMemo,
   SetStateAction,
   createRef,
   useCallback,
@@ -34,6 +35,7 @@ type MessageListProps = {
     x: number;
     y: number;
   };
+  customHeight?: number;
   client: ChatClient | null;
   conversationId: string;
   textInputRef: any;
@@ -68,7 +70,8 @@ const MessageList = (props: MessageListProps) => {
     renderChatBubble,
     renderChatHeader,
     headerHeightOffset,
-    getOlderMessages
+    getOlderMessages,
+    customHeight
   } = props;
 
   const ref = useRef<HTMLDivElement>()
@@ -231,12 +234,19 @@ const MessageList = (props: MessageListProps) => {
    
   }, [scrollToKey]);
 
+  const getListHeight = useMemo(() => {
+    if(customHeight){
+      return `calc(${customHeight}px - 80px - 60px - ${headerHeightOffset}px)`
+    }
+    return `calc(100vh - 80px - 60px - ${headerHeightOffset}px)`
+  },[customHeight])
+
   return (
     <div
       ref={ref}
       onScroll={onScroll}
       className={styles.wrapper}
-      style={{ height: `calc(100vh - 80px - 60px - ${headerHeightOffset}px)` }}
+      style={{ height: getListHeight }}
     >
       {fetchingMore && (
         <div className={styles.loading}>

@@ -53,7 +53,7 @@ userList -> An array of user objects, each representing a user that can be added
 
 ```
 import { Chat } from "softchatjs-react"
-import { users } from '../contants/users 
+import { users } from '../constants/users 
 
 export default function ChatPage() {
   return (

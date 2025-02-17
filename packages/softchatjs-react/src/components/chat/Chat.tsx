@@ -4,8 +4,8 @@ import ChatClient, {
   Conversation,
   Message,
   UserMeta,
-  ConnectionEvent, 
-  ConversationListMeta
+  ConnectionEvent,
+  ConversationListMeta,
 } from "softchatjs-core";
 import styles from "./chat.module.css";
 import ChatInput from "../inputs/chat-input";
@@ -20,7 +20,7 @@ import { ImageViewer } from "../modals";
 import { ChatTopNav } from "./ChatTopNav";
 import { ChatIcon } from "../assets/icons";
 import Navbar, { NavButton } from "../navigation";
-import BroadcastLists from '../broadcast-lists'
+import BroadcastLists from "../broadcast-lists";
 
 type ChatProps = {
   renderChatBubble?: (message: Message) => JSX.Element;
@@ -35,9 +35,9 @@ type ChatProps = {
   user: UserMeta;
   userList?: UserMeta[];
   /**
-   * use activeConversationId to preselect a conversation once the user enters the chat. 
+   * use activeConversationId to preselect a conversation once the user enters the chat.
    */
-  activeConversationId?: string
+  activeConversationId?: string;
   /**@note
    * This value calculates the the height off the container incase of an external header
    * Value should be in px i.e 300
@@ -46,16 +46,34 @@ type ChatProps = {
   /**
    * FCM token used to send push notifications to web users
    */
-  webToken?: string
-   /**
+  webToken?: string;
+  /**
    * Hide the broadcast icon on the navigation bar
    * NOTE: this doesn't disable the functionality itself
    */
-  enableBroadcasts?: boolean
+  enableBroadcasts?: boolean;
+  /**
+   * Set a custom height for the chat container
+   */
+  height?: number;
+  /**
+   * Set a custom width for the chat container
+   */
+  width?: number;
 };
 
 const Chat = (props: ChatProps) => {
-  const { headerHeightOffset = 0, user, userList = [], onCreateBroadcastList, activeConversationId, webToken, enableBroadcasts = true } = props;
+  const {
+    headerHeightOffset = 0,
+    user,
+    userList = [],
+    onCreateBroadcastList,
+    activeConversationId,
+    webToken,
+    enableBroadcasts = true,
+    height,
+    width,
+  } = props;
   const chatUserId = user.uid;
   const { client, config } = useChatClient();
   const {
@@ -85,10 +103,13 @@ const Chat = (props: ChatProps) => {
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
   const [forceScrollCount, setForceScrollCount] = useState(0);
   const [recipientId, setRecipientId] = useState("");
-  
+
   const [isSmallScreen, setIsSmallScreen] = useState(false);
   const [inputContainerWidth, setInputContainerWidth] = useState(0);
-  const [ view, setView ] = useState<"conversation-list" | "broadcast-lists">("conversation-list")
+  const [view, setView] = useState<"conversation-list" | "broadcast-lists">(
+    "conversation-list"
+  );
+  const chatContainerRef = useRef<HTMLDivElement>(null);
 
   const { theme } = config;
 
@@ -120,26 +141,28 @@ const Chat = (props: ChatProps) => {
 
   const getPreSelectedConversation = () => {
     try {
-      if(activeConversationId){
+      if (activeConversationId) {
         const converationListMeta = client.getConversations();
         const selectedConveration = converationListMeta[activeConversationId];
-        if(selectedConveration){
+        if (selectedConveration) {
           setActiveConversation(selectedConveration);
         }
       }
     } catch (error) {
-      console.error(error.message)
+      console.error(error.message);
     }
-  }
+  };
 
   useEffect(() => {
     getPreSelectedConversation();
-  },[activeConversationId, client, connectionStatus])
+  }, [activeConversationId, client, connectionStatus]);
 
   useEffect(() => {
-    if(props.user && webToken){
-      client.initializeUser(props.user, { notificationConfig: { type: "fcm", token: webToken } });
-    }else{
+    if (props.user && webToken) {
+      client.initializeUser(props.user, {
+        notificationConfig: { type: "fcm", token: webToken },
+      });
+    } else {
       client.initializeUser(props.user);
     }
   }, [props.user, webToken]);
@@ -148,20 +171,33 @@ const Chat = (props: ChatProps) => {
     const checkScreenSize = () => {
       const screenWidth = window.innerWidth;
       const screenHeight = window.innerHeight;
-
-      if (screenWidth < 1024 || screenHeight < 768) {
-        setIsSmallScreen(true);
-      } else {
-        setIsSmallScreen(false);
-      }
+      setIsSmallScreen(screenWidth < 1024 || screenHeight < 768);
     };
-
-    checkScreenSize();
-
-    window.addEventListener("resize", checkScreenSize);
-
-    return () => window.removeEventListener("resize", checkScreenSize);
-  }, []);
+  
+    if (!width || !height) {
+      checkScreenSize();
+      window.addEventListener("resize", checkScreenSize);
+  
+      return () => window.removeEventListener("resize", checkScreenSize);
+    }
+  
+    const checkSize = () => {
+      if (!chatContainerRef.current) return;
+  
+      const { offsetWidth, offsetHeight } = chatContainerRef.current;
+      setIsSmallScreen(offsetWidth < 1024 || offsetHeight < 768);
+    };
+  
+    const observer = new ResizeObserver(() => checkSize());
+  
+    if (chatContainerRef.current) {
+      observer.observe(chatContainerRef.current);
+      checkSize(); // Initial check
+    }
+  
+    return () => observer.disconnect();
+  }, [height, width]);
+  
 
   useEffect(() => {
     document.addEventListener("mousedown", closeGeneralMenu);
@@ -388,11 +424,13 @@ const Chat = (props: ChatProps) => {
 
   useEffect(() => {
     try {
-      var conversationId = activeConversation?.conversation?.conversationId
+      var conversationId = activeConversation?.conversation?.conversationId;
       if (conversationId) {
-        if(activeConversation.conversation.conversationType === "broadcast-chat"){
-          getBroadcastMessages(conversationId)
-        }else{
+        if (
+          activeConversation.conversation.conversationType === "broadcast-chat"
+        ) {
+          getBroadcastMessages(conversationId);
+        } else {
           getMessages(conversationId);
         }
       }
@@ -403,18 +441,34 @@ const Chat = (props: ChatProps) => {
     }
   }, [activeConversation?.conversation?.conversationId]);
 
-  const showMainList = useMemo(() => {
+  const chatConverationStyles = useMemo(() => {
     if (isSmallScreen) {
-      return false;
+      return {
+        display: "flex",
+        width: "100%",
+        height: height? `${height}px` : "100%",
+      };
     }
-    return mainListOpen;
-  }, [mainListOpen, isSmallScreen]);
+    return {
+      display: "flex",
+      width: "30%",
+      height: "100%",
+    };
+  }, [width, height, isSmallScreen]);
 
   if (isSmallScreen && activeConversation) {
     return (
       <div
+        ref={chatContainerRef}
         className={styles.chat__messages}
-        style={{ width: "100%", backgroundColor: theme?.background?.primary }}
+        // style={{ width: "100%", backgroundColor: theme?.background?.primary }}
+        style={{
+          width: width ? `${width}px` : "100%",
+          height: height
+          ? `${height}px`
+          : `calc(100vh - ${headerHeightOffset}px)`,
+          backgroundColor: theme?.background?.primary,
+        }}
       >
         <ChatTopNav
           setMainListOpen={setMainListOpen}
@@ -423,6 +477,7 @@ const Chat = (props: ChatProps) => {
           chatUserId={chatUserId}
         />
         <MessageList
+          customHeight={height}
           headerHeightOffset={headerHeightOffset}
           setEditDetails={setEditDetails}
           messages={messages}
@@ -440,7 +495,12 @@ const Chat = (props: ChatProps) => {
           messagesEndRef={messagesEndRef}
           renderChatBubble={props.renderChatBubble}
           renderChatHeader={props.renderChatHeader}
-          getOlderMessages={(func) => activeConversation?.conversation?.conversationType !== "broadcast-chat"? getOlderMessages(func) : null}
+          getOlderMessages={(func) =>
+            activeConversation?.conversation?.conversationType !==
+            "broadcast-chat"
+              ? getOlderMessages(func)
+              : null
+          }
         />
         <ChatInput
           closeGeneralMenu={() => setMenuDetails({ element: null })}
@@ -463,13 +523,19 @@ const Chat = (props: ChatProps) => {
 
   return (
     <div
+      ref={chatContainerRef}
       style={{
         background: theme?.background?.primary,
-        height: `calc(100vh - ${headerHeightOffset}px)`,
+        // height: `calc(100vh - ${headerHeightOffset}px)`,
+        height: height
+          ? `${height}px`
+          : `calc(100vh - ${headerHeightOffset}px)`,
+        width: width ? `${width}px` : "100%",
       }}
       className={styles.chat}
     >
-      <div className={`${styles.chat__conversations}`}>
+      <div style={{ ...chatConverationStyles }}>
+        {/* <div className={`${styles.chat__conversations}`} style={{ ...chatConverationStyles }}> */}
         <Navbar
           chatUser={user}
           userList={userList}
@@ -489,10 +555,8 @@ const Chat = (props: ChatProps) => {
             userListRef={userListRef}
             renderConversationList={props.renderConversationList}
           />
-        ):(
-          <BroadcastLists 
-            onCreateBroadcastList={onCreateBroadcastList}
-          />
+        ) : (
+          <BroadcastLists onCreateBroadcastList={onCreateBroadcastList} />
         )}
       </div>
       {activeConversation ? (
@@ -542,7 +606,7 @@ const Chat = (props: ChatProps) => {
         <div
           style={{
             flex: 1,
-            display: "flex",
+            display: isSmallScreen ? "none" : "flex",
             alignItems: "center",
             flexDirection: "column",
             justifyContent: "center",
