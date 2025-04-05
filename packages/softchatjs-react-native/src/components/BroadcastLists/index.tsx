@@ -4,29 +4,35 @@ import {
   TouchableOpacity,
   StyleSheet,
   FlatList,
+  Dimensions,
 } from "react-native";
 import React, { useState, useEffect, useCallback } from "react";
-import ChatClient, { Events, ConversationListMeta, ConversationListItem } from "softchatjs-core";
+import ChatClient, {
+  Events,
+  ConversationListMeta,
+  ConversationListItem,
+} from "softchatjs-core";
 import { useConfig } from "../../contexts/ChatProvider";
-import { ArrowRight } from "../../assets/icons";
+import { ArrowRight, MessagePlus } from "../../assets/icons";
 
-type BroadcastListsProps =  { 
+type BroadcastListsProps = {
   /**
    * ChatClient instance
    */
-  client: ChatClient | null, 
+  client: ChatClient | null;
   /**Function
    *  to select a broadcastlist item
    */
-  onOpen: (item: ConversationListItem) => void; renderPlaceholder?: () => JSX.Element, 
+  onOpen: (item: ConversationListItem) => void;
+  renderPlaceholder?: () => JSX.Element;
   /**
-   * 
-   * @param data: ConversationListItem 
+   *
+   * @param data: ConversationListItem
    * @param index: number
-   * @returns 
+   * @returns
    */
-  renderItem?: (data: ConversationListItem, index: number) => JSX.Element 
-}
+  renderItem?: (data: ConversationListItem, index: number) => JSX.Element;
+};
 
 export default function BroadcastLists(props: BroadcastListsProps) {
   const { client, onOpen, renderPlaceholder } = props;
@@ -61,13 +67,13 @@ export default function BroadcastLists(props: BroadcastListsProps) {
   };
 
   useEffect(() => {
-      const res = client.getBroadcastLists();
-      const list = Object.values(res).flat();
-      setBroadcastLists(list);
-      client.subscribe(
-        Events.BROADCAST_LIST_META_CHANGED,
-        handleBroadcastListMetaChanged
-      );
+    const res = client.getBroadcastLists();
+    const list = Object.values(res).flat();
+    setBroadcastLists(list);
+    client.subscribe(
+      Events.BROADCAST_LIST_META_CHANGED,
+      handleBroadcastListMetaChanged
+    );
     return () => {
       client.unsubscribe(
         Events.BROADCAST_LIST_META_CHANGED,
@@ -76,49 +82,72 @@ export default function BroadcastLists(props: BroadcastListsProps) {
     };
   }, []);
 
-  const renderBroadcastItem = useCallback(({ item, index }: { item: ConversationListItem, index: number }) => {
+  const renderBroadcastItem = useCallback(
+    ({ item, index }: { item: ConversationListItem; index: number }) => {
+      if (props.renderItem) {
+        return (
+          <TouchableOpacity key={index} onPress={() => onOpen(item)}>
+            {props.renderItem(item, index)}
+          </TouchableOpacity>
+        );
+      }
 
-    if(props.renderItem){
       return (
-        <TouchableOpacity key={index} onPress={() => onOpen(item)}>
-          {props.renderItem(item, index)}
+        <TouchableOpacity
+          key={index}
+          style={[
+            {
+              ...styles.broadcast_item,
+            },
+            broadcastLists.length !== index + 1 && {
+              borderBottomWidth: 1,
+              borderColor: theme.divider,
+            },
+          ]}
+          onPress={() => onOpen(item)}
+        >
+          <View>
+            <Text style={{ fontSize: 20 * fontScale, fontFamily }}>
+              {item.conversation.name}
+            </Text>
+            <Text>{item.conversation.participants.length} Recipients</Text>
+          </View>
+          <ArrowRight size={12} color={theme.icon} />
         </TouchableOpacity>
-      )
-    }
-
-    return (
-      <TouchableOpacity
-      key={index}
-      style={[
-        {
-          ...styles.broadcast_item,
-        },
-        broadcastLists.length !== index + 1 && {
-          borderBottomWidth: 1,
-          borderColor: theme.divider,
-        },
-      ]}
-      onPress={() => onOpen(item)}
-    >
-      <View>
-        <Text style={{ fontSize: 20 * fontScale, fontFamily }}>
-          {item.conversation.name}
-        </Text>
-        <Text>{item.conversation.participants.length} Recipients</Text>
-      </View>
-      <ArrowRight size={12} color={theme.icon} />
-    </TouchableOpacity>
-    )
-  },[props.renderItem, broadcastLists, fontScale]);
+      );
+    },
+    [props.renderItem, broadcastLists, fontScale]
+  );
 
   return (
-    <View style={styles.main}>
+    <View
+      style={{ ...styles.main, backgroundColor: theme?.background.primary }}
+    >
       <FlatList
+        showsVerticalScrollIndicator={false}
         data={broadcastLists}
         renderItem={renderBroadcastItem}
-        ListEmptyComponent={
-          renderPlaceholder? renderPlaceholder() : null
-        }
+        ListEmptyComponent={renderPlaceholder ? renderPlaceholder() : (
+          <View
+          style={{
+            flex: 1,
+            height: Dimensions.get("window").height,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <MessagePlus size={100} color={theme?.icon} />
+          <Text
+            style={{
+              color: theme?.text.disabled,
+              marginTop: 20 * fontScale,
+              fontFamily: fontFamily || undefined,
+            }}
+          >
+            You have no broadcastlists yet
+          </Text>
+        </View>
+        )}
       />
     </View>
   );
@@ -126,7 +155,6 @@ export default function BroadcastLists(props: BroadcastListsProps) {
 
 const styles = StyleSheet.create({
   main: {
-    backgroundColor: "white",
     flex: 1,
     height: "100%",
     width: "100%",

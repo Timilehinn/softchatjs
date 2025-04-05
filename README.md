@@ -1,4 +1,4 @@
-# 🧠 SoftchatJS
+# SoftchatJS
 
 SoftchatJS is a flexible, full-featured text/voice messaging platform designed for businesses and developers. It enables real-time chat experiences across web and mobile platforms, with customizable UIs and a backend-agnostic architecture.
 

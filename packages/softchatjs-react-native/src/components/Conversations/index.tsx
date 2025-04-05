@@ -161,7 +161,6 @@ const Conversations = forwardRef((props: ConversationProps, ref) => {
   const handleConnectionChanged = (
     event: ChatEventGenerics<ConnectionEvent>
   ) => {
-    console.log(event, "---events");
     setConnectionStatus(event);
   };
 
@@ -202,7 +201,6 @@ const Conversations = forwardRef((props: ConversationProps, ref) => {
 
   const getConnectionStatus = () => {
     const connStatus = client.getConnectionStatus();
-    console.log(connStatus.connecting, ':::connStatus')
     setConnectionStatus(connStatus);
   }
 
