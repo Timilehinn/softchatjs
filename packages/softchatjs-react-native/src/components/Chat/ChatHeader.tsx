@@ -23,7 +23,7 @@ export default function ChatHeader(props: ChatHeaderProps) {
   const { conversation, chatUserId, renderChatHeader, isTyping } =
     props;
 
-  const { theme, fontFamily } = useConfig();
+  const { theme, fontFamily, fontScale } = useConfig();
 
   let conversationTitle = useMemo(() => {
     return conversation ? getConversationTitle(chatUserId, conversation) : null;
@@ -77,6 +77,7 @@ export default function ChatHeader(props: ChatHeaderProps) {
           <Text
             style={{
               ...styles.conversationTitle,
+              fontSize: 20 * fontScale, 
               color: theme?.text.secondary,
               fontFamily,
             }}
@@ -88,6 +89,7 @@ export default function ChatHeader(props: ChatHeaderProps) {
           <Text
             style={{
               ...styles.typingIndicator,
+              fontSize: 15 * fontScale,
               color: theme?.text.secondary,
               fontFamily,
             }}

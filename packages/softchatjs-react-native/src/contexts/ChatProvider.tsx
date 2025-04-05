@@ -9,6 +9,11 @@ type ChatProvider = {
   children: JSX.Element;
   theme?: ChatTheme;
   fontFamily: string | undefined;
+   /**
+   * Multiplier to adjust the font size dynamically.
+   * A value of 1 keeps the default size, while values like 0.5 or 1.5 scale it down or up.
+  */
+   fontScale?: number
 };
 
 const ConfigContext = createContext<
@@ -17,6 +22,7 @@ const ConfigContext = createContext<
   theme: defaultTheme,
   client: null,
   fontFamily: undefined,
+  fontScale: 1
 });
 
 export function useConfig() {
@@ -26,10 +32,10 @@ export function useConfig() {
 export default function ChatProvider(
   props: ChatProvider & { client: ChatClient | null }
 ) {
-  const { children, client, theme = defaultTheme, fontFamily } = props;
+  const { children, client, theme = defaultTheme, fontFamily, fontScale } = props;
 
   return (
-    <ConfigContext.Provider value={{ theme, client, fontFamily }}>
+    <ConfigContext.Provider value={{ theme, client, fontFamily, fontScale }}>
       <MessageStateProvider>
         <ModalProvider>{children}</ModalProvider>
       </MessageStateProvider>

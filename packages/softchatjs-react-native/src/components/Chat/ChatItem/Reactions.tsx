@@ -16,7 +16,7 @@ type ReactionProps = {
 
 export default function Reactions(props: ReactionProps) {
   const { reactions, position, conversationId, messageId, chatUserId, recipientId, layout } = props;
-  const { client, theme } = useConfig()
+  const { client, theme, fontScale } = useConfig()
 
   const removeReaction = (selected: Reaction) => {
     if(client){
@@ -54,7 +54,7 @@ export default function Reactions(props: ReactionProps) {
           }}
         >
           <Text
-            style={{ fontSize: Platform.OS === 'android'? 16 : 18 }}
+            style={{ fontSize: Platform.OS === 'android'? 16 * fontScale : 18 * fontScale }}
           >{reaction.emoji}</Text>
         </TouchableOpacity>
       ))}

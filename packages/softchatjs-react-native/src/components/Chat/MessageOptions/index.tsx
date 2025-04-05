@@ -95,7 +95,7 @@ var emojis = [
 export const MessageOptions = forwardRef(
   (props: MessageOptionsProps, ref: any) => {
     const optionsRef = useRef<ActionSheetRef>(null);
-    const { client, fontFamily } = useConfig();
+    const { client, fontFamily, fontScale } = useConfig();
     const {
       recipientId,
       message,
@@ -267,7 +267,7 @@ export const MessageOptions = forwardRef(
             >
               <Text
                 style={{
-                  fontSize: Platform.OS === "ios" ? emojiSize : emojiSize - 5,
+                  fontSize: Platform.OS === "ios" ? emojiSize * fontScale : (emojiSize - 5) * fontScale,
                   fontFamily,
                 }}
               >
@@ -361,7 +361,7 @@ export const MessageOptions = forwardRef(
                     style={{
                       marginStart: 15,
                       fontFamily,
-                      fontSize: 17,
+                      fontSize: 17 * fontScale,
                       color:
                         option.label === "Delete"
                           ? "red"

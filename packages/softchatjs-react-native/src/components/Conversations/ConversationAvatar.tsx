@@ -35,7 +35,9 @@ export const ConversationAvatar = ({
   participantList: ParticipantListInfo[];
   groupMeta: GroupChatMeta | null;
 }) => {
-  const { fontFamily } = useConfig()
+
+  const { fontFamily, fontScale } = useConfig();
+  
   const userInfo = useMemo(() => {
     if (type === "private-chat") {
       return getUserInfoWithId(chatUserId, participantList);
@@ -54,7 +56,7 @@ export const ConversationAvatar = ({
       <Image source={{ uri: imageUri }} style={styles.avatar} cachePolicy="disk" />
     ) : (
       <View style={styles.avatar}>
-        <Text style={{ ...styles.avatarInitials, fontFamily }}>{initials}</Text>
+        <Text style={{ ...styles.avatarInitials, fontSize: 30 * fontScale, fontFamily }}>{initials}</Text>
       </View>
     )
   );

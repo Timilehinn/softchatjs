@@ -25,7 +25,7 @@ export type ConversationItemProps = {
 };
 
 export const ConversationItem = (props: ConversationItemProps) => {
-  const { theme, fontFamily } = useConfig();
+  const { theme, fontFamily, fontScale } = useConfig();
   const { conversation, chatUserId, isLastItem, onPress, lastMessage, unread } =
     props;
 
@@ -47,7 +47,7 @@ export const ConversationItem = (props: ConversationItemProps) => {
     ) {
 
       return (
-        <Text style={{ ...styles.messageText, color: theme?.text.secondary, fontFamily }}>
+        <Text style={{ fontSize: 15.5 * fontScale, color: theme?.text.secondary, fontFamily }}>
           <Text style={{ fontStyle: "italic" }}>
             @
             {
@@ -63,7 +63,7 @@ export const ConversationItem = (props: ConversationItemProps) => {
     }
     if (lastMessage.message) {
       return (
-        <Text style={{ ...styles.messageText, color: theme?.text.secondary, fontFamily }}>
+        <Text style={{ fontSize: 15.5 * fontScale, color: theme?.text.secondary, fontFamily }}>
           {lastMessage.from === chatUserId ? "You: " : ""}
           {truncate(lastMessage.message, 35)}
         </Text>
@@ -71,15 +71,14 @@ export const ConversationItem = (props: ConversationItemProps) => {
     } else {
       return (
         <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <Text style={{ ...styles.messageText, color: theme?.text.secondary, fontFamily }}>
+          <Text style={{ fontSize: 15.5 * fontScale, color: theme?.text.secondary, fontFamily }}>
             {lastMessage.from === chatUserId ? "You: " : ""}
           </Text>
           <View style={{ padding: 3, borderWidth: 1, borderColor: theme?.divider, borderRadius: 3 }}>
             <Text
               style={{
-                ...styles.messageText,
                 fontFamily,
-                fontSize: 10,
+                fontSize: 10 * fontScale,
                 color: theme?.text.secondary
               }}
             >
@@ -125,7 +124,8 @@ export const ConversationItem = (props: ConversationItemProps) => {
           <View style={{ flex: 1 }}>
             <Text
               style={{
-                ...styles.conversationTitle,
+                textTransform: "capitalize",
+                fontSize: 20 * fontScale,
                 color: theme?.text.secondary,
                 fontFamily
               }}
@@ -141,7 +141,7 @@ export const ConversationItem = (props: ConversationItemProps) => {
           {lastMessage && (
             <Text
               style={{
-                ...styles.messageTime,
+                fontSize: 15.5 * fontScale,
                 color: theme?.text.secondary,
                 fontFamily
               }}

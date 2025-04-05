@@ -50,7 +50,7 @@ export default function Default(props: DefaultProps) {
     retryUpload,
   } = props;
 
-  const { theme, fontFamily } = useConfig();
+  const { theme, fontFamily, fontScale } = useConfig();
 
   const getStyle = useMemo(() => {
     if (position === "right") {
@@ -155,7 +155,7 @@ export default function Default(props: DefaultProps) {
         <Text
           style={{
             fontFamily,
-            fontSize: 11,
+            fontSize: 11 * fontScale,
             marginTop: 3,
             color:
               position === "left"
@@ -214,7 +214,7 @@ export default function Default(props: DefaultProps) {
               style={{
                 fontFamily,
                 padding: 10,
-                fontSize: 16,
+                fontSize: 16 * fontScale,
                 color:
                   position === "left"
                     ? theme?.chatBubble.left.messageColor
@@ -248,7 +248,7 @@ export default function Default(props: DefaultProps) {
             {
               fontFamily,
               color: theme?.text.disabled,
-              fontSize: 11,
+              fontSize: 11 * fontScale,
               marginTop: 5,
               fontStyle: "italic",
             },
@@ -266,7 +266,7 @@ export default function Default(props: DefaultProps) {
             {
               fontFamily,
               color: "tomato",
-              fontSize: 11,
+              fontSize: 11 * fontScale,
               marginTop: 5,
               fontStyle: "italic",
             },

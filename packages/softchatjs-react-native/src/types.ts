@@ -278,7 +278,8 @@ export type ChatHeaderRenderProps = {
 export type ConversationListRenderProps = {
   title: string | undefined,
   recipient: UserMeta | undefined,
-  lastMessage: Message | undefined | null
+  lastMessage: Message | undefined | null;
+  imageUrl: string | null
 }
 
 type DefaultColors = {

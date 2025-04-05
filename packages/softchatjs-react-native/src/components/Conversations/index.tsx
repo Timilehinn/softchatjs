@@ -253,6 +253,11 @@ const Conversations = forwardRef((props: ConversationProps, ref) => {
           item.conversation.participantList
         );
 
+        const imageUrl = item.conversation.conversationType === "private-chat"
+          ? userInfo?.receivingUser?.profileUrl
+          : item.conversation.groupMeta?.groupIcon;
+        
+
         return (
           <TouchableOpacity
             onPress={() =>
@@ -265,6 +270,7 @@ const Conversations = forwardRef((props: ConversationProps, ref) => {
                   title: conversationTitle,
                   recipient: userInfo.presentUser,
                   lastMessage: item.lastMessage,
+                  imageUrl
                 },
               })}
             </>

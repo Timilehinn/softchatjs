@@ -34,7 +34,7 @@ type QuotedProps = {
 
 export default function Quoted(props: QuotedProps) {
   const { quotedMessage, layout, onPress, theme, position, chatUserId } = props;
-  const { fontFamily } = useConfig();
+  const { fontFamily, fontScale } = useConfig();
 
   if (!quotedMessage) {
     return null;
@@ -227,7 +227,7 @@ export default function Quoted(props: QuotedProps) {
             display: quotedMessage.message ? "flex" : "none",
             fontFamily,
             color: "white",
-            fontSize: 14,
+            fontSize: 14 * fontScale,
             marginTop: 5
           }}
         >

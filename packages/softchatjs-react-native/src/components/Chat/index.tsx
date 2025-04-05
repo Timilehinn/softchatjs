@@ -111,14 +111,14 @@ const KeyboardAvoiding = (props: { keyboardOffset: number, children: Children })
 }
 
 export default function Chat(props: ChatProps) {
-  const { client, theme, fontFamily } = useConfig();
+  const { client, theme, fontFamily, fontScale } = useConfig();
   const {
     activeConversation,
     renderChatBubble,
     renderChatInput,
     renderChatHeader,
     placeholder,
-    keyboardOffset = Platform.OS === "ios" ? 10 : 0,
+    keyboardOffset = Platform.OS === "ios" ? 10 : 0
   } = props;
   let layout: "stacked" | undefined
   const chatUserId = client.chatUserId;
@@ -904,7 +904,7 @@ export default function Chat(props: ChatProps) {
         <Text
           style={{
             color: theme?.text.disabled,
-            marginTop: 20,
+            marginTop: 20 * fontScale,
             fontFamily: fontFamily || undefined,
           }}
         >
@@ -912,7 +912,7 @@ export default function Chat(props: ChatProps) {
         </Text>
       </View>
     );
-  }, [placeholder]);
+  }, [placeholder, fontScale]);
 
   const chatInputProps: ChatInputRenderProps = {
     // sendMessage: (externalInputRef: RefObject<TextInput>) =>
@@ -1076,7 +1076,7 @@ export default function Chat(props: ChatProps) {
                 style={{
                   marginStart: 5,
                   fontFamily: fontFamily || undefined,
-                  fontSize: 14,
+                  fontSize: 14 * fontScale,
                   color: theme?.text.disabled,
                 }}
               >

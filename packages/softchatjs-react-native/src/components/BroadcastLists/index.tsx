@@ -30,7 +30,7 @@ type BroadcastListsProps =  {
 
 export default function BroadcastLists(props: BroadcastListsProps) {
   const { client, onOpen, renderPlaceholder } = props;
-  const { fontFamily, theme } = useConfig();
+  const { fontFamily, theme, fontScale } = useConfig();
 
   const [broadcastLists, setBroadcastLists] = useState([]);
 
@@ -101,7 +101,7 @@ export default function BroadcastLists(props: BroadcastListsProps) {
       onPress={() => onOpen(item)}
     >
       <View>
-        <Text style={{ fontSize: 20, fontFamily }}>
+        <Text style={{ fontSize: 20 * fontScale, fontFamily }}>
           {item.conversation.name}
         </Text>
         <Text>{item.conversation.participants.length} Recipients</Text>
@@ -109,7 +109,7 @@ export default function BroadcastLists(props: BroadcastListsProps) {
       <ArrowRight size={12} color={theme.icon} />
     </TouchableOpacity>
     )
-  },[props.renderItem, broadcastLists]);
+  },[props.renderItem, broadcastLists, fontScale]);
 
   return (
     <View style={styles.main}>

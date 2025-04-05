@@ -30,7 +30,7 @@ let defaultSheetHeight = "45%";
 export const MediaOptions = forwardRef((props: MediaOptionsProps, ref: any) => {
   // const sheetRef = useRef<BottomSheetRef>();
   const sheetRef = useRef<ActionSheetRef>(null);
-  const { theme, fontFamily } = useConfig();
+  const { theme, fontFamily, fontScale } = useConfig();
   const { displayModal } = useModalProvider();
   const {
     recipientId,
@@ -233,7 +233,7 @@ export const MediaOptions = forwardRef((props: MediaOptionsProps, ref: any) => {
                 marginStart: 15,
                 textTransform: "capitalize",
                 fontFamily,
-                fontSize: 17,
+                fontSize: 17 * fontScale,
                 color:
                   option.label === "Delete" ? "red" : theme?.text.secondary,
               }}

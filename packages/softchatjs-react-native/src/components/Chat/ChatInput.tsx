@@ -130,8 +130,7 @@ export default function ChatInput(props: ChatInputProps) {
     audioTime = 0,
   } = props;
 
-  const { theme } = useConfig();
-
+  const { theme, fontScale } = useConfig();
   var minInputHeight = Platform.OS === "android" ? 30 : 40;
   const { addNewPendingMessages, pauseVoiceMessage } = useMessageState();
   const { client, fontFamily } = useConfig();
@@ -279,6 +278,7 @@ export default function ChatInput(props: ChatInputProps) {
             ref={inputRef}
             style={{
               ...styles.textInput,
+              fontSize: 18 * fontScale,
               color: theme?.text.secondary,
               backgroundColor: theme?.background.secondary,
               fontFamily
