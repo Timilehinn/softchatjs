@@ -70,6 +70,7 @@ cd apps/expo-app-demo && npm run dev
 - 💡 Platform-agnostic logic for React and React Native
 - 🧩 Broadcast lists
 
+---
 
 ## 🧩 How the Chat Works
 
