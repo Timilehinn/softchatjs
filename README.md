@@ -55,6 +55,22 @@ cd apps/expo-app-demo && npm run dev
 
 ---
 
+## ✨ Features
+
+- 💬 Real-time messaging
+- ✍️ Typing indicators (with debounced start/stop events)
+- 👁️ Read receipts
+- 😍 Emoji reactions
+- 🔉 Voice messaging
+- 🧵 Conversation threading (coming soon)
+- 📂 File and media attachments
+- 🛎️ Push notifications via FCM (Android) & APNs (iOS)
+- 🧠 AI-assisted message summarization (planned)
+- 🧪 Fully customizable UI via components and hooks
+- 💡 Platform-agnostic logic for React and React Native
+- 🧩 Broadcast lists
+
+
 ## 🧩 How the Chat Works
 
 SoftchatJS is designed to be backend-agnostic and event-driven. Here's how the pieces fit together:
