@@ -79,6 +79,8 @@ SoftchatJS is designed to be backend-agnostic and event-driven. Here's how the p
 - 💡 Platform-agnostic core (logic shared across web and mobile)
 - 📦 Modular design for scalability and flexibility
 - ☁️ Backend-agnostic and designed for easy integration with custom infrastructures
+- 📲 Push notifications supported via FCM (Firebase Cloud Messaging) and APNs (Apple Push Notification Service)
+
 
 ---
 
