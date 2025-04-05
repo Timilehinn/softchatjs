@@ -127,15 +127,15 @@ export default function TabOneScreen() {
       <TouchableOpacity
         onPress={() => {
           router.navigate({
-            pathname: "/(main)/two",
+            pathname: "/(main)/conversations",
             params: {},
           });
         }}
-        style={{ backgroundColor: "green", padding: 20 }}
+        style={styles.button}
       >
-        <Text>Go to conversations</Text>
+        <Text style={styles.buttonText}>Go to conversations {'>'}</Text>
       </TouchableOpacity>
-      <TouchableOpacity
+      {/* <TouchableOpacity
         onPress={() => {
           router.navigate({
             pathname: "/(main)/three",
@@ -148,20 +148,20 @@ export default function TabOneScreen() {
         style={{ backgroundColor: "red", padding: 20 }}
       >
         <Text>Go to chat</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
       <TouchableOpacity
         onPress={() => {
           router.navigate({
-            pathname: "/(main)/four",
+            pathname: "/(main)/broadcastlists",
             params: {
               chatUser: JSON.stringify(chatUser),
               activeConversation: JSON.stringify(store),
             },
           });
         }}
-        style={{ backgroundColor: "indigo", padding: 20 }}
+        style={styles.button}
       >
-        <Text style={{ color: 'white' }}>Go to broadcastlists</Text>
+        <Text style={styles.buttonText}>Go to broadcastlists {'>'}</Text>
       </TouchableOpacity>
       {/* <SlateRenderer
         document={[
@@ -213,7 +213,9 @@ export default function TabOneScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 50,
+    padding: 20,
+    paddingTop: 70
+    
   },
   title: {
     fontSize: 20,
@@ -223,4 +225,16 @@ const styles = StyleSheet.create({
     height: 1,
     width: "80%",
   },
+  button: {
+    padding: 20,
+    borderWidth: 1,
+    borderRadius: 5, 
+    borderColor: "lighrgrey",
+    marginBottom: 15
+  },
+  buttonText: {
+    color: 'black',
+    fontSize: 20,
+    fontWeight: "600"
+  }
 });
